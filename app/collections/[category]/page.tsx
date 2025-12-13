@@ -1,20 +1,16 @@
 import { TopBar, Header, NavBar, Footer } from '@/components';
 import { CategoryHero, CollectionFilters, CollectionProductGrid } from '@/components/collection';
-import { fetchAllProducts, fetchAllCategories } from '@/lib/api';
+import { fetchAllProducts } from '@/lib/api';
 import { mapProductDataToProduct } from '@/lib/productMapper';
 import { mapFilterToTagSlugs } from '@/lib/tagMapper';
+import { getAllFrontendCategories, getFrontendCategoryBySlug, mapDbCategoryToFrontend } from '@/lib/categoryMapper';
 import { Product } from '@/types/product';
 
 export async function generateStaticParams() {
-  try {
-    const response = await fetchAllCategories();
-    return response.data.map((category) => ({
-      category: category.slug,
-    }));
-  } catch (error) {
-    console.error('Error generating static params:', error);
-    return [];
-  }
+  const frontendCategories = getAllFrontendCategories();
+  return frontendCategories.map((category) => ({
+    category: category.slug,
+  }));
 }
 
 export default async function CategoryPage({
@@ -27,14 +23,8 @@ export default async function CategoryPage({
   const { category } = await params;
   const filters = await searchParams;
 
-  let categoryName: string | undefined;
-  try {
-    const categoriesResponse = await fetchAllCategories();
-    const categoryData = categoriesResponse.data.find((cat) => cat.slug === category);
-    categoryName = categoryData?.name;
-  } catch (error) {
-    console.error('Error fetching categories:', error);
-  }
+  const frontendCategory = getFrontendCategoryBySlug(category);
+  const categoryName = frontendCategory?.name || category;
 
   const pattern = filters.pattern;
   const color = filters.color;
@@ -69,9 +59,14 @@ export default async function CategoryPage({
       tags: uniqueTagSlugs.length > 0 ? uniqueTagSlugs : undefined,
     });
     
-    if (categoryName) {
+    if (frontendCategory) {
       filteredProducts = response.data
-        .filter((data) => data.categories.some((cat) => cat.name === categoryName))
+        .filter((data) => {
+          return data.categories.some((dbCategory) => {
+            const mappedSlug = mapDbCategoryToFrontend(dbCategory.name, dbCategory.slug);
+            return mappedSlug === frontendCategory.slug;
+          });
+        })
         .map((data) => mapProductDataToProduct(data));
     } else {
       filteredProducts = response.data.map((data) => mapProductDataToProduct(data));

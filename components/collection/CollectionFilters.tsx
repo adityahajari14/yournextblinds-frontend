@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
-import { fetchAllCategories, CategoryData } from '@/lib/api';
+import { fetchAllProducts } from '@/lib/api';
+import { getAllFrontendCategories, FrontendCategory, mapDbCategoryToFrontend } from '@/lib/categoryMapper';
+
+interface CategoryWithCount extends FrontendCategory {
+  count: number;
+}
 
 interface CollectionFiltersProps {
   currentCategory: string;
@@ -18,23 +23,44 @@ interface CollectionFiltersProps {
 
 export default function CollectionFilters({ currentCategory, activeFilters }: CollectionFiltersProps) {
   const searchParams = useSearchParams();
-  const [categories, setCategories] = useState<CategoryData[]>([]);
+  const [categories, setCategories] = useState<CategoryWithCount[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const loadCategories = async () => {
+    const loadCategoryCounts = async () => {
       try {
-        const response = await fetchAllCategories();
-        setCategories(response.data);
+        const response = await fetchAllProducts({ limit: 1000 });
+        const frontendCategories = getAllFrontendCategories();
+        
+        const categoryCounts: Record<string, number> = {};
+        frontendCategories.forEach(cat => {
+          categoryCounts[cat.slug] = 0;
+        });
+
+        response.data.forEach((product) => {
+          product.categories.forEach((dbCategory) => {
+            const frontendSlug = mapDbCategoryToFrontend(dbCategory.name, dbCategory.slug);
+            if (frontendSlug && categoryCounts[frontendSlug] !== undefined) {
+              categoryCounts[frontendSlug]++;
+            }
+          });
+        });
+
+        const categoriesWithCounts: CategoryWithCount[] = frontendCategories.map(cat => ({
+          ...cat,
+          count: categoryCounts[cat.slug] || 0,
+        }));
+
+        setCategories(categoriesWithCounts);
       } catch (error) {
-        console.error('Error fetching categories:', error);
-        setCategories([]);
+        console.error('Error fetching category counts:', error);
+        setCategories(getAllFrontendCategories().map(cat => ({ ...cat, count: 0 })));
       } finally {
         setLoading(false);
       }
     };
 
-    loadCategories();
+    loadCategoryCounts();
   }, []);
 
   const buildFilterUrl = (filterType: string, value: string) => {
@@ -109,7 +135,7 @@ export default function CollectionFilters({ currentCategory, activeFilters }: Co
                 >
                   <span>{category.name}</span>
                   <span className="text-xs text-gray-400">
-                    {category.productCount}
+                    {category.count}
                   </span>
                 </Link>
               );

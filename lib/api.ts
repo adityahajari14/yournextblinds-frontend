@@ -59,19 +59,6 @@ export interface ProductResponse {
   data: ProductData;
 }
 
-export interface CategoryData {
-  id: string;
-  slug: string;
-  name: string;
-  description: string | null;
-  productCount: number;
-}
-
-export interface CategoriesResponse {
-  success: boolean;
-  data: CategoryData[];
-}
-
 export async function fetchAllProducts(params?: {
   page?: number;
   limit?: number;
@@ -131,31 +118,6 @@ export async function fetchProductBySlug(slug: string): Promise<ProductResponse>
         throw new Error('Product not found');
       }
       throw new Error(`Failed to fetch product: ${response.status} ${response.statusText}`);
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error('Fetch error:', error);
-    console.error('Attempted URL:', url);
-    throw error;
-  }
-}
-
-export async function fetchAllCategories(): Promise<CategoriesResponse> {
-  const url = `${API_BASE_URL}/api/categories`;
-  
-  try {
-    const response = await fetch(url, {
-      next: { revalidate: 300 },
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error(`API Error [${response.status}]: ${errorText}`);
-      throw new Error(`Failed to fetch categories: ${response.status} ${response.statusText}`);
     }
 
     return response.json();
