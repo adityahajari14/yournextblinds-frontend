@@ -169,7 +169,7 @@ export const navigationData: NavigationItem[] = [
   {
     label: 'Shop by Room',
     roomMenu: [
-      { name: 'Conservatory', image: '/nav-icons/rooms-conservatory.webp', href: '/collections/vertical-blinds?room=conservatory' },
+      { name: 'Conservatory', image: '/nav-icons/rooms-conservatory.webp', href: '/collections/conservatory' },
       { name: 'Bedroom', image: '/nav-icons/rooms-bedroom.webp', href: '/collections/vertical-blinds?room=bedroom' },
       { name: 'Kitchen', image: '/nav-icons/rooms-kitchen.webp', href: '/collections/vertical-blinds?room=kitchen' },
       { name: 'Office', image: '/nav-icons/rooms-office.webp', href: '/collections/vertical-blinds?room=office' },
