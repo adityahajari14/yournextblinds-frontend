@@ -90,6 +90,7 @@ interface FetchProductsParams {
   page?: number;
   limit?: number;
   tags?: string[];
+  search?: string;
 }
 
 export async function fetchProducts(params?: FetchProductsParams): Promise<ApiProductsResponse> {
@@ -98,6 +99,7 @@ export async function fetchProducts(params?: FetchProductsParams): Promise<ApiPr
   if (params?.page) queryParams.append('page', params.page.toString());
   if (params?.limit) queryParams.append('limit', params.limit.toString());
   if (params?.tags?.length) queryParams.append('tags', params.tags.join(','));
+  if (params?.search) queryParams.append('search', params.search);
 
   const query = queryParams.toString();
   return apiFetch<ApiProductsResponse>(`/api/products${query ? `?${query}` : ''}`);

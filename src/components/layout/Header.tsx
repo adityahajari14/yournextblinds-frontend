@@ -19,9 +19,9 @@ const Header = () => {
       
       {/* Action Icons */}
       <div className="flex gap-4 md:gap-5 lg:gap-6 items-center">
-        <button aria-label="Search" className="hover:opacity-70 transition-opacity">
+        <Link href="/search" aria-label="Search" className="hover:opacity-70 transition-opacity">
           <Image src="/icons/search.svg" alt="Search" width={20} height={20} className="md:w-6 md:h-6" />
-        </button>
+        </Link>
         <button aria-label="Account" className="hover:opacity-70 transition-opacity">
           <Image src="/icons/profile.svg" alt="Profile" width={20} height={20} className="md:w-6 md:h-6" />
         </button>

@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Hero = () => {
   return (
@@ -25,9 +26,11 @@ const Hero = () => {
             Discover blinds designed to complement your space and lifestyle crafted for beauty, built to last.
           </p>
           
+          <Link href="/collections">
           <button className="mt-2 md:mt-3 bg-[#00473c] text-white px-6 md:px-8 py-3 md:py-4 rounded text-sm md:text-base lg:text-lg font-medium tracking-wider hover:bg-[#003a31] transition-colors">
             Explore Now
           </button>
+          </Link>
         </div>
       </div>
     </section>
