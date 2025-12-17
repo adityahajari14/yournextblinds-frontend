@@ -2,6 +2,7 @@ import { TopBar, Header, NavBar, Footer, FlashSale, FAQ } from '@/components';
 import { fetchProducts, transformProduct, extractFilterOptions } from '@/lib/api';
 import CategoryHero from '@/components/collection/CategoryHero';
 import ProductGridWithFilters from '@/components/collection/ProductGridWithFilters';
+import { Product } from '@/types';
 
 export const metadata = {
   title: 'All Products | Your Next Blinds',
@@ -9,8 +10,8 @@ export const metadata = {
 };
 
 export default async function CollectionsPage() {
-  let products = [];
-  let filterOptions = { colors: [], patterns: [] };
+  let products: Product[] = [];
+  let filterOptions: { colors: string[]; patterns: string[] } = { colors: [], patterns: [] };
   
   try {
     const response = await fetchProducts({ limit: 500 });
