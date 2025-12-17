@@ -62,11 +62,6 @@ const MobileMenuItem = ({ item, onClose }: { item: any; onClose: () => void }) =
                               <Image src={link.icon} alt="" width={16} height={16} className="opacity-70" />
                             )}
                             <span>{link.label}</span>
-                            {link.badge && (
-                              <span className="text-xs font-medium bg-[#00473c] text-white px-1.5 py-0.5 rounded">
-                                {link.badge}
-                              </span>
-                            )}
                           </Link>
                         </li>
                       ))}
@@ -187,15 +182,6 @@ const NavBar = () => {
                                       className="text-[15px] text-gray-700 hover:text-[#00473c] transition-colors flex items-center gap-2 flex-wrap"
                                     >
                                       <span>{link.label}</span>
-                                      {link.badge === 'trending' && (
-                                        <span className="text-xs font-medium bg-[#0F9D49] text-white px-2 py-0.5 rounded">Trending</span>
-                                      )}
-                                      {link.badge === 'new' && (
-                                        <span className="text-xs font-medium bg-[#00473c] text-white px-2 py-0.5 rounded">New</span>
-                                      )}
-                                      {link.badge === 'best-seller' && (
-                                        <span className="text-xs font-medium bg-[#00473c] text-white px-2 py-0.5 rounded">Best Seller</span>
-                                      )}
                                     </Link>
                                   </li>
                                 ))}

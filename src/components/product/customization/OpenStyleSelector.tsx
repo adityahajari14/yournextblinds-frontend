@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { PriceOption } from '@/types/product';
+import { PriceOption } from '@/types';
 
 interface OpenStyleSelectorProps {
   options: PriceOption[];

@@ -7,6 +7,20 @@ export interface ProductImage {
   alt: string;
 }
 
+export interface PriceOption {
+  id: string;
+  name: string;
+  price?: number;
+  image?: string;
+  hex?: string;
+}
+
+export interface Room {
+  id: string;
+  name: string;
+  icon: string;
+}
+
 export interface ProductReview {
   id: number;
   author: string;

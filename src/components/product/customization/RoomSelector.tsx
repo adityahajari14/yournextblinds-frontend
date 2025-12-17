@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { Room } from '@/types/product';
+import { Room } from '@/types';
 
 interface RoomSelectorProps {
   rooms: Room[];

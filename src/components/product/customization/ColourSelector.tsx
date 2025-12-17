@@ -1,6 +1,6 @@
 'use client';
 
-import { PriceOption } from '@/types/product';
+import { PriceOption } from '@/types';
 
 interface ColourSelectorProps {
   options: PriceOption[];
