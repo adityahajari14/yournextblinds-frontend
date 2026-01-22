@@ -20,7 +20,10 @@ export async function generateStaticParams() {
     const categories = await fetchCategories();
     categories.forEach((cat) => slugs.add(cat.slug));
   } catch (error) {
-    console.error('Error fetching categories for static params:', error);
+    // Silently fail during build - backend may be unavailable
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching categories for static params:', error);
+    }
   }
 
   return Array.from(slugs).map((category) => ({ category }));
@@ -82,7 +85,10 @@ export default async function CollectionPage({ params }: PageProps) {
   try {
     backendCategories = await fetchCategories();
   } catch (error) {
-    console.error('Error fetching categories:', error);
+    // Silently fail during build - backend may be unavailable
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching categories:', error);
+    }
   }
 
   // Find matching backend category using mapped slug
@@ -110,7 +116,10 @@ export default async function CollectionPage({ params }: PageProps) {
       apiProducts = await fetchProductsByCategory(backendSlug);
       products = apiProducts.map(transformProduct);
     } catch (error) {
-      console.error('Error fetching products:', error);
+      // Silently fail during build - backend may be unavailable
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching products:', error);
+      }
     }
   }
 

@@ -21,6 +21,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // Roller Blinds
@@ -37,6 +38,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: true,
         hasWrappedCassette: true,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // Roman Blinds
@@ -53,6 +55,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // Venetian Blinds
@@ -69,6 +72,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // Day and Night Blinds (Zebra Blinds / Dual Zebra Shades)
@@ -78,7 +82,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasHeadrail: false,               // Not used for day/night blinds
         hasHeadrailColour: false,          // Not used for day/night blinds
         hasInstallationMethod: true,       // Fitting Type (Inside Mount/Outside Mount)
-        hasControlOption: false,           // Motorization handled separately (if needed)
+        hasControlOption: false,           // Not used for day/night blinds
         hasStacking: false,                // Not in spec
         hasControlSide: true,              // Continuous Chain - Select Location (LEFT/RIGHT)
         hasBottomChain: false,             // Not in spec
@@ -86,6 +90,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: true,               // Chain Colour (WHITE/GREY/BLACK/CHROME METAL)
         hasWrappedCassette: false,         // Not in spec
         hasCassetteMatchingBar: true,      // Cassette + Bottom Bar Matching (WHITE/BLACK/GREY)
+        hasMotorization: true,              // Motorization (Base $150 + Remote options)
     },
 
     // Blackout Blinds (similar to roller blinds)
@@ -102,6 +107,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // Skylight Blinds
@@ -118,6 +124,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // Wooden Blinds (similar to venetian)
@@ -134,6 +141,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // No Drill Blinds (similar to roller)
@@ -150,6 +158,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // Motorized Blinds (similar to roller with motorized control)
@@ -166,6 +175,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // Pleated Blinds
@@ -182,6 +192,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 
     // Default fallback for uncategorized products
@@ -198,6 +209,7 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasChainColor: false,
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
+        hasMotorization: false,
     },
 };
 

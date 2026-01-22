@@ -208,6 +208,7 @@ export function configToCustomizations(config: {
   chainColor?: string | null;
   wrappedCassette?: string | null;
   cassetteMatchingBar?: string | null;
+  motorization?: string | null;
 }): { category: string; optionId: string }[] {
   const customizations: { category: string; optionId: string }[] = [];
   
@@ -243,6 +244,9 @@ export function configToCustomizations(config: {
   }
   if (config.cassetteMatchingBar) {
     customizations.push({ category: 'cassette-bar', optionId: config.cassetteMatchingBar });
+  }
+  if (config.motorization && config.motorization !== 'none') {
+    customizations.push({ category: 'motorization', optionId: config.motorization });
   }
   
   return customizations;

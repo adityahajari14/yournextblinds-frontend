@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useEffect, useState } from 'react';
+import { useMemo, useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { Product, ProductConfiguration, PriceBandMatrix, CustomizationPricing as CustomizationPricingType } from '@/types';
 import { useCart } from '@/context/CartContext';
@@ -25,6 +25,7 @@ import {
   ChainColorSelector,
   WrappedCassetteSelector,
   CassetteMatchingBarSelector,
+  MotorizationSelector,
 } from './customization';
 import {
   HEADRAIL_OPTIONS,
@@ -40,6 +41,7 @@ import {
   CHAIN_COLOR_OPTIONS,
   WRAPPED_CASSETTE_OPTIONS,
   CASSETTE_MATCHING_BAR_OPTIONS,
+  MOTORIZATION_OPTIONS,
 } from '@/data/customizations';
 
 interface CustomizationModalProps {
@@ -66,25 +68,51 @@ const CustomizationModal = ({
   const [customizationPricing, setCustomizationPricing] = useState<CustomizationPricingType[]>([]);
   const [pricingLoaded, setPricingLoaded] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
+  const fetchingRef = useRef(false);
 
   // Fetch pricing data on mount
   useEffect(() => {
+    // Prevent multiple simultaneous fetches
+    if (fetchingRef.current) {
+      return;
+    }
+
+    fetchingRef.current = true;
+    let isMounted = true;
+
     const loadPricingData = async () => {
       try {
         const [matrix, customizations] = await Promise.all([
           fetchPriceMatrix(product.id),
           fetchCustomizationPricing(),
         ]);
-        setPriceMatrix(matrix);
-        setCustomizationPricing(customizations);
-        setPricingLoaded(true);
+        
+        // Only update state if component is still mounted
+        if (isMounted) {
+          setPriceMatrix(matrix);
+          setCustomizationPricing(customizations);
+          setPricingLoaded(true);
+        }
       } catch (error) {
         console.error('Failed to load pricing data:', error);
         // Pricing will fall back to old system if this fails
-        setPricingLoaded(true);
+        if (isMounted) {
+          setPricingLoaded(true);
+        }
+      } finally {
+        if (isMounted) {
+          fetchingRef.current = false;
+        }
       }
     };
+    
     loadPricingData();
+
+    // Cleanup function
+    return () => {
+      isMounted = false;
+      fetchingRef.current = false;
+    };
   }, [product.id]);
 
   // Determine which options to use based on product category
@@ -112,6 +140,7 @@ const CustomizationModal = ({
         showControlSide: product.features.hasControlSide,
         showBottomChain: product.features.hasBottomChain,
         showBracketType: product.features.hasBracketType,
+        showMotorization: product.features.hasMotorization,
       };
     }
 
@@ -158,6 +187,7 @@ const CustomizationModal = ({
       chainColor: config.chainColor,
       wrappedCassette: config.wrappedCassette,
       cassetteMatchingBar: config.cassetteMatchingBar,
+      motorization: config.motorization,
     });
   }, [config, visibleOptions]);
 
@@ -421,6 +451,17 @@ const CustomizationModal = ({
                       options={CASSETTE_MATCHING_BAR_OPTIONS}
                       selectedBar={config.cassetteMatchingBar}
                       onBarChange={(barId) => setConfig({ ...config, cassetteMatchingBar: barId })}
+                    />
+                  </div>
+                )}
+
+                {/* Motorization Selector */}
+                {product.features.hasMotorization && (
+                  <div className="pt-6 relative z-[2]">
+                    <MotorizationSelector
+                      options={MOTORIZATION_OPTIONS}
+                      selectedOption={config.motorization}
+                      onOptionChange={(optionId) => setConfig({ ...config, motorization: optionId })}
                     />
                   </div>
                 )}

@@ -39,26 +39,51 @@ if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
 // API Fetch Helpers
 // ============================================
 
-async function apiFetch<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function apiFetch<T>(endpoint: string, options?: RequestInit, retries: number = 2): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
+  const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
+
+  // Create AbortController for timeout
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
 
   try {
     const response = await fetch(url, {
       next: { revalidate: 60 },
       headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
       ...options,
     });
 
+    clearTimeout(timeoutId);
+
     if (!response.ok) {
       const errorText = await response.text();
-      console.error(`API Error [${response.status}]: ${errorText}`);
+      if (!isBuildTime) {
+        console.error(`API Error [${response.status}]: ${errorText}`);
+      }
       throw new Error(`API request failed: ${response.status} ${response.statusText}`);
     }
 
     return response.json();
-  } catch (error) {
-    console.error('Fetch error:', error);
-    console.error('Attempted URL:', url);
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    
+    // Retry logic for network errors
+    if (retries > 0 && (error.name === 'AbortError' || error.code === 'UND_ERR_CONNECT_TIMEOUT' || error.message?.includes('timeout'))) {
+      if (!isBuildTime) {
+        console.warn(`Retrying fetch (${retries} attempts remaining): ${url}`);
+      }
+      // Wait 1 second before retry
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return apiFetch<T>(endpoint, options, retries - 1);
+    }
+
+    // Only log errors in development or client-side
+    if (!isBuildTime) {
+      console.error('Fetch error:', error);
+      console.error('Attempted URL:', url);
+    }
     throw error;
   }
 }

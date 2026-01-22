@@ -19,7 +19,10 @@ export async function generateStaticParams() {
       slug: product.slug,
     }));
   } catch (error) {
-    console.error('Error generating static params:', error);
+    // Silently fail during build - backend may be unavailable
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error generating static params:', error);
+    }
     return [];
   }
 }
@@ -51,7 +54,10 @@ export default async function ProductPageRoute({ params }: ProductPageProps) {
     const response = await fetchProductBySlug(slug);
     productData = response.data;
   } catch (error) {
-    console.error('Error fetching product:', error);
+    // Only log in development
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching product:', error);
+    }
     notFound();
   }
   
@@ -94,7 +100,10 @@ export default async function ProductPageRoute({ params }: ProductPageProps) {
       relatedProducts.push(...otherProducts);
     }
   } catch (error) {
-    console.error('Error fetching related products:', error);
+    // Silently fail - related products are optional
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching related products:', error);
+    }
   }
   
   return (
