@@ -28,7 +28,7 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
-          menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        menuRef.current && !menuRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -44,11 +44,11 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
       const updateMenuPosition = () => {
         if (buttonRef.current) {
           const buttonRect = buttonRef.current.getBoundingClientRect();
-          
+
           // Calculate position - always open below
           const left = buttonRect.left;
           const width = buttonRect.width;
-          
+
           setMenuPosition({
             top: buttonRect.bottom + 4,
             left,
@@ -58,10 +58,10 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
       };
 
       updateMenuPosition();
-      
+
       window.addEventListener('scroll', updateMenuPosition, true);
       window.addEventListener('resize', updateMenuPosition);
-      
+
       return () => {
         window.removeEventListener('scroll', updateMenuPosition, true);
         window.removeEventListener('resize', updateMenuPosition);
@@ -82,25 +82,9 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
           className="w-full border-2 border-gray-300 rounded-lg p-3 bg-white text-left flex items-center justify-between hover:border-[#00473c] transition-colors"
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {selectedOption?.image && (
-              <div className="w-8 h-8 bg-gray-100 rounded-md overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
-                <Image
-                  src={selectedOption.image}
-                  alt={selectedOption.name}
-                  width={32}
-                  height={32}
-                  className="object-contain w-full h-full"
-                />
-              </div>
-            )}
             <span className="text-[#3a3a3a] font-medium truncate">
               {selectedOption ? selectedOption.name : placeholder}
             </span>
-            {selectedOption?.price && selectedOption.price > 0 && (
-              <span className="text-xs font-semibold bg-[#00473c] text-white px-2 py-0.5 rounded-md shrink-0 ml-auto">
-                +£{selectedOption.price.toFixed(2)}
-              </span>
-            )}
           </div>
           <svg
             className={`w-5 h-5 text-gray-500 transition-transform shrink-0 ml-2 ${isOpen ? 'rotate-180' : ''}`}
@@ -115,8 +99,8 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
         {isOpen && (
           <>
             {/* Backdrop to capture clicks outside */}
-            <div 
-              className="fixed inset-0 z-[99998]" 
+            <div
+              className="fixed inset-0 z-[99998]"
               onClick={() => setIsOpen(false)}
             />
             {/* Dropdown menu with fixed positioning to escape overflow constraints - always opens below */}
@@ -126,56 +110,42 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
               style={{
                 top: `${menuPosition.top}px`,
                 left: `${menuPosition.left}px`,
-                width: `${menuPosition.width}px`,
+                minWidth: `${menuPosition.width}px`,
                 maxHeight: '320px',
               }}
             >
-            {options.map((option) => (
-              <button
-                key={option.id}
-                type="button"
-                onClick={() => {
-                  onChange(option.id);
-                  setIsOpen(false);
-                }}
-                className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0 transition-colors ${
-                  selectedValue === option.id ? 'bg-[#f6fffd]' : ''
-                }`}
-              >
-                {option.image ? (
-                  <div className="w-10 h-10 bg-gray-100 rounded-md overflow-hidden shrink-0 border border-gray-200 flex items-center justify-center">
-                    <Image
-                      src={option.image}
-                      alt={option.name}
-                      width={40}
-                      height={40}
-                      className="object-contain w-full h-full"
-                    />
+              {options.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  onClick={() => {
+                    onChange(option.id);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0 transition-colors ${selectedValue === option.id ? 'bg-[#f6fffd]' : ''
+                    }`}
+                >
+                  <div className="flex-grow min-w-0">
+                    <p className={`text-sm font-medium ${selectedValue === option.id ? 'text-[#00473c]' : 'text-[#3a3a3a]'}`}>
+                      {option.name}
+                    </p>
                   </div>
-                ) : (
-                  <div className="w-10 h-10 shrink-0" />
-                )}
-                <div className="flex-grow min-w-0">
-                  <p className={`text-sm font-medium ${selectedValue === option.id ? 'text-[#00473c]' : 'text-[#3a3a3a]'}`}>
-                    {option.name}
-                  </p>
-                </div>
-                {option.price && option.price > 0 ? (
-                  <span className="text-xs font-semibold bg-[#00473c] text-white px-2.5 py-1 rounded-md shrink-0">
-                    +£{option.price.toFixed(2)}
-                  </span>
-                ) : null}
-                {selectedValue === option.id && (
-                  <div className="w-5 h-5 shrink-0 flex items-center justify-center">
-                    <div className="w-4 h-4 bg-[#00473c] rounded-sm flex items-center justify-center">
-                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                      </svg>
+                  {option.price && option.price > 0 ? (
+                    <span className="text-xs font-semibold bg-[#00473c] text-white px-2.5 py-1 rounded-md shrink-0">
+                      +£{option.price.toFixed(2)}
+                    </span>
+                  ) : null}
+                  {selectedValue === option.id && (
+                    <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                      <div className="w-4 h-4 bg-[#00473c] rounded-sm flex items-center justify-center">
+                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                        </svg>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </button>
-            ))}
+                  )}
+                </button>
+              ))}
             </div>
           </>
         )}

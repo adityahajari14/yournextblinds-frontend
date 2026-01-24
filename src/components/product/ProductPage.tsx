@@ -59,14 +59,14 @@ interface ProductPageProps {
   originalPricePerSquareMeter?: number; // Original price per m² from backend
 }
 
-const ProductPage = ({ 
-  product, 
+const ProductPage = ({
+  product,
   relatedProducts,
   basePricePerSquareMeter,
   originalPricePerSquareMeter,
 }: ProductPageProps) => {
   const { addToCart } = useCart();
-  
+
   const [config, setConfig] = useState<ProductConfiguration>({
     ...DEFAULT_CONFIGURATION,
     width: 0,
@@ -113,7 +113,7 @@ const ProductPage = ({
           fetchPriceMatrix(product.id),
           fetchCustomizationPricing(),
         ]);
-        
+
         // Only update state if component is still mounted
         if (isMounted) {
           setPriceMatrix(matrix);
@@ -132,7 +132,7 @@ const ProductPage = ({
         }
       }
     };
-    
+
     loadPricingData();
 
     // Cleanup function
@@ -223,11 +223,11 @@ const ProductPage = ({
     // Need valid dimensions to calculate price
     const widthInches = getTotalInches(config.width, config.widthFraction);
     const heightInches = getTotalInches(config.height, config.heightFraction);
-    
+
     if (!priceMatrix || widthInches <= 0 || heightInches <= 0) {
       return null;
     }
-    
+
     return calculateTotalPrice(
       widthInches,
       heightInches,
@@ -253,8 +253,8 @@ const ProductPage = ({
   const discountPercentage = originalPricePerSquareMeter && basePricePerSquareMeter
     ? Math.round(((originalPricePerSquareMeter - basePricePerSquareMeter) / originalPricePerSquareMeter) * 100)
     : product.originalPrice && product.price
-    ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-    : 0;
+      ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
+      : 0;
 
   const handleAddToCart = async () => {
     // Validate dimensions are selected
@@ -264,12 +264,12 @@ const ProductPage = ({
     }
 
     setIsValidating(true);
-    
+
     try {
       // Validate price with backend
       const widthInches = getTotalInches(config.width, config.widthFraction);
       const heightInches = getTotalInches(config.height, config.heightFraction);
-      
+
       const validation = await validateCartPrice(
         {
           productId: product.id,
@@ -279,7 +279,7 @@ const ProductPage = ({
         },
         totalPrice
       );
-      
+
       if (!validation.valid) {
         console.warn('Price mismatch detected:', {
           submitted: totalPrice,
@@ -386,7 +386,7 @@ const ProductPage = ({
                   <div className="text-xs md:text-sm text-[#0F9D49] mb-1">{discountPercentage}% off on First Order</div>
                   <div className="flex items-baseline gap-2 mb-3 md:mb-4">
                     <span className="text-xl md:text-2xl font-bold text-[#3a3a3a]">
-                      {showMinPriceIndicator 
+                      {showMinPriceIndicator
                         ? formatPriceWithCurrency(formatPrice(product.price), product.currency)
                         : formatPriceWithCurrency(formatPrice(totalPrice), product.currency)
                       }
@@ -427,7 +427,7 @@ const ProductPage = ({
                       )}
                     </div>
                   </button>
-                  
+
                   {isMeasureOpen && (
                     <div className="p-4 md:p-6 space-y-6">
                       {/* Size Selector */}
@@ -491,7 +491,7 @@ const ProductPage = ({
                       )}
                     </div>
                   </button>
-                  
+
                   {isCustomizeOpen && (
                     <div className="p-4 md:p-6 space-y-6 divide-y divide-gray-100">
                       {/* Headrail Selector */}
@@ -566,8 +566,7 @@ const ProductPage = ({
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                           {/* Continuous Chain - Select Location Card */}
                           {product.features.hasChainColor && (
-                            <button
-                              type="button"
+                            <div
                               onClick={() => {
                                 const newValue = !selectedOptionalCards.continuousChain;
                                 setSelectedOptionalCards({
@@ -578,11 +577,10 @@ const ProductPage = ({
                                   setConfig({ ...config, chainColor: null, controlSide: null });
                                 }
                               }}
-                              className={`relative border-2 rounded-lg p-5 transition-all duration-300 text-left group ${
-                                selectedOptionalCards.continuousChain
-                                  ? 'border-[#00473c] bg-gradient-to-br from-[#f6fffd] to-[#e8f5f3] shadow-md scale-[1.01]'
-                                  : 'border-gray-300 bg-white hover:border-[#00473c] hover:shadow-sm hover:scale-[1.005]'
-                              }`}
+                              className={`relative border-2 rounded-lg p-5 transition-all duration-300 text-left group cursor-pointer h-full flex flex-col ${selectedOptionalCards.continuousChain
+                                ? 'border-[#00473c] bg-gradient-to-br from-[#f6fffd] to-[#e8f5f3] shadow-md'
+                                : 'border-gray-300 bg-white hover:border-[#00473c] hover:shadow-sm'
+                                }`}
                             >
                               {selectedOptionalCards.continuousChain && (
                                 <div className="absolute top-3 right-3 w-6 h-6 bg-[#00473c] rounded-full flex items-center justify-center shadow-md z-10">
@@ -592,11 +590,10 @@ const ProductPage = ({
                                 </div>
                               )}
                               {CONTINUOUS_CHAIN_CARD.image && (
-                                <div className={`relative h-[120px] w-full mb-3 rounded-lg overflow-hidden flex items-center justify-center transition-all duration-300 ${
-                                  selectedOptionalCards.continuousChain
-                                    ? 'bg-gradient-to-br from-[#e8f5f3] to-[#d0ebe8] shadow-inner'
-                                    : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-150'
-                                }`}>
+                                <div className={`relative h-[120px] w-full mb-3 rounded-lg overflow-hidden flex items-center justify-center transition-all duration-300 ${selectedOptionalCards.continuousChain
+                                  ? 'bg-gradient-to-br from-[#e8f5f3] to-[#d0ebe8] shadow-inner'
+                                  : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-150'
+                                  }`}>
                                   <Image
                                     src={CONTINUOUS_CHAIN_CARD.image}
                                     alt={CONTINUOUS_CHAIN_CARD.name}
@@ -610,20 +607,42 @@ const ProductPage = ({
                                 {CONTINUOUS_CHAIN_CARD.name}
                               </h4>
                               {CONTINUOUS_CHAIN_CARD.description && (
-                                <p className="text-xs text-gray-600 leading-relaxed">{CONTINUOUS_CHAIN_CARD.description}</p>
+                                <p className="text-xs text-gray-600 leading-relaxed mb-2">{CONTINUOUS_CHAIN_CARD.description}</p>
                               )}
                               {CONTINUOUS_CHAIN_CARD.price > 0 && (
                                 <span className="absolute bottom-4 right-4 bg-[#00473c] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md">
                                   +£{CONTINUOUS_CHAIN_CARD.price.toFixed(2)}
                                 </span>
                               )}
-                            </button>
+
+                              {/* Dropdowns inside the card */}
+                              {selectedOptionalCards.continuousChain && (
+                                <div
+                                  className="mt-4 space-y-3 pt-3 border-t border-gray-200/50"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <SimpleDropdown
+                                    label="Select Location"
+                                    options={CONTROL_SIDE_OPTIONS}
+                                    selectedValue={config.controlSide}
+                                    onChange={(sideId) => setConfig({ ...config, controlSide: sideId })}
+                                    placeholder="Select location"
+                                  />
+                                  <SimpleDropdown
+                                    label="Chain Color"
+                                    options={CHAIN_COLOR_OPTIONS}
+                                    selectedValue={config.chainColor}
+                                    onChange={(colorId) => setConfig({ ...config, chainColor: colorId })}
+                                    placeholder="Select chain color"
+                                  />
+                                </div>
+                              )}
+                            </div>
                           )}
 
                           {/* Cassette and Bottom Matching Bar Card */}
                           {(product.features.hasWrappedCassette || product.features.hasCassetteMatchingBar) && (
-                            <button
-                              type="button"
+                            <div
                               onClick={() => {
                                 const newValue = !selectedOptionalCards.cassette;
                                 setSelectedOptionalCards({
@@ -631,18 +650,17 @@ const ProductPage = ({
                                   cassette: newValue,
                                 });
                                 if (!newValue) {
-                                  setConfig({ 
-                                    ...config, 
+                                  setConfig({
+                                    ...config,
                                     wrappedCassette: null,
-                                    cassetteMatchingBar: null 
+                                    cassetteMatchingBar: null
                                   });
                                 }
                               }}
-                              className={`relative border-2 rounded-lg p-5 transition-all duration-300 text-left group ${
-                                selectedOptionalCards.cassette
-                                  ? 'border-[#00473c] bg-gradient-to-br from-[#f6fffd] to-[#e8f5f3] shadow-md scale-[1.01]'
-                                  : 'border-gray-300 bg-white hover:border-[#00473c] hover:shadow-sm hover:scale-[1.005]'
-                              }`}
+                              className={`relative border-2 rounded-lg p-5 transition-all duration-300 text-left group cursor-pointer h-full flex flex-col ${selectedOptionalCards.cassette
+                                ? 'border-[#00473c] bg-gradient-to-br from-[#f6fffd] to-[#e8f5f3] shadow-md'
+                                : 'border-gray-300 bg-white hover:border-[#00473c] hover:shadow-sm'
+                                }`}
                             >
                               {selectedOptionalCards.cassette && (
                                 <div className="absolute top-3 right-3 w-6 h-6 bg-[#00473c] rounded-full flex items-center justify-center shadow-md z-10">
@@ -652,11 +670,10 @@ const ProductPage = ({
                                 </div>
                               )}
                               {CASSETTE_CARD.image && (
-                                <div className={`relative h-[120px] w-full mb-3 rounded-lg overflow-hidden flex items-center justify-center transition-all duration-300 ${
-                                  selectedOptionalCards.cassette
-                                    ? 'bg-gradient-to-br from-[#e8f5f3] to-[#d0ebe8] shadow-inner'
-                                    : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-150'
-                                }`}>
+                                <div className={`relative h-[120px] w-full mb-3 rounded-lg overflow-hidden flex items-center justify-center transition-all duration-300 ${selectedOptionalCards.cassette
+                                  ? 'bg-gradient-to-br from-[#e8f5f3] to-[#d0ebe8] shadow-inner'
+                                  : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-150'
+                                  }`}>
                                   <Image
                                     src={CASSETTE_CARD.image}
                                     alt={CASSETTE_CARD.name}
@@ -670,20 +687,46 @@ const ProductPage = ({
                                 {CASSETTE_CARD.name}
                               </h4>
                               {CASSETTE_CARD.description && (
-                                <p className="text-xs text-gray-600 leading-relaxed">{CASSETTE_CARD.description}</p>
+                                <p className="text-xs text-gray-600 leading-relaxed mb-2">{CASSETTE_CARD.description}</p>
                               )}
                               {CASSETTE_CARD.price > 0 && (
                                 <span className="absolute bottom-4 right-4 bg-[#00473c] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md">
                                   +£{CASSETTE_CARD.price.toFixed(2)}
                                 </span>
                               )}
-                            </button>
+
+                              {/* Dropdowns inside the card */}
+                              {selectedOptionalCards.cassette && (
+                                <div
+                                  className="mt-4 space-y-3 pt-3 border-t border-gray-200/50"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {product.features.hasWrappedCassette && (
+                                    <SimpleDropdown
+                                      label="Cassette Color"
+                                      options={WRAPPED_CASSETTE_OPTIONS}
+                                      selectedValue={config.wrappedCassette}
+                                      onChange={(optionId) => setConfig({ ...config, wrappedCassette: optionId })}
+                                      placeholder="Select cassette color"
+                                    />
+                                  )}
+                                  {product.features.hasCassetteMatchingBar && (
+                                    <SimpleDropdown
+                                      label="Cassette and Bottom Matching Bar"
+                                      options={CASSETTE_MATCHING_BAR_OPTIONS}
+                                      selectedValue={config.cassetteMatchingBar}
+                                      onChange={(optionId) => setConfig({ ...config, cassetteMatchingBar: optionId })}
+                                      placeholder="Select cassette and bottom bar"
+                                    />
+                                  )}
+                                </div>
+                              )}
+                            </div>
                           )}
 
                           {/* Motorization Card */}
                           {product.features.hasMotorization && (
-                            <button
-                              type="button"
+                            <div
                               onClick={() => {
                                 const newValue = !selectedOptionalCards.motorization;
                                 setSelectedOptionalCards({
@@ -694,11 +737,10 @@ const ProductPage = ({
                                   setConfig({ ...config, motorization: null });
                                 }
                               }}
-                              className={`relative border-2 rounded-lg p-5 transition-all duration-300 text-left group ${
-                                selectedOptionalCards.motorization
-                                  ? 'border-[#00473c] bg-gradient-to-br from-[#f6fffd] to-[#e8f5f3] shadow-md scale-[1.01]'
-                                  : 'border-gray-300 bg-white hover:border-[#00473c] hover:shadow-sm hover:scale-[1.005]'
-                              }`}
+                              className={`relative border-2 rounded-lg p-5 transition-all duration-300 text-left group cursor-pointer h-full flex flex-col ${selectedOptionalCards.motorization
+                                  ? 'border-[#00473c] bg-gradient-to-br from-[#f6fffd] to-[#e8f5f3] shadow-md'
+                                  : 'border-gray-300 bg-white hover:border-[#00473c] hover:shadow-sm'
+                                }`}
                             >
                               {selectedOptionalCards.motorization && (
                                 <div className="absolute top-3 right-3 w-6 h-6 bg-[#00473c] rounded-full flex items-center justify-center shadow-md z-10">
@@ -708,11 +750,10 @@ const ProductPage = ({
                                 </div>
                               )}
                               {MOTORIZATION_CARD.image && (
-                                <div className={`relative h-[120px] w-full mb-3 rounded-lg overflow-hidden flex items-center justify-center transition-all duration-300 ${
-                                  selectedOptionalCards.motorization
-                                    ? 'bg-gradient-to-br from-[#e8f5f3] to-[#d0ebe8] shadow-inner'
-                                    : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-150'
-                                }`}>
+                                <div className={`relative h-[120px] w-full mb-3 rounded-lg overflow-hidden flex items-center justify-center transition-all duration-300 ${selectedOptionalCards.motorization
+                                  ? 'bg-gradient-to-br from-[#e8f5f3] to-[#d0ebe8] shadow-inner'
+                                  : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-150'
+                                  }`}>
                                   <Image
                                     src={MOTORIZATION_CARD.image}
                                     alt={MOTORIZATION_CARD.name}
@@ -726,79 +767,33 @@ const ProductPage = ({
                                 {MOTORIZATION_CARD.name}
                               </h4>
                               {MOTORIZATION_CARD.description && (
-                                <p className="text-xs text-gray-600 leading-relaxed">{MOTORIZATION_CARD.description}</p>
+                                <p className="text-xs text-gray-600 leading-relaxed mb-2">{MOTORIZATION_CARD.description}</p>
                               )}
                               {MOTORIZATION_CARD.price > 0 && (
                                 <span className="absolute bottom-4 right-4 bg-[#00473c] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md">
                                   +£{MOTORIZATION_CARD.price.toFixed(2)}
                                 </span>
                               )}
-                            </button>
+
+                              {/* Dropdowns inside the card */}
+                              {selectedOptionalCards.motorization && (
+                                <div
+                                  className="mt-4 pt-3 border-t border-gray-200/50"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <SimpleDropdown
+                                    label="Motorization Option"
+                                    options={MOTORIZATION_OPTIONS}
+                                    selectedValue={config.motorization}
+                                    onChange={(optionId) => setConfig({ ...config, motorization: optionId })}
+                                    placeholder="Select motorization"
+                                  />
+                                </div>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>
-
-                      {/* Continuous Chain - Select Location - Only shown when Continuous Chain card is selected */}
-                      {selectedOptionalCards.continuousChain && product.features.hasChainColor && (
-                        <div className="pt-6 space-y-4">
-                          {/* Location Selection (Left/Right) Dropdown */}
-                          <SimpleDropdown
-                            label="Select Location"
-                            options={CONTROL_SIDE_OPTIONS}
-                            selectedValue={config.controlSide}
-                            onChange={(sideId) => setConfig({ ...config, controlSide: sideId })}
-                            placeholder="Select location"
-                          />
-
-                          {/* Chain Color Dropdown */}
-                          <SimpleDropdown
-                            label="Chain Color"
-                            options={CHAIN_COLOR_OPTIONS}
-                            selectedValue={config.chainColor}
-                            onChange={(colorId) => setConfig({ ...config, chainColor: colorId })}
-                            placeholder="Select chain color"
-                          />
-                        </div>
-                      )}
-
-                      {/* Cassette Options - Only shown when Cassette card is selected */}
-                      {selectedOptionalCards.cassette && (
-                        <div className="pt-6 space-y-4">
-                          {/* Wrapped Cassette Options (for Roller Blinds) */}
-                          {product.features.hasWrappedCassette && (
-                            <SimpleDropdown
-                              label="Cassette Color"
-                              options={WRAPPED_CASSETTE_OPTIONS}
-                              selectedValue={config.wrappedCassette}
-                              onChange={(optionId) => setConfig({ ...config, wrappedCassette: optionId })}
-                              placeholder="Select cassette color"
-                            />
-                          )}
-                          {/* Cassette Matching Bar Options (for Day/Night Blinds) */}
-                          {product.features.hasCassetteMatchingBar && (
-                            <SimpleDropdown
-                              label="Cassette and Bottom Matching Bar"
-                              options={CASSETTE_MATCHING_BAR_OPTIONS}
-                              selectedValue={config.cassetteMatchingBar}
-                              onChange={(optionId) => setConfig({ ...config, cassetteMatchingBar: optionId })}
-                              placeholder="Select cassette and bottom bar"
-                            />
-                          )}
-                        </div>
-                      )}
-
-                      {/* Motorization Dropdown - Only shown when Motorization card is selected */}
-                      {selectedOptionalCards.motorization && product.features.hasMotorization && (
-                        <div className="pt-6">
-                          <SimpleDropdown
-                            label="Motorization Option"
-                            options={MOTORIZATION_OPTIONS}
-                            selectedValue={config.motorization}
-                            onChange={(optionId) => setConfig({ ...config, motorization: optionId })}
-                            placeholder="Select motorization"
-                          />
-                        </div>
-                      )}
                     </div>
                   )}
                 </div>
@@ -808,11 +803,10 @@ const ProductPage = ({
               <button
                 onClick={handleAddToCart}
                 disabled={isValidating || showMinPriceIndicator}
-                className={`w-full mt-4 md:mt-6 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors ${
-                  isValidating || showMinPriceIndicator
-                    ? 'bg-gray-400 text-white cursor-not-allowed'
-                    : 'bg-[#00473c] text-white hover:bg-[#003830]'
-                }`}
+                className={`w-full mt-4 md:mt-6 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors ${isValidating || showMinPriceIndicator
+                  ? 'bg-gray-400 text-white cursor-not-allowed'
+                  : 'bg-[#00473c] text-white hover:bg-[#003830]'
+                  }`}
               >
                 {isValidating ? 'Adding to Cart...' : 'Add to Cart'}
               </button>
