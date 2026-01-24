@@ -310,12 +310,20 @@ export function formatPriceWithCurrency(price: number, currency: string = 'GBP')
  */
 export function transformProduct(apiProduct: ApiProduct): Product {
   const categoryName = apiProduct.categories[0]?.name || 'Blinds';
-  const categorySlug = apiProduct.categories[0]?.slug || 'default';
+  // Check if product belongs to 'motorised-eclipsecore' (priority category)
+  const priorityCategories = ['motorised-eclipsecore', 'motorized-eclipsecore'];
+  const priorityCategory = apiProduct.categories.find(c => priorityCategories.includes(c.slug));
+
+  // Use priority category if found, otherwise fall back to first category
+  const activeCategorySlug = priorityCategory
+    ? priorityCategory.slug
+    : (apiProduct.categories[0]?.slug || 'default');
+
   const basePrice = parsePrice(apiProduct.basePrice);
   const oldPrice = parsePrice(apiProduct.oldPrice);
 
   // Get category-specific customization features
-  const features = getCategoryCustomizations(categorySlug);
+  const features = getCategoryCustomizations(activeCategorySlug);
 
   return {
     id: apiProduct.id,

@@ -45,6 +45,9 @@ export interface ProductFeatures {
   hasWrappedCassette: boolean;
   hasCassetteMatchingBar: boolean;
   hasMotorization: boolean;
+  hasBlindColor: boolean;
+  hasFrameColor: boolean;
+  hasOpeningDirection: boolean;
 }
 
 export interface Product {
@@ -73,10 +76,10 @@ export interface Product {
 export interface ProductConfiguration {
   width: number;
   widthFraction: string;
-  widthUnit: string;
+  widthUnit: 'inches' | 'cm';
   height: number;
   heightFraction: string;
-  heightUnit: string;
+  heightUnit: 'inches' | 'cm';
   roomType: string | null;
   blindName: string | null;
   headrail: string | null;
@@ -91,6 +94,9 @@ export interface ProductConfiguration {
   wrappedCassette: string | null;
   cassetteMatchingBar: string | null;
   motorization: string | null;
+  blindColor: string | null;
+  frameColor: string | null;
+  openingDirection: string | null;
 }
 
 export const DEFAULT_CONFIGURATION: ProductConfiguration = {
@@ -114,6 +120,9 @@ export const DEFAULT_CONFIGURATION: ProductConfiguration = {
   wrappedCassette: null,
   cassetteMatchingBar: null,
   motorization: null,
+  blindColor: null,
+  frameColor: null,
+  openingDirection: null,
 };
 
 // ============================================
@@ -227,6 +236,9 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasWrappedCassette: false,
   hasCassetteMatchingBar: false,
   hasMotorization: false,
+  hasBlindColor: false,
+  hasFrameColor: false,
+  hasOpeningDirection: false,
 };
 
 export const DEFAULT_ESTIMATED_DELIVERY = '22 December 2025';

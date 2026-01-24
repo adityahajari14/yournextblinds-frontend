@@ -47,6 +47,9 @@ import {
   WRAPPED_CASSETTE_OPTIONS,
   CASSETTE_MATCHING_BAR_OPTIONS,
   MOTORIZATION_OPTIONS,
+  BLIND_COLOR_OPTIONS,
+  FRAME_COLOR_OPTIONS,
+  OPENING_DIRECTION_OPTIONS,
 } from '@/data/customizations';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 import { CONTINUOUS_CHAIN_CARD, CASSETTE_CARD, MOTORIZATION_CARD } from '@/data/optionalCustomizations';
@@ -168,6 +171,9 @@ const ProductPage = ({
         showBottomChain: product.features.hasBottomChain,
         showBracketType: product.features.hasBracketType,
         showMotorization: product.features.hasMotorization,
+        showBlindColor: product.features.hasBlindColor,
+        showFrameColor: product.features.hasFrameColor,
+        showOpeningDirection: product.features.hasOpeningDirection,
       };
     }
 
@@ -197,6 +203,10 @@ const ProductPage = ({
 
       // Bracket Type for Classic and Platinum
       showBracketType: product.features.hasBracketType && (headrail === 'classic' || headrail === 'platinum'),
+
+      showBlindColor: product.features.hasBlindColor,
+      showFrameColor: product.features.hasFrameColor,
+      showOpeningDirection: product.features.hasOpeningDirection,
     };
   }, [config.headrail, isRollerOrDayNight, product.features]);
 
@@ -221,8 +231,8 @@ const ProductPage = ({
   // Calculate price using new pricing system
   const priceCalculation = useMemo(() => {
     // Need valid dimensions to calculate price
-    const widthInches = getTotalInches(config.width, config.widthFraction);
-    const heightInches = getTotalInches(config.height, config.heightFraction);
+    const widthInches = getTotalInches(config.width, config.widthFraction, config.widthUnit);
+    const heightInches = getTotalInches(config.height, config.heightFraction, config.heightUnit);
 
     if (!priceMatrix || widthInches <= 0 || heightInches <= 0) {
       return null;
@@ -267,8 +277,8 @@ const ProductPage = ({
 
     try {
       // Validate price with backend
-      const widthInches = getTotalInches(config.width, config.widthFraction);
-      const heightInches = getTotalInches(config.height, config.heightFraction);
+      const widthInches = getTotalInches(config.width, config.widthFraction, config.widthUnit);
+      const heightInches = getTotalInches(config.height, config.heightFraction, config.heightUnit);
 
       const validation = await validateCartPrice(
         {
@@ -437,10 +447,12 @@ const ProductPage = ({
                           widthFraction={config.widthFraction}
                           height={config.height}
                           heightFraction={config.heightFraction}
+                          unit={config.widthUnit}
                           onWidthChange={(value) => setConfig({ ...config, width: value })}
                           onWidthFractionChange={(value) => setConfig({ ...config, widthFraction: value })}
                           onHeightChange={(value) => setConfig({ ...config, height: value })}
                           onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
+                          onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
                         />
                       )}
 
@@ -557,6 +569,71 @@ const ProductPage = ({
                             options={BRACKET_TYPE_OPTIONS}
                             selectedBracket={config.bracketType}
                             onBracketChange={(bracketId) => setConfig({ ...config, bracketType: bracketId })}
+                          />
+                        </div>
+                      )}
+
+                      {/* Blind Color Selector */}
+                      {product.features.hasBlindColor && visibleOptions.showBlindColor && (
+                        <div className="pt-6">
+                          <h3 className="text-sm font-medium text-[#3a3a3a] mb-3">Blind Color</h3>
+                          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                            {BLIND_COLOR_OPTIONS.map((option) => (
+                              <button
+                                key={option.id}
+                                onClick={() => setConfig({ ...config, blindColor: option.id })}
+                                className={`flex flex-col items-center justify-center p-2 border-2 rounded-lg transition-all ${config.blindColor === option.id
+                                  ? 'border-[#00473c] bg-[#f0fdf9]'
+                                  : 'border-gray-200 hover:border-gray-300'
+                                  }`}
+                              >
+                                {option.image && (
+                                  <div className="w-full aspect-square relative mb-1.5 rounded overflow-hidden shadow-sm">
+                                    <div className={`w-full h-full ${option.id === 'white' ? 'bg-white border border-gray-100' : option.id === 'cream' ? 'bg-[#FFFDD0]' : 'bg-[#36454F]'}`}></div>
+                                  </div>
+                                )}
+                                <span className="text-xs font-medium text-center text-[#3a3a3a]">{option.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Frame Color Selector */}
+                      {product.features.hasFrameColor && visibleOptions.showFrameColor && (
+                        <div className="pt-6">
+                          <h3 className="text-sm font-medium text-[#3a3a3a] mb-3">Frame Color</h3>
+                          <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
+                            {FRAME_COLOR_OPTIONS.map((option) => (
+                              <button
+                                key={option.id}
+                                onClick={() => setConfig({ ...config, frameColor: option.id })}
+                                className={`flex flex-col items-center justify-center p-2 border-2 rounded-lg transition-all ${config.frameColor === option.id
+                                  ? 'border-[#00473c] bg-[#f0fdf9]'
+                                  : 'border-gray-200 hover:border-gray-300'
+                                  }`}
+                              >
+                                {option.image && (
+                                  <div className="w-full aspect-square relative mb-1.5 rounded overflow-hidden shadow-sm">
+                                    <div className={`w-full h-full ${option.id === 'white' ? 'bg-white border border-gray-100' : 'bg-[#53565B]'}`}></div>
+                                  </div>
+                                )}
+                                <span className="text-xs font-medium text-center text-[#3a3a3a]">{option.name}</span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Opening Direction Selector */}
+                      {product.features.hasOpeningDirection && visibleOptions.showOpeningDirection && (
+                        <div className="pt-6">
+                          <SimpleDropdown
+                            label="Opening Direction"
+                            options={OPENING_DIRECTION_OPTIONS}
+                            selectedValue={config.openingDirection}
+                            onChange={(optionId) => setConfig({ ...config, openingDirection: optionId })}
+                            placeholder="Select opening direction"
                           />
                         </div>
                       )}

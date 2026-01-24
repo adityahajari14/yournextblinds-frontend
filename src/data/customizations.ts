@@ -275,3 +275,57 @@ export const MOTORIZATION_OPTIONS = [
     image: '/products/motorization/16ch.png',
   },
 ];
+
+// Blind Color Options
+export const BLIND_COLOR_OPTIONS = [
+  {
+    id: 'white',
+    name: 'White',
+    price: 0,
+    image: '/products/blindColor/white.png',
+  },
+  {
+    id: 'cream',
+    name: 'Cream',
+    price: 0,
+    image: '/products/blindColor/cream.png',
+  },
+  {
+    id: 'anthracite',
+    name: 'Anthracite',
+    price: 0,
+    image: '/products/blindColor/anthracite.png',
+  },
+];
+
+// Frame Color Options
+export const FRAME_COLOR_OPTIONS = [
+  {
+    id: 'white',
+    name: 'White',
+    price: 0,
+    image: '/products/frameColor/white.png',
+  },
+  {
+    id: 'graphite',
+    name: 'Graphite',
+    price: 0,
+    image: '/products/frameColor/graphite.png',
+  },
+];
+
+// Opening Direction Options
+export const OPENING_DIRECTION_OPTIONS = [
+  {
+    id: 'left-right',
+    name: 'Left & Right',
+    price: 0,
+    image: '/products/openingDirection/leftRight.png',
+  },
+  {
+    id: 'up-down',
+    name: 'Up & Down',
+    price: 0,
+    image: '/products/openingDirection/upDown.png',
+  },
+];

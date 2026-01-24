@@ -62,7 +62,7 @@ const CustomizationModal = ({
   originalPricePerSquareMeter,
 }: CustomizationModalProps) => {
   const { addToCart } = useCart();
-  
+
   // State for pricing data from backend
   const [priceMatrix, setPriceMatrix] = useState<PriceBandMatrix | null>(null);
   const [customizationPricing, setCustomizationPricing] = useState<CustomizationPricingType[]>([]);
@@ -86,7 +86,7 @@ const CustomizationModal = ({
           fetchPriceMatrix(product.id),
           fetchCustomizationPricing(),
         ]);
-        
+
         // Only update state if component is still mounted
         if (isMounted) {
           setPriceMatrix(matrix);
@@ -105,7 +105,7 @@ const CustomizationModal = ({
         }
       }
     };
-    
+
     loadPricingData();
 
     // Cleanup function
@@ -194,13 +194,13 @@ const CustomizationModal = ({
   // Calculate price using new pricing system
   const priceCalculation = useMemo(() => {
     // Need valid dimensions to calculate price
-    const widthInches = getTotalInches(config.width, config.widthFraction);
-    const heightInches = getTotalInches(config.height, config.heightFraction);
-    
+    const widthInches = getTotalInches(config.width, config.widthFraction, config.widthUnit);
+    const heightInches = getTotalInches(config.height, config.heightFraction, config.heightUnit);
+
     if (!priceMatrix || widthInches <= 0 || heightInches <= 0) {
       return null;
     }
-    
+
     return calculateTotalPrice(
       widthInches,
       heightInches,
@@ -230,12 +230,12 @@ const CustomizationModal = ({
     }
 
     setIsValidating(true);
-    
+
     try {
       // Validate price with backend
-      const widthInches = getTotalInches(config.width, config.widthFraction);
-      const heightInches = getTotalInches(config.height, config.heightFraction);
-      
+      const widthInches = getTotalInches(config.width, config.widthFraction, config.widthUnit);
+      const heightInches = getTotalInches(config.height, config.heightFraction, config.heightUnit);
+
       const validation = await validateCartPrice(
         {
           productId: product.id,
@@ -245,7 +245,7 @@ const CustomizationModal = ({
         },
         totalPrice
       );
-      
+
       if (!validation.valid) {
         console.warn('Price mismatch detected:', {
           submitted: totalPrice,
@@ -326,10 +326,12 @@ const CustomizationModal = ({
                       widthFraction={config.widthFraction}
                       height={config.height}
                       heightFraction={config.heightFraction}
+                      unit={config.widthUnit}
                       onWidthChange={(value) => setConfig({ ...config, width: value })}
                       onWidthFractionChange={(value) => setConfig({ ...config, widthFraction: value })}
                       onHeightChange={(value) => setConfig({ ...config, height: value })}
                       onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
+                      onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
                     />
                   </div>
                 )}
@@ -480,7 +482,7 @@ const CustomizationModal = ({
                 {showMinPriceIndicator ? 'From' : 'Price'}
               </span>
               <div className="text-xl md:text-2xl font-bold text-[#3a3a3a]">
-                {showMinPriceIndicator 
+                {showMinPriceIndicator
                   ? formatPriceWithCurrency(formatPrice(product.price), product.currency)
                   : formatPriceWithCurrency(formatPrice(totalPrice), product.currency)
                 }
@@ -494,11 +496,10 @@ const CustomizationModal = ({
             <button
               onClick={handleAddToCart}
               disabled={isValidating || showMinPriceIndicator}
-              className={`py-2.5 md:py-3 px-6 md:px-8 rounded text-sm md:text-base font-medium transition-colors ${
-                isValidating || showMinPriceIndicator
-                  ? 'bg-gray-400 text-white cursor-not-allowed'
-                  : 'bg-[#00473c] text-white hover:bg-[#003830]'
-              }`}
+              className={`py-2.5 md:py-3 px-6 md:px-8 rounded text-sm md:text-base font-medium transition-colors ${isValidating || showMinPriceIndicator
+                ? 'bg-gray-400 text-white cursor-not-allowed'
+                : 'bg-[#00473c] text-white hover:bg-[#003830]'
+                }`}
             >
               {isValidating ? 'Adding to Cart...' : 'Add to Cart'}
             </button>

@@ -28,15 +28,15 @@ export interface CustomizationPriceResult {
 export function findCeilingWidthBand(widthInches: number, widthBands: WidthBand[]): WidthBand | null {
   // Sort bands by inches ascending
   const sortedBands = [...widthBands].sort((a, b) => a.inches - b.inches);
-  
+
   // Find the smallest band >= requested width
   const ceilingBand = sortedBands.find(band => band.inches >= Math.ceil(widthInches));
-  
+
   // If no band found, return the largest band
   if (!ceilingBand && sortedBands.length > 0) {
     return sortedBands[sortedBands.length - 1];
   }
-  
+
   return ceilingBand || null;
 }
 
@@ -47,15 +47,15 @@ export function findCeilingWidthBand(widthInches: number, widthBands: WidthBand[
 export function findCeilingHeightBand(heightInches: number, heightBands: HeightBand[]): HeightBand | null {
   // Sort bands by inches ascending
   const sortedBands = [...heightBands].sort((a, b) => a.inches - b.inches);
-  
+
   // Find the smallest band >= requested height
   const ceilingBand = sortedBands.find(band => band.inches >= Math.ceil(heightInches));
-  
+
   // If no band found, return the largest band
   if (!ceilingBand && sortedBands.length > 0) {
     return sortedBands[sortedBands.length - 1];
   }
-  
+
   return ceilingBand || null;
 }
 
@@ -74,20 +74,20 @@ export function calculateDimensionPrice(
 ): PriceCalculationResult | null {
   const widthBand = findCeilingWidthBand(widthInches, priceMatrix.widthBands);
   const heightBand = findCeilingHeightBand(heightInches, priceMatrix.heightBands);
-  
+
   if (!widthBand || !heightBand) {
     return null;
   }
-  
+
   // Find the price cell for this combination
   const priceCell = priceMatrix.prices.find(
     p => p.widthMm === widthBand.mm && p.heightMm === heightBand.mm
   );
-  
+
   if (!priceCell) {
     return null;
   }
-  
+
   return {
     dimensionPrice: priceCell.price,
     widthBand,
@@ -108,11 +108,11 @@ export function getCustomizationPrice(
   const option = customizationPricing.find(
     c => c.category === category && c.optionId === optionId
   );
-  
+
   if (!option) {
     return null;
   }
-  
+
   // Check for width-specific pricing first
   if (widthBand) {
     const widthSpecificPrice = option.prices.find(p => p.widthMm === widthBand.mm);
@@ -125,7 +125,7 @@ export function getCustomizationPrice(
       };
     }
   }
-  
+
   // Fall back to fixed pricing (widthMm === null)
   const fixedPrice = option.prices.find(p => p.widthMm === null);
   if (fixedPrice) {
@@ -136,7 +136,7 @@ export function getCustomizationPrice(
       price: fixedPrice.price,
     };
   }
-  
+
   return null;
 }
 
@@ -158,14 +158,14 @@ export function calculateTotalPrice(
 } | null {
   // Calculate dimension price
   const dimensionResult = calculateDimensionPrice(widthInches, heightInches, priceMatrix);
-  
+
   if (!dimensionResult) {
     return null;
   }
-  
+
   // Calculate customization prices
   const customizationPrices: CustomizationPriceResult[] = [];
-  
+
   for (const customization of selectedCustomizations) {
     const priceResult = getCustomizationPrice(
       customization.category,
@@ -173,16 +173,16 @@ export function calculateTotalPrice(
       dimensionResult.widthBand,
       customizationPricing
     );
-    
+
     if (priceResult && priceResult.price > 0) {
       customizationPrices.push(priceResult);
     }
   }
-  
+
   // Calculate total
   const customizationTotal = customizationPrices.reduce((sum, c) => sum + c.price, 0);
   const totalPrice = dimensionResult.dimensionPrice + customizationTotal;
-  
+
   return {
     dimensionPrice: dimensionResult.dimensionPrice,
     customizationPrices,
@@ -209,9 +209,12 @@ export function configToCustomizations(config: {
   wrappedCassette?: string | null;
   cassetteMatchingBar?: string | null;
   motorization?: string | null;
+  blindColor?: string | null;
+  frameColor?: string | null;
+  openingDirection?: string | null;
 }): { category: string; optionId: string }[] {
   const customizations: { category: string; optionId: string }[] = [];
-  
+
   if (config.headrail) {
     customizations.push({ category: 'headrail', optionId: config.headrail });
   }
@@ -248,7 +251,16 @@ export function configToCustomizations(config: {
   if (config.motorization && config.motorization !== 'none') {
     customizations.push({ category: 'motorization', optionId: config.motorization });
   }
-  
+  if (config.blindColor) {
+    customizations.push({ category: 'blind-color', optionId: config.blindColor });
+  }
+  if (config.frameColor) {
+    customizations.push({ category: 'frame-color', optionId: config.frameColor });
+  }
+  if (config.openingDirection) {
+    customizations.push({ category: 'opening-direction', optionId: config.openingDirection });
+  }
+
   return customizations;
 }
 
@@ -265,8 +277,17 @@ export function parseFraction(fraction: string): number {
 }
 
 /**
- * Get total inches including fraction
+ * Get total inches including fraction, converting from other units if necessary
  */
-export function getTotalInches(whole: number, fraction: string): number {
+export function getTotalInches(whole: number, fraction: string, unit: 'inches' | 'cm' | 'mm' = 'inches'): number {
+  if (unit === 'cm') {
+    // For CM, 'whole' is cm, 'fraction' is mm (as a whole number 0-9)
+    const mm = parseFloat(fraction) || 0;
+    const totalCm = whole + (mm / 10);
+    return totalCm / 2.54;
+  }
+  if (unit === 'mm') {
+    return whole / 25.4;
+  }
   return whole + parseFraction(fraction);
 }

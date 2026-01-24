@@ -369,7 +369,7 @@ export const newNavigationData: NewNavigationItem[] = [
     submenu: [
       { label: 'Motorised roller shades', href: '/collections/motorised-roller-shades' },
       { label: 'Motorised Dual / zebra shades', href: '/collections/motorised-dual-zebra-shades' },
-      { label: 'Motorised EclipseCore', href: '/collections/motorised-eclipsecore' },
+      { label: 'Motorised EclipseCore', href: '/product/non-driii-honeycomb-blackout-blinds' },
     ]
   },
   {

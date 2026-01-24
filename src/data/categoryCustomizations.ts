@@ -22,6 +22,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // Roller Blinds
@@ -39,6 +42,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: true,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // Roman Blinds
@@ -56,6 +62,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // Venetian Blinds
@@ -73,6 +82,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // Day and Night Blinds (Zebra Blinds / Dual Zebra Shades)
@@ -91,6 +103,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,         // Not in spec
         hasCassetteMatchingBar: true,      // Cassette + Bottom Bar Matching (WHITE/BLACK/GREY)
         hasMotorization: true,              // Motorization (Base $150 + Remote options)
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // Blackout Blinds (similar to roller blinds)
@@ -108,6 +123,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // Skylight Blinds
@@ -125,6 +143,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // Wooden Blinds (similar to venetian)
@@ -142,6 +163,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // No Drill Blinds (similar to roller)
@@ -159,6 +183,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // Motorized Blinds (similar to roller with motorized control)
@@ -176,6 +203,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 
     // Pleated Blinds
@@ -193,6 +223,28 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
+    },
+
+    'motorised-eclipsecore': {
+        hasSize: true,
+        hasHeadrail: false,
+        hasHeadrailColour: false,
+        hasInstallationMethod: false,
+        hasControlOption: false,
+        hasStacking: false,
+        hasControlSide: false,
+        hasBottomChain: false,
+        hasBracketType: false,
+        hasChainColor: false,
+        hasWrappedCassette: false,
+        hasCassetteMatchingBar: false,
+        hasMotorization: false,
+        hasBlindColor: true,
+        hasFrameColor: true,
+        hasOpeningDirection: true,
     },
 
     // Default fallback for uncategorized products
@@ -210,6 +262,9 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasWrappedCassette: false,
         hasCassetteMatchingBar: false,
         hasMotorization: false,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
     },
 };
 
@@ -226,7 +281,7 @@ export function getCategoryCustomizations(categorySlug: string): ProductFeatures
     const slugMapping: Record<string, string> = {
         'day-night-blinds': 'day-and-night-blinds', // Backend uses 'day-night-blinds' (no 'and')
     };
-    
+
     const mappedSlug = slugMapping[normalizedSlug] || normalizedSlug;
 
     // Try exact match first
