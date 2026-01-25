@@ -30,3 +30,11 @@ export const MOTORIZATION_CARD: OptionalCustomizationCard = {
   price: 0,
   image: '/products/motorization/1ch.png',
 };
+
+export const BOTTOM_BAR_CARD: OptionalCustomizationCard = {
+  id: 'bottom-bar-option',
+  name: 'Bottom Bar Option',
+  description: 'Customize your blind with a premium bottom bar',
+  price: 0,
+  image: '/products/bottomBar/bottomBar.png',
+};

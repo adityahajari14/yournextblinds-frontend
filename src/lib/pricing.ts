@@ -181,7 +181,12 @@ export function calculateTotalPrice(
 
   // Calculate total
   const customizationTotal = customizationPrices.reduce((sum, c) => sum + c.price, 0);
-  const totalPrice = dimensionResult.dimensionPrice + customizationTotal;
+
+  // Add motorization base price if applicable
+  const hasMotorization = selectedCustomizations.some(c => c.category === 'motorization');
+  const motorizationBasePrice = hasMotorization ? 95 : 0;
+
+  const totalPrice = dimensionResult.dimensionPrice + customizationTotal + motorizationBasePrice;
 
   return {
     dimensionPrice: dimensionResult.dimensionPrice,
@@ -212,6 +217,8 @@ export function configToCustomizations(config: {
   blindColor?: string | null;
   frameColor?: string | null;
   openingDirection?: string | null;
+  bottomBar?: string | null;
+  rollStyle?: string | null;
 }): { category: string; optionId: string }[] {
   const customizations: { category: string; optionId: string }[] = [];
 
@@ -259,6 +266,12 @@ export function configToCustomizations(config: {
   }
   if (config.openingDirection) {
     customizations.push({ category: 'opening-direction', optionId: config.openingDirection });
+  }
+  if (config.bottomBar) {
+    customizations.push({ category: 'bottom-bar', optionId: config.bottomBar });
+  }
+  if (config.rollStyle) {
+    customizations.push({ category: 'roll-style', optionId: config.rollStyle });
   }
 
   return customizations;

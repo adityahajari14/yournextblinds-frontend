@@ -1,7 +1,7 @@
 // Customization Selectors
 export { default as SizeSelector } from './SizeSelector';
 export { default as RoomTypeSelector } from './RoomTypeSelector';
-export { default as BlindNameInput } from './BlindNameInput';
+
 export { default as HeadrailSelector } from './HeadrailSelector';
 export { default as HeadrailColourSelector } from './HeadrailColourSelector';
 export { default as InstallationMethodSelector } from './InstallationMethodSelector';
@@ -15,3 +15,5 @@ export { default as WrappedCassetteSelector } from './WrappedCassetteSelector';
 export { default as CassetteMatchingBarSelector } from './CassetteMatchingBarSelector';
 export { default as MotorizationSelector } from './MotorizationSelector';
 export { default as SimpleDropdown } from './SimpleDropdown';
+export { default as BottomBarSelector } from './BottomBarSelector';
+export { default as RollStyleSelector } from './RollStyleSelector';

@@ -250,28 +250,28 @@ export const MOTORIZATION_OPTIONS = [
     id: '1ch-remote',
     name: '1 CH Remote',
     description: '1 channel remote control (included with motorization)',
-    price: 150.00, // Base motorization price
+    price: 13.95,
     image: '/products/motorization/1ch.png',
   },
   {
     id: '2ch-remote',
     name: '2 CH Remote',
     description: '2 channel remote control',
-    price: 175.00, // Base $150 + $25
+    price: 13.95,
     image: '/products/motorization/2ch.png',
   },
   {
     id: '6ch-remote',
     name: '6 CH Remote',
     description: '6 channel remote control',
-    price: 179.00, // Base $150 + $29
+    price: 15.95,
     image: '/products/motorization/6ch.png',
   },
   {
     id: '16ch-remote',
     name: '16 CH Remote',
     description: '16 channel remote control',
-    price: 180.00, // Base $150 + $30
+    price: 15.95,
     image: '/products/motorization/16ch.png',
   },
 ];
@@ -327,5 +327,49 @@ export const OPENING_DIRECTION_OPTIONS = [
     name: 'Up & Down',
     price: 0,
     image: '/products/openingDirection/upDown.png',
+  },
+];
+
+// Bottom Bar Options
+export const BOTTOM_BAR_OPTIONS = [
+  {
+    id: 'basic',
+    name: 'Basic',
+    price: 0,
+    image: '/products/bottomBar/bottomBar.png',
+  },
+  {
+    id: 'grey-round-bar',
+    name: 'Grey Round Bar',
+    price: 8.00,
+    image: '/products/bottomBar/greyRoundBar.png',
+  },
+  {
+    id: 'white-round-bar',
+    name: 'White Round Bar',
+    price: 8.00,
+    image: '/products/bottomBar/whiteRoundBar.png',
+  },
+  {
+    id: 'full-fabric-cover-premium-bar',
+    name: 'Full Fabric Cover Premium Bar',
+    price: 15.00,
+    image: '/products/bottomBar/fullFabric.png',
+  },
+];
+
+// Roll Style Options (used for roller blinds)
+export const ROLL_STYLE_OPTIONS = [
+  {
+    id: 'front-roll',
+    name: 'Front Roll',
+    price: 0,
+    image: '/products/rollStyle/frontRoll.png',
+  },
+  {
+    id: 'back-roll',
+    name: 'Back Roll',
+    price: 0,
+    image: '/products/rollStyle/backRoll.png',
   },
 ];

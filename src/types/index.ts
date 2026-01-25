@@ -48,6 +48,8 @@ export interface ProductFeatures {
   hasBlindColor: boolean;
   hasFrameColor: boolean;
   hasOpeningDirection: boolean;
+  hasBottomBar: boolean;
+  hasRollStyle: boolean;
 }
 
 export interface Product {
@@ -97,6 +99,8 @@ export interface ProductConfiguration {
   blindColor: string | null;
   frameColor: string | null;
   openingDirection: string | null;
+  bottomBar: string | null;
+  rollStyle: string | null;
 }
 
 export const DEFAULT_CONFIGURATION: ProductConfiguration = {
@@ -123,6 +127,8 @@ export const DEFAULT_CONFIGURATION: ProductConfiguration = {
   blindColor: null,
   frameColor: null,
   openingDirection: null,
+  bottomBar: null,
+  rollStyle: null,
 };
 
 // ============================================
@@ -239,6 +245,8 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasBlindColor: false,
   hasFrameColor: false,
   hasOpeningDirection: false,
+  hasBottomBar: false,
+  hasRollStyle: false,
 };
 
 export const DEFAULT_ESTIMATED_DELIVERY = '22 December 2025';

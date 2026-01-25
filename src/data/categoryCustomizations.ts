@@ -25,6 +25,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // Roller Blinds
@@ -33,18 +35,20 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasHeadrail: false,
         hasHeadrailColour: false,
         hasInstallationMethod: true,
-        hasControlOption: true,
+        hasControlOption: false,
         hasStacking: false,
         hasControlSide: false,
         hasBottomChain: false,
         hasBracketType: false,
         hasChainColor: true,
-        hasWrappedCassette: true,
-        hasCassetteMatchingBar: false,
-        hasMotorization: false,
+        hasWrappedCassette: false,
+        hasCassetteMatchingBar: true,
+        hasMotorization: true,
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: true,
+        hasRollStyle: true,
     },
 
     // Roman Blinds
@@ -65,6 +69,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // Venetian Blinds
@@ -85,6 +91,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // Day and Night Blinds (Zebra Blinds / Dual Zebra Shades)
@@ -106,6 +114,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // Blackout Blinds (similar to roller blinds)
@@ -126,6 +136,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // Skylight Blinds
@@ -146,6 +158,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // Wooden Blinds (similar to venetian)
@@ -166,6 +180,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // No Drill Blinds (similar to roller)
@@ -186,6 +202,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // Motorized Blinds (similar to roller with motorized control)
@@ -206,6 +224,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // Pleated Blinds
@@ -226,6 +246,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     'motorised-eclipsecore': {
@@ -245,6 +267,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: true,
         hasFrameColor: true,
         hasOpeningDirection: true,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 
     // Default fallback for uncategorized products
@@ -265,6 +289,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasBlindColor: false,
         hasFrameColor: false,
         hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
     },
 };
 

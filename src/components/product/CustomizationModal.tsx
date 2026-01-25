@@ -26,6 +26,7 @@ import {
   WrappedCassetteSelector,
   CassetteMatchingBarSelector,
   MotorizationSelector,
+  BottomBarSelector,
 } from './customization';
 import {
   HEADRAIL_OPTIONS,
@@ -42,6 +43,7 @@ import {
   WRAPPED_CASSETTE_OPTIONS,
   CASSETTE_MATCHING_BAR_OPTIONS,
   MOTORIZATION_OPTIONS,
+  BOTTOM_BAR_OPTIONS,
 } from '@/data/customizations';
 
 interface CustomizationModalProps {
@@ -89,8 +91,16 @@ const CustomizationModal = ({
 
         // Only update state if component is still mounted
         if (isMounted) {
+          // Inject bottom bar pricing if not present
+          const bottomBarPricing = BOTTOM_BAR_OPTIONS.map(option => ({
+            category: 'bottom-bar',
+            optionId: option.id,
+            name: option.name,
+            prices: [{ widthMm: null, price: option.price || 0 }]
+          }));
+
           setPriceMatrix(matrix);
-          setCustomizationPricing(customizations);
+          setCustomizationPricing([...customizations, ...bottomBarPricing]);
           setPricingLoaded(true);
         }
       } catch (error) {
@@ -141,6 +151,7 @@ const CustomizationModal = ({
         showBottomChain: product.features.hasBottomChain,
         showBracketType: product.features.hasBracketType,
         showMotorization: product.features.hasMotorization,
+        showBottomBar: product.features.hasBottomBar,
       };
     }
 
@@ -170,6 +181,8 @@ const CustomizationModal = ({
 
       // Bracket Type for Classic and Platinum
       showBracketType: product.features.hasBracketType && (headrail === 'classic' || headrail === 'platinum'),
+
+      showBottomBar: product.features.hasBottomBar,
     };
   }, [config.headrail, isRollerOrDayNight, product.features]);
 
@@ -188,6 +201,7 @@ const CustomizationModal = ({
       wrappedCassette: config.wrappedCassette,
       cassetteMatchingBar: config.cassetteMatchingBar,
       motorization: config.motorization,
+      bottomBar: visibleOptions.showBottomBar ? config.bottomBar : null,
     });
   }, [config, visibleOptions]);
 
@@ -453,6 +467,17 @@ const CustomizationModal = ({
                       options={CASSETTE_MATCHING_BAR_OPTIONS}
                       selectedBar={config.cassetteMatchingBar}
                       onBarChange={(barId) => setConfig({ ...config, cassetteMatchingBar: barId })}
+                    />
+                  </div>
+                )}
+
+                {/* Bottom Bar Selector */}
+                {product.features.hasBottomBar && visibleOptions.showBottomBar && (
+                  <div className="pt-6 relative z-[2.5]">
+                    <BottomBarSelector
+                      options={BOTTOM_BAR_OPTIONS}
+                      selectedBottomBar={config.bottomBar}
+                      onBottomBarChange={(optionId) => setConfig({ ...config, bottomBar: optionId })}
                     />
                   </div>
                 )}

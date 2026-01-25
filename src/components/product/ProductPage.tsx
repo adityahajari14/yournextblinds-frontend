@@ -17,7 +17,6 @@ import {
 import {
   SizeSelector,
   RoomTypeSelector,
-  BlindNameInput,
   HeadrailSelector,
   HeadrailColourSelector,
   InstallationMethodSelector,
@@ -31,6 +30,8 @@ import {
   CassetteMatchingBarSelector,
   MotorizationSelector,
   SimpleDropdown,
+  BottomBarSelector,
+  RollStyleSelector,
 } from './customization';
 import {
   HEADRAIL_OPTIONS,
@@ -50,9 +51,11 @@ import {
   BLIND_COLOR_OPTIONS,
   FRAME_COLOR_OPTIONS,
   OPENING_DIRECTION_OPTIONS,
+  BOTTOM_BAR_OPTIONS,
+  ROLL_STYLE_OPTIONS
 } from '@/data/customizations';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
-import { CONTINUOUS_CHAIN_CARD, CASSETTE_CARD, MOTORIZATION_CARD } from '@/data/optionalCustomizations';
+import { CONTINUOUS_CHAIN_CARD, CASSETTE_CARD, MOTORIZATION_CARD, BOTTOM_BAR_CARD } from '@/data/optionalCustomizations';
 import Image from 'next/image';
 
 interface ProductPageProps {
@@ -94,10 +97,12 @@ const ProductPage = ({
     continuousChain: boolean;
     cassette: boolean;
     motorization: boolean;
+    bottomBar: boolean;
   }>({
     continuousChain: false,
     cassette: false,
     motorization: false,
+    bottomBar: false,
   });
 
   // Fetch pricing data on mount
@@ -119,8 +124,16 @@ const ProductPage = ({
 
         // Only update state if component is still mounted
         if (isMounted) {
+          // Inject bottom bar pricing if not present
+          const bottomBarPricing = BOTTOM_BAR_OPTIONS.map(option => ({
+            category: 'bottom-bar',
+            optionId: option.id,
+            name: option.name,
+            prices: [{ widthMm: null, price: option.price || 0 }]
+          }));
+
           setPriceMatrix(matrix);
-          setCustomizationPricing(customizations);
+          setCustomizationPricing([...customizations, ...bottomBarPricing]);
           setPricingLoaded(true);
         }
       } catch (error) {
@@ -174,6 +187,8 @@ const ProductPage = ({
         showBlindColor: product.features.hasBlindColor,
         showFrameColor: product.features.hasFrameColor,
         showOpeningDirection: product.features.hasOpeningDirection,
+        showBottomBar: product.features.hasBottomBar,
+        showRollStyle: product.features.hasRollStyle,
       };
     }
 
@@ -207,6 +222,8 @@ const ProductPage = ({
       showBlindColor: product.features.hasBlindColor,
       showFrameColor: product.features.hasFrameColor,
       showOpeningDirection: product.features.hasOpeningDirection,
+      showBottomBar: product.features.hasBottomBar,
+      showRollStyle: product.features.hasRollStyle,
     };
   }, [config.headrail, isRollerOrDayNight, product.features]);
 
@@ -225,6 +242,8 @@ const ProductPage = ({
       wrappedCassette: config.wrappedCassette,
       cassetteMatchingBar: config.cassetteMatchingBar,
       motorization: config.motorization,
+      bottomBar: visibleOptions.showBottomBar ? config.bottomBar : null,
+      rollStyle: visibleOptions.showRollStyle ? config.rollStyle : null,
     });
   }, [config, visibleOptions]);
 
@@ -465,18 +484,23 @@ const ProductPage = ({
                         />
                       )}
 
-                      {/* Blind Name Selector (Room Type dropdown) */}
+
+
+                      {/* Blind Name Selector (Room Type dropdown AND input) */}
                       <RoomTypeSelector
                         options={ROOM_TYPE_OPTIONS}
                         selectedRoomType={config.roomType}
                         onRoomTypeChange={(roomTypeId) => setConfig({ ...config, roomType: roomTypeId })}
+                        blindName={config.blindName}
+                        onBlindNameChange={(value) => setConfig({ ...config, blindName: value || null })}
                       />
 
-                      {/* Custom Blind Name Input - Only shown when "Other" is selected */}
-                      {config.roomType === 'other' && (
-                        <BlindNameInput
-                          value={config.blindName}
-                          onChange={(value) => setConfig({ ...config, blindName: value || null })}
+                      {/* Roll Style Selector */}
+                      {product.features.hasRollStyle && visibleOptions.showRollStyle && (
+                        <RollStyleSelector
+                          options={ROLL_STYLE_OPTIONS}
+                          selectedRollStyle={config.rollStyle}
+                          onRollStyleChange={(styleId) => setConfig({ ...config, rollStyle: styleId })}
                         />
                       )}
                     </div>
@@ -641,6 +665,73 @@ const ProductPage = ({
                       {/* Optional Customization Cards Row */}
                       <div className="pt-6 pb-6 border-b border-gray-200">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+
+                          {/* Bottom Bar Card - Only for products with hasBottomBar */}
+                          {product.features.hasBottomBar && visibleOptions.showBottomBar && (
+                            <div
+                              onClick={() => {
+                                const newValue = !selectedOptionalCards.bottomBar;
+                                setSelectedOptionalCards({
+                                  ...selectedOptionalCards,
+                                  bottomBar: newValue,
+                                });
+                                if (!newValue) {
+                                  setConfig({
+                                    ...config,
+                                    bottomBar: null
+                                  });
+                                }
+                              }}
+                              className={`relative border-2 rounded-lg p-5 transition-all duration-300 text-left group cursor-pointer h-full flex flex-col ${selectedOptionalCards.bottomBar
+                                ? 'border-[#00473c] bg-gradient-to-br from-[#f6fffd] to-[#e8f5f3] shadow-md'
+                                : 'border-gray-300 bg-white hover:border-[#00473c] hover:shadow-sm'
+                                }`}
+                            >
+                              {selectedOptionalCards.bottomBar && (
+                                <div className="absolute top-3 right-3 w-6 h-6 bg-[#00473c] rounded-full flex items-center justify-center shadow-md z-10">
+                                  <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              )}
+                              {BOTTOM_BAR_CARD?.image && (
+                                <div className={`relative h-[120px] w-full mb-3 rounded-lg overflow-hidden flex items-center justify-center transition-all duration-300 ${selectedOptionalCards.bottomBar
+                                  ? 'bg-gradient-to-br from-[#e8f5f3] to-[#d0ebe8] shadow-inner'
+                                  : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-150'
+                                  }`}>
+                                  <Image
+                                    src={BOTTOM_BAR_CARD.image}
+                                    alt={BOTTOM_BAR_CARD.name}
+                                    width={120}
+                                    height={120}
+                                    className="object-contain"
+                                  />
+                                </div>
+                              )}
+                              <h4 className="text-base font-semibold text-[#3a3a3a] mb-1.5 pr-8">
+                                {BOTTOM_BAR_CARD?.name || 'Bottom Bar Option'}
+                              </h4>
+                              {BOTTOM_BAR_CARD?.description && (
+                                <p className="text-xs text-gray-600 leading-relaxed mb-2">{BOTTOM_BAR_CARD.description}</p>
+                              )}
+
+                              {/* Dropdowns inside the card */}
+                              {selectedOptionalCards.bottomBar && (
+                                <div
+                                  className="mt-4 space-y-3 pt-3 border-t border-gray-200/50"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <SimpleDropdown
+                                    label="Select Bottom Bar"
+                                    options={BOTTOM_BAR_OPTIONS}
+                                    selectedValue={config.bottomBar}
+                                    onChange={(optionId) => setConfig({ ...config, bottomBar: optionId })}
+                                    placeholder="Select bottom bar style"
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          )}
                           {/* Continuous Chain - Select Location Card */}
                           {product.features.hasChainColor && (
                             <div
@@ -649,8 +740,11 @@ const ProductPage = ({
                                 setSelectedOptionalCards({
                                   ...selectedOptionalCards,
                                   continuousChain: newValue,
+                                  motorization: newValue ? false : selectedOptionalCards.motorization,
                                 });
-                                if (!newValue) {
+                                if (newValue) {
+                                  setConfig({ ...config, motorization: null });
+                                } else {
                                   setConfig({ ...config, chainColor: null, controlSide: null });
                                 }
                               }}
@@ -809,8 +903,11 @@ const ProductPage = ({
                                 setSelectedOptionalCards({
                                   ...selectedOptionalCards,
                                   motorization: newValue,
+                                  continuousChain: newValue ? false : selectedOptionalCards.continuousChain,
                                 });
-                                if (!newValue) {
+                                if (newValue) {
+                                  setConfig({ ...config, chainColor: null, controlSide: null });
+                                } else {
                                   setConfig({ ...config, motorization: null });
                                 }
                               }}
@@ -846,11 +943,11 @@ const ProductPage = ({
                               {MOTORIZATION_CARD.description && (
                                 <p className="text-xs text-gray-600 leading-relaxed mb-2">{MOTORIZATION_CARD.description}</p>
                               )}
-                              {MOTORIZATION_CARD.price > 0 && (
-                                <span className="absolute bottom-4 right-4 bg-[#00473c] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md">
-                                  +£{MOTORIZATION_CARD.price.toFixed(2)}
-                                </span>
-                              )}
+
+                              {/* Simple Price Text */}
+                              <div className="mt-2 text-sm font-medium text-[#00473c]">
+                                +£95.00 (Remote)
+                              </div>
 
                               {/* Dropdowns inside the card */}
                               {selectedOptionalCards.motorization && (
