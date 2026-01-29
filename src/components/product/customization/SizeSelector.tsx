@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { ProductConfiguration } from '@/types';
 
 interface SizeSelectorProps {
@@ -14,6 +14,11 @@ interface SizeSelectorProps {
   onHeightChange: (value: number) => void;
   onHeightFractionChange: (value: string) => void;
   onUnitChange: (unit: 'inches' | 'cm') => void;
+  // Optional: Dynamic size ranges from price band
+  minWidth?: number;
+  maxWidth?: number;
+  minHeight?: number;
+  maxHeight?: number;
 }
 
 const fractions = ['0', '1/16', '1/8', '3/16', '1/4', '5/16', '3/8', '7/16', '1/2', '9/16', '5/8', '11/16', '3/4', '13/16', '7/8', '15/16'];
@@ -30,6 +35,10 @@ const SizeSelector = ({
   onHeightChange,
   onHeightFractionChange,
   onUnitChange,
+  minWidth,
+  maxWidth,
+  minHeight,
+  maxHeight,
 }: SizeSelectorProps) => {
   const [widthInput, setWidthInput] = useState(width > 0 ? width.toString() : '');
   const [heightInput, setHeightInput] = useState(height > 0 ? height.toString() : '');
@@ -58,16 +67,42 @@ const SizeSelector = ({
     if (!isNaN(numValue)) onHeightChange(numValue);
   };
 
-  const getInputLimits = (dimension: 'width' | 'height') => {
+  // Calculate limits with useMemo to ensure they update when props change
+  const widthLimits = useMemo(() => {
     if (unit === 'inches') {
-      return dimension === 'width' ? { min: 20, max: 157, placeholder: '20-157' } : { min: 20, max: 118, placeholder: '20-118' };
+      const min = minWidth ?? 20;
+      const max = maxWidth ?? 157;
+      const placeholder = `${min}-${max}`;
+      // Debug log (remove in production)
+      if (process.env.NODE_ENV === 'development' && (minWidth !== undefined || maxWidth !== undefined)) {
+        console.log('SizeSelector - Width limits (inches):', { min, max, placeholder, minWidth, maxWidth });
+      }
+      return { min, max, placeholder };
+    } else {
+      // cm - convert from inches if provided, otherwise use defaults
+      const min = minWidth ? Math.round(minWidth * 2.54) : 50;
+      const max = maxWidth ? Math.round(maxWidth * 2.54) : 400;
+      return { min, max, placeholder: `${min}-${max}` };
     }
-    // cm (approx 50-400cm)
-    return dimension === 'width' ? { min: 50, max: 400, placeholder: '50-400' } : { min: 50, max: 300, placeholder: '50-300' };
-  };
+  }, [unit, minWidth, maxWidth]);
 
-  const widthLimits = getInputLimits('width');
-  const heightLimits = getInputLimits('height');
+  const heightLimits = useMemo(() => {
+    if (unit === 'inches') {
+      const min = minHeight ?? 20;
+      const max = maxHeight ?? 118;
+      const placeholder = `${min}-${max}`;
+      // Debug log (remove in production)
+      if (process.env.NODE_ENV === 'development' && (minHeight !== undefined || maxHeight !== undefined)) {
+        console.log('SizeSelector - Height limits (inches):', { min, max, placeholder, minHeight, maxHeight });
+      }
+      return { min, max, placeholder };
+    } else {
+      // cm - convert from inches if provided, otherwise use defaults
+      const min = minHeight ? Math.round(minHeight * 2.54) : 50;
+      const max = maxHeight ? Math.round(maxHeight * 2.54) : 300;
+      return { min, max, placeholder: `${min}-${max}` };
+    }
+  }, [unit, minHeight, maxHeight]);
 
   return (
     <div className="space-y-4">

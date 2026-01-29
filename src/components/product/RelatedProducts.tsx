@@ -44,11 +44,6 @@ const RelatedProducts = ({ products }: RelatedProductsProps) => {
                     <span className="text-base md:text-[21px] font-bold text-black">
                       {formatPriceWithCurrency(product.price, product.currency)}
                     </span>
-                    {product.originalPrice > product.price && (
-                      <span className="text-xs md:text-base text-[#474747] line-through">
-                        {formatPriceWithCurrency(product.originalPrice, product.currency)}
-                      </span>
-                    )}
                   </div>
                 </div>
                 {/* Stars */}

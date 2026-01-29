@@ -12,7 +12,6 @@ interface ProductCardProps {
     name: string;
     slug: string;
     price: number;
-    originalPrice: number;
     currency?: string;
     rating: number;
     image?: string;
@@ -58,9 +57,6 @@ export default function ProductCard({ product, className = '' }: ProductCardProp
             <div className="flex gap-2 md:gap-3 items-end">
               <span className="text-lg md:text-xl font-bold text-black">
                 {formatPriceWithCurrency(product.price, currency)}
-              </span>
-              <span className="text-sm md:text-base text-[#474747] line-through">
-                {formatPriceWithCurrency(product.originalPrice, currency)}
               </span>
             </div>
           </div>

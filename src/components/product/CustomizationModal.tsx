@@ -51,8 +51,6 @@ interface CustomizationModalProps {
   config: ProductConfiguration;
   setConfig: React.Dispatch<React.SetStateAction<ProductConfiguration>>;
   onClose: () => void;
-  basePricePerSquareMeter?: number; // Price per m² from backend (fallback)
-  originalPricePerSquareMeter?: number; // Original price per m² from backend (fallback)
 }
 
 const CustomizationModal = ({
@@ -60,8 +58,6 @@ const CustomizationModal = ({
   config,
   setConfig,
   onClose,
-  basePricePerSquareMeter,
-  originalPricePerSquareMeter,
 }: CustomizationModalProps) => {
   const { addToCart } = useCart();
 
@@ -233,6 +229,28 @@ const CustomizationModal = ({
     return product.price;
   }, [priceCalculation, product.price]);
 
+  // Calculate dynamic size ranges from price band
+  const sizeRanges = useMemo(() => {
+    if (!priceMatrix || !priceMatrix.widthBands.length || !priceMatrix.heightBands.length) {
+      return null;
+    }
+
+    const widthBands = priceMatrix.widthBands;
+    const heightBands = priceMatrix.heightBands;
+
+    const minWidth = Math.min(...widthBands.map(b => b.inches));
+    const maxWidth = Math.max(...widthBands.map(b => b.inches));
+    const minHeight = Math.min(...heightBands.map(b => b.inches));
+    const maxHeight = Math.max(...heightBands.map(b => b.inches));
+
+    return {
+      minWidth,
+      maxWidth,
+      minHeight,
+      maxHeight,
+    };
+  }, [priceMatrix]);
+
   // Show minimum price indicator when no dimensions selected
   const showMinPriceIndicator = config.width === 0 || config.height === 0;
 
@@ -346,6 +364,10 @@ const CustomizationModal = ({
                       onHeightChange={(value) => setConfig({ ...config, height: value })}
                       onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
                       onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
+                      minWidth={sizeRanges?.minWidth}
+                      maxWidth={sizeRanges?.maxWidth}
+                      minHeight={sizeRanges?.minHeight}
+                      maxHeight={sizeRanges?.maxHeight}
                     />
                   </div>
                 )}

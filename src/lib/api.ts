@@ -45,7 +45,7 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit, retries: num
 
   // Create AbortController for timeout
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30 second timeout
+  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for build time
 
   try {
     const response = await fetch(url, {
@@ -69,11 +69,25 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit, retries: num
   } catch (error: any) {
     clearTimeout(timeoutId);
 
-    // Retry logic for network errors
-    if (retries > 0 && (error.name === 'AbortError' || error.code === 'UND_ERR_CONNECT_TIMEOUT' || error.message?.includes('timeout'))) {
-      if (!isBuildTime) {
-        console.warn(`Retrying fetch (${retries} attempts remaining): ${url}`);
-      }
+    // Handle connection refused errors during build time gracefully
+    const isConnectionError = error.code === 'ECONNREFUSED' || 
+                              error.cause?.code === 'ECONNREFUSED' ||
+                              (error.cause as any)?.code === 'ECONNREFUSED' ||
+                              error.message?.includes('ECONNREFUSED') ||
+                              error.message?.includes('fetch failed') ||
+                              (error.cause as any)?.errors?.some((e: any) => e.code === 'ECONNREFUSED');
+
+    if (isBuildTime && isConnectionError) {
+      // During build, if backend is not available, throw a special error
+      // that calling functions can catch and handle gracefully
+      const buildError = new Error(`Backend unavailable during build: ${endpoint}`);
+      (buildError as any).isBuildTimeError = true;
+      throw buildError;
+    }
+
+    // Retry logic for network errors (but not during build)
+    if (!isBuildTime && retries > 0 && (error.name === 'AbortError' || error.code === 'UND_ERR_CONNECT_TIMEOUT' || error.message?.includes('timeout'))) {
+      console.warn(`Retrying fetch (${retries} attempts remaining): ${url}`);
       // Wait 1 second before retry
       await new Promise(resolve => setTimeout(resolve, 1000));
       return apiFetch<T>(endpoint, options, retries - 1);
@@ -109,8 +123,17 @@ interface CategoriesResponse {
  * Fetch all categories from backend
  */
 export async function fetchCategories(): Promise<Category[]> {
-  const response = await apiFetch<CategoriesResponse>('/api/categories');
-  return response.data;
+  try {
+    const response = await apiFetch<CategoriesResponse>('/api/categories');
+    return response.data || [];
+  } catch (error: any) {
+    // Return empty array during build if backend is unavailable
+    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
+    if (isBuildTime && (error.isBuildTimeError || error.code === 'ECONNREFUSED' || error.message?.includes('ECONNREFUSED'))) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 // ============================================
@@ -133,11 +156,56 @@ export async function fetchProducts(params?: FetchProductsParams): Promise<ApiPr
   if (params?.search) queryParams.append('search', params.search);
 
   const query = queryParams.toString();
-  return apiFetch<ApiProductsResponse>(`/api/products${query ? `?${query}` : ''}`);
+  try {
+    return await apiFetch<ApiProductsResponse>(`/api/products${query ? `?${query}` : ''}`);
+  } catch (error: any) {
+    // Return empty response during build if backend is unavailable
+    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
+    if (isBuildTime && (error.isBuildTimeError || error.code === 'ECONNREFUSED' || error.message?.includes('ECONNREFUSED'))) {
+      return {
+        success: true,
+        data: [],
+        pagination: {
+          page: 1,
+          limit: params?.limit || 20,
+          total: 0,
+          totalPages: 0,
+          hasNextPage: false,
+          hasPreviousPage: false,
+        },
+      };
+    }
+    throw error;
+  }
 }
 
 export async function fetchProductBySlug(slug: string): Promise<ApiProductResponse> {
-  return apiFetch<ApiProductResponse>(`/api/products/${slug}`);
+  try {
+    return await apiFetch<ApiProductResponse>(`/api/products/${slug}`);
+  } catch (error: any) {
+    // Return empty response during build if backend is unavailable
+    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
+    if (isBuildTime && (error.isBuildTimeError || error.code === 'ECONNREFUSED' || error.message?.includes('ECONNREFUSED'))) {
+      // Return a minimal product structure that will trigger notFound()
+      return {
+        success: false,
+        data: {
+          id: '',
+          slug: '',
+          title: '',
+          description: null,
+          images: [],
+          videos: [],
+          price: 0,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          categories: [],
+          tags: [],
+        },
+      };
+    }
+    throw error;
+  }
 }
 
 /**
@@ -157,12 +225,21 @@ function mapCategorySlug(frontendSlug: string): string {
  * Maps frontend slug to backend slug if needed
  */
 export async function fetchProductsByCategory(categorySlug: string): Promise<ApiProduct[]> {
-  const backendSlug = mapCategorySlug(categorySlug);
-  const response = await fetchProducts({ limit: 500 });
+  try {
+    const backendSlug = mapCategorySlug(categorySlug);
+    const response = await fetchProducts({ limit: 500 });
 
-  return response.data.filter((product) =>
-    product.categories.some((cat) => cat.slug === backendSlug)
-  );
+    return response.data.filter((product) =>
+      product.categories.some((cat) => cat.slug === backendSlug)
+    );
+  } catch (error: any) {
+    // Return empty array during build if backend is unavailable
+    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
+    if (isBuildTime && (error.isBuildTimeError || error.code === 'ECONNREFUSED' || error.message?.includes('ECONNREFUSED'))) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 // ============================================
@@ -178,24 +255,51 @@ interface PricingApiResponse<T> {
  * Get size bands (width and height bands) for pricing lookup
  */
 export async function fetchSizeBands(): Promise<SizeBands> {
-  const response = await apiFetch<PricingApiResponse<SizeBands>>('/api/pricing/bands');
-  return response.data;
+  try {
+    const response = await apiFetch<PricingApiResponse<SizeBands>>('/api/pricing/bands');
+    return response.data;
+  } catch (error: any) {
+    // Return empty structure during build if backend is unavailable
+    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
+    if (isBuildTime && (error.isBuildTimeError || error.code === 'ECONNREFUSED' || error.message?.includes('ECONNREFUSED'))) {
+      return { widthBands: [], heightBands: [] };
+    }
+    throw error;
+  }
 }
 
 /**
  * Get price band matrix for a product
  */
 export async function fetchPriceMatrix(productId: string): Promise<PriceBandMatrix> {
-  const response = await apiFetch<PricingApiResponse<PriceBandMatrix>>(`/api/pricing/matrix/${productId}`);
-  return response.data;
+  try {
+    const response = await apiFetch<PricingApiResponse<PriceBandMatrix>>(`/api/pricing/matrix/${productId}`);
+    return response.data;
+  } catch (error: any) {
+    // Return empty structure during build if backend is unavailable
+    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
+    if (isBuildTime && (error.isBuildTimeError || error.code === 'ECONNREFUSED' || error.message?.includes('ECONNREFUSED'))) {
+      return { id: '', name: '', widthBands: [], heightBands: [], prices: [] };
+    }
+    throw error;
+  }
 }
 
 /**
  * Get all customization options with their pricing
  */
 export async function fetchCustomizationPricing(): Promise<CustomizationPricing[]> {
-  const response = await apiFetch<PricingApiResponse<CustomizationPricing[]>>('/api/pricing/customizations');
-  return response.data;
+  try {
+    const response = await apiFetch<PricingApiResponse<CustomizationPricing[]>>('/api/pricing/customizations');
+    return response.data;
+  } catch (error: any) {
+    // Return empty array during build if backend is unavailable
+    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
+    if (isBuildTime && (error.isBuildTimeError || error.code === 'ECONNREFUSED' || error.message?.includes('ECONNREFUSED'))) {
+      return [];
+    }
+    throw error;
+  }
 }
 
 /**
@@ -319,8 +423,8 @@ export function transformProduct(apiProduct: ApiProduct): Product {
     ? priorityCategory.slug
     : (apiProduct.categories[0]?.slug || 'default');
 
-  const basePrice = parsePrice(apiProduct.basePrice);
-  const oldPrice = parsePrice(apiProduct.oldPrice);
+  // Price is now the minimum band price (20x20) from the backend
+  const price = typeof apiProduct.price === 'string' ? parseFloat(apiProduct.price) : apiProduct.price;
 
   // Get category-specific customization features
   const features = getCategoryCustomizations(activeCategorySlug);
@@ -330,8 +434,7 @@ export function transformProduct(apiProduct: ApiProduct): Product {
     name: apiProduct.title,
     slug: apiProduct.slug,
     category: categoryName,
-    price: formatPrice(basePrice),
-    originalPrice: formatPrice(oldPrice),
+    price: formatPrice(price),
     currency: 'GBP',
     rating: DEFAULT_RATING,
     reviewCount: DEFAULT_REVIEW_COUNT,
@@ -346,17 +449,10 @@ export function transformProduct(apiProduct: ApiProduct): Product {
 }
 
 /**
- * Get base price per square meter from API product
+ * Get price from API product (minimum band price - 20x20)
  */
-export function getBasePricePerSqM(apiProduct: ApiProduct): number {
-  return parsePrice(apiProduct.basePrice);
-}
-
-/**
- * Get original price per square meter from API product
- */
-export function getOriginalPricePerSqM(apiProduct: ApiProduct): number {
-  return parsePrice(apiProduct.oldPrice);
+export function getProductPrice(apiProduct: ApiProduct): number {
+  return typeof apiProduct.price === 'string' ? parseFloat(apiProduct.price) : apiProduct.price;
 }
 
 /**

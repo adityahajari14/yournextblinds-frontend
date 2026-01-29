@@ -9,7 +9,6 @@ interface ProductCardData {
   name: string;
   slug: string;
   price: number;
-  originalPrice: number;
   currency?: string;
   rating: number;
   image?: string;
@@ -32,7 +31,6 @@ const BestSelling = () => {
             name: product.name,
             slug: product.slug,
             price: product.price,
-            originalPrice: product.originalPrice,
             currency: product.currency,
             rating: product.rating,
             image: product.images[0],

@@ -61,15 +61,11 @@ import Image from 'next/image';
 interface ProductPageProps {
   product: Product;
   relatedProducts: Product[];
-  basePricePerSquareMeter?: number; // Price per m² from backend
-  originalPricePerSquareMeter?: number; // Original price per m² from backend
 }
 
 const ProductPage = ({
   product,
   relatedProducts,
-  basePricePerSquareMeter,
-  originalPricePerSquareMeter,
 }: ProductPageProps) => {
   const { addToCart } = useCart();
 
@@ -278,12 +274,36 @@ const ProductPage = ({
   // Show minimum price indicator when no dimensions selected
   const showMinPriceIndicator = config.width === 0 || config.height === 0;
 
-  // Calculate discount percentage
-  const discountPercentage = originalPricePerSquareMeter && basePricePerSquareMeter
-    ? Math.round(((originalPricePerSquareMeter - basePricePerSquareMeter) / originalPricePerSquareMeter) * 100)
-    : product.originalPrice && product.price
-      ? Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100)
-      : 0;
+  // Calculate dynamic size ranges from price band
+  const sizeRanges = useMemo(() => {
+    if (!priceMatrix || !priceMatrix.widthBands || !priceMatrix.heightBands) {
+      return null;
+    }
+
+    if (priceMatrix.widthBands.length === 0 || priceMatrix.heightBands.length === 0) {
+      return null;
+    }
+
+    const widthBands = priceMatrix.widthBands;
+    const heightBands = priceMatrix.heightBands;
+
+    const minWidth = Math.min(...widthBands.map(b => b.inches));
+    const maxWidth = Math.max(...widthBands.map(b => b.inches));
+    const minHeight = Math.min(...heightBands.map(b => b.inches));
+    const maxHeight = Math.max(...heightBands.map(b => b.inches));
+
+    // Debug log (remove in production)
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Size ranges calculated:', { minWidth, maxWidth, minHeight, maxHeight, priceMatrix: priceMatrix.name });
+    }
+
+    return {
+      minWidth,
+      maxWidth,
+      minHeight,
+      maxHeight,
+    };
+  }, [priceMatrix]);
 
   const handleAddToCart = async () => {
     // Validate dimensions are selected
@@ -381,38 +401,22 @@ const ProductPage = ({
                 <StarRating rating={product.rating} />
               </div>
 
-              {/* Discount & Shipping Info Box */}
-              <div className="flex flex-col md:flex-row items-stretch md:items-center border border-gray-200 rounded-lg mb-4 md:mb-6 overflow-hidden">
-                {/* Discount Badge */}
-                <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 bg-gray-50/50">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-[#00473c] rounded-lg flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5 md:w-6 md:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" />
-                    </svg>
-                  </div>
-                  <div>
-                    <span className="text-xs md:text-sm font-semibold text-[#3a3a3a]">{discountPercentage}% off on First Order</span>
-                    <div className="text-[10px] md:text-xs text-gray-500">Code:FIRSTPURCHASE</div>
-                  </div>
+              {/* Shipping Info Box */}
+              <div className="flex items-center border border-gray-200 rounded-lg mb-4 md:mb-6 px-3 md:px-4 py-2 md:py-3">
+                <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
+                  <svg className="w-5 h-5 md:w-6 md:h-6 text-[#00473c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
+                  </svg>
                 </div>
-                {/* Shipping Date */}
-                <div className="flex items-center gap-2 md:gap-3 px-3 md:px-4 py-2 md:py-3 md:ml-auto border-t md:border-t-0 md:border-l border-gray-200">
-                  <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
-                    <svg className="w-5 h-5 md:w-6 md:h-6 text-[#00473c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8.25 18.75a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 01-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 00-3.213-9.193 2.056 2.056 0 00-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 00-10.026 0 1.106 1.106 0 00-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12" />
-                    </svg>
-                  </div>
-                  <div>
-                    <div className="text-[10px] md:text-xs text-gray-500">Estimated Shipping Date</div>
-                    <div className="text-xs md:text-sm font-semibold text-[#00473c]">{product.estimatedDelivery}</div>
-                  </div>
+                <div className="ml-2 md:ml-3">
+                  <div className="text-[10px] md:text-xs text-gray-500">Estimated Shipping Date</div>
+                  <div className="text-xs md:text-sm font-semibold text-[#00473c]">{product.estimatedDelivery}</div>
                 </div>
               </div>
 
               {/* Price Section */}
               <div className="border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6">
                 <div className="flex flex-col items-center lg:items-start">
-                  <div className="text-xs md:text-sm text-[#0F9D49] mb-1">{discountPercentage}% off on First Order</div>
                   <div className="flex items-baseline gap-2 mb-3 md:mb-4">
                     <span className="text-xl md:text-2xl font-bold text-[#3a3a3a]">
                       {showMinPriceIndicator
@@ -420,11 +424,6 @@ const ProductPage = ({
                         : formatPriceWithCurrency(formatPrice(totalPrice), product.currency)
                       }
                     </span>
-                    {product.originalPrice && product.originalPrice > (showMinPriceIndicator ? product.price : totalPrice) && (
-                      <span className="text-xs md:text-sm text-gray-400 line-through">
-                        {formatPriceWithCurrency(formatPrice(product.originalPrice), product.currency)}
-                      </span>
-                    )}
                   </div>
                   {priceCalculation && !showMinPriceIndicator && (
                     <div className="text-xs text-gray-400 mb-3">
@@ -472,6 +471,10 @@ const ProductPage = ({
                           onHeightChange={(value) => setConfig({ ...config, height: value })}
                           onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
                           onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
+                          minWidth={sizeRanges?.minWidth}
+                          maxWidth={sizeRanges?.maxWidth}
+                          minHeight={sizeRanges?.minHeight}
+                          maxHeight={sizeRanges?.maxHeight}
                         />
                       )}
 

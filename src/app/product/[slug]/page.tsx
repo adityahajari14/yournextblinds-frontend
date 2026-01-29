@@ -3,7 +3,7 @@ import { Suspense } from 'react';
 import { Product } from '@/types';
 import { ProductPage, CustomerReviewsSection, ProductFeatureSection, ProductComparisonSection, HowItWorksSection, ProductRechargeSection, ProductWarrantySection, ProductComparisonTableSection } from '@/components/product';
 import { TopBar, Header, FlashSale, FAQ, Footer, NavBar } from '@/components';
-import { fetchProductBySlug, fetchProducts, transformProduct, getBasePricePerSqM, getOriginalPricePerSqM } from '@/lib/api';
+import { fetchProductBySlug, fetchProducts, transformProduct } from '@/lib/api';
 
 interface ProductPageProps {
   params: Promise<{
@@ -116,8 +116,6 @@ export default async function ProductPageRoute({ params }: ProductPageProps) {
           <ProductPage
             product={product}
             relatedProducts={relatedProducts}
-            basePricePerSquareMeter={getBasePricePerSqM(productData)}
-            originalPricePerSquareMeter={getOriginalPricePerSqM(productData)}
           />
         </Suspense>
         {slug !== 'non-driii-honeycomb-blackout-blinds' && (

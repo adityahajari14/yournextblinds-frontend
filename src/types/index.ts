@@ -58,7 +58,6 @@ export interface Product {
   slug: string;
   category: string;
   price: number;
-  originalPrice: number;
   currency: string;
   rating: number;
   reviewCount: number;
@@ -182,8 +181,7 @@ export interface ApiProduct {
   description: string | null;
   images: string[];
   videos?: string[];
-  oldPrice: number | string;
-  basePrice: number | string;
+  price: number; // Minimum price from 20x20 band
   createdAt: string;
   updatedAt: string;
   categories: ApiCategory[];
@@ -300,7 +298,6 @@ export interface PricingRequest {
 }
 
 export interface PricingResponse {
-  basePrice: number;
   dimensionPrice: number;
   customizationPrices: {
     category: string;
