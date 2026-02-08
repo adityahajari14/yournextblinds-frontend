@@ -118,27 +118,6 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasRollStyle: false,
     },
 
-    // Blackout Blinds (similar to roller blinds)
-    'blackout-blinds': {
-        hasSize: false,
-        hasHeadrail: false,
-        hasHeadrailColour: false,
-        hasInstallationMethod: false,
-        hasControlOption: false,
-        hasStacking: false,
-        hasControlSide: false,
-        hasBottomChain: false,
-        hasBracketType: false,
-        hasChainColor: false,
-        hasWrappedCassette: false,
-        hasCassetteMatchingBar: false,
-        hasMotorization: false,
-        hasBlindColor: false,
-        hasFrameColor: false,
-        hasOpeningDirection: false,
-        hasBottomBar: false,
-        hasRollStyle: false,
-    },
 
     // Skylight Blinds
     'skylight-blinds': {
@@ -250,7 +229,8 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasRollStyle: false,
     },
 
-    'motorised-eclipsecore': {
+    // EclipseCore Shades
+    'eclipsecore-shades': {
         hasSize: true,
         hasHeadrail: false,
         hasHeadrailColour: false,
@@ -295,37 +275,87 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
 };
 
 /**
- * Get customization features for a specific category
- * @param categorySlug - The category slug to get features for
+ * Primary categories (core product types) - these define the base features
+ */
+const PRIMARY_CATEGORIES = [
+    'vertical-blinds',
+    'roller-blinds',
+    'roman-blinds',
+    'venetian-blinds',
+    'day-and-night-blinds',
+    'pleated-blinds',
+    'wooden-blinds',
+    'skylight-blinds',
+    'eclipsecore-shades',
+];
+
+/**
+ * Secondary categories (installation/control types) - these modify features
+ */
+const SECONDARY_CATEGORIES = [
+    'no-drill-blinds',
+    'motorized-blinds',
+];
+
+/**
+ * Get customization features for a product with potentially multiple categories
+ * @param categorySlugOrSlugs - Single category slug (string) or array of category slugs
  * @returns ProductFeatures object with available customizations
  */
-export function getCategoryCustomizations(categorySlug: string): ProductFeatures {
-    // Normalize the slug to lowercase and handle variations
-    const normalizedSlug = categorySlug.toLowerCase().trim();
+export function getCategoryCustomizations(
+    categorySlugOrSlugs: string | string[]
+): ProductFeatures {
+    // Normalize input to array
+    const categorySlugs = Array.isArray(categorySlugOrSlugs)
+        ? categorySlugOrSlugs
+        : [categorySlugOrSlugs];
+
+    // Normalize all slugs to lowercase
+    const normalizedSlugs = categorySlugs.map(slug => slug.toLowerCase().trim());
 
     // Map backend slug formats to frontend formats
     const slugMapping: Record<string, string> = {
         'day-night-blinds': 'day-and-night-blinds', // Backend uses 'day-night-blinds' (no 'and')
+        'motorised-eclipsecore': 'eclipsecore-shades', // Legacy mapping
+        'motorized-eclipsecore': 'eclipsecore-shades', // Legacy mapping
     };
 
-    const mappedSlug = slugMapping[normalizedSlug] || normalizedSlug;
+    const mappedSlugs = normalizedSlugs.map(slug => slugMapping[slug] || slug);
 
-    // Try exact match first
-    if (CATEGORY_CUSTOMIZATIONS[mappedSlug]) {
-        return CATEGORY_CUSTOMIZATIONS[mappedSlug];
+    // Find primary category (core product type)
+    const primaryCategory = mappedSlugs.find(slug => PRIMARY_CATEGORIES.includes(slug));
+
+    // Get base features from primary category
+    let features: ProductFeatures;
+    if (primaryCategory && CATEGORY_CUSTOMIZATIONS[primaryCategory]) {
+        // Deep clone to avoid mutating the original
+        features = { ...CATEGORY_CUSTOMIZATIONS[primaryCategory] };
+    } else {
+        // Try partial match for primary category
+        const partialMatch = Object.keys(CATEGORY_CUSTOMIZATIONS).find(key =>
+            PRIMARY_CATEGORIES.includes(key) &&
+            mappedSlugs.some(slug => 
+                key.includes(slug) || slug.includes(key.split('-')[0])
+            )
+        );
+
+        if (partialMatch) {
+            features = { ...CATEGORY_CUSTOMIZATIONS[partialMatch] };
+        } else {
+            // Return default if no primary category found
+            features = { ...CATEGORY_CUSTOMIZATIONS['default'] };
+        }
     }
 
-    // Try partial match (e.g., "roller" matches "roller-blinds")
-    const partialMatch = Object.keys(CATEGORY_CUSTOMIZATIONS).find(key =>
-        key.includes(mappedSlug) || mappedSlug.includes(key.split('-')[0])
-    );
-
-    if (partialMatch) {
-        return CATEGORY_CUSTOMIZATIONS[partialMatch];
+    // Apply secondary category modifications
+    if (mappedSlugs.includes('motorized-blinds')) {
+        // Enable motorization for motorized products
+        features.hasMotorization = true;
     }
 
-    // Return default if no match found
-    return CATEGORY_CUSTOMIZATIONS['default'];
+    // Note: no-drill-blinds doesn't modify features (as per requirement)
+
+    return features;
 }
 
 /**

@@ -3,10 +3,10 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { newNavigationData, NewNavigationItem, NewNavigationLink } from '@/data/navigation';
+import { navigationData, NavigationItem, NavigationLink } from '@/data/navigation';
 
 // Mobile Menu Item Component with Accordion
-const MobileMenuItem = ({ item, onClose }: { item: NewNavigationItem; onClose: () => void }) => {
+const MobileMenuItem = ({ item, onClose }: { item: NavigationItem; onClose: () => void }) => {
   const [isOpen, setIsOpen] = useState(false);
   const hasSubmenu = item.submenu && item.submenu.length > 0;
 
@@ -49,7 +49,7 @@ const MobileMenuItem = ({ item, onClose }: { item: NewNavigationItem; onClose: (
       {isOpen && item.submenu && (
         <div className="pb-3 pl-4">
           <ul className="space-y-2">
-            {item.submenu.map((link: NewNavigationLink, linkIndex: number) => (
+            {item.submenu.map((link: NavigationLink, linkIndex: number) => (
               <li key={linkIndex}>
                 {link.href ? (
                   <Link
@@ -82,7 +82,7 @@ const NavBar = () => {
       <nav className="hidden lg:block bg-white border-t border-[#eaeaea] px-6 lg:px-20 relative">
         <div className="max-w-[1200px] mx-auto">
           <ul className="flex gap-8 items-center justify-center">
-            {newNavigationData.map((item, index) => (
+            {navigationData.map((item, index) => (
               <li key={index} className="group py-4 static">
                 {item.submenu ? (
                   <>
@@ -205,7 +205,7 @@ const NavBar = () => {
                 </button>
               </div>
               <div className="px-4 py-4">
-                {newNavigationData.map((item, index) => (
+                {navigationData.map((item, index) => (
                   <MobileMenuItem
                     key={index}
                     item={item}

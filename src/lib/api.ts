@@ -414,20 +414,15 @@ export function formatPriceWithCurrency(price: number, currency: string = 'USD')
  */
 export function transformProduct(apiProduct: ApiProduct): Product {
   const categoryName = apiProduct.categories[0]?.name || 'Blinds';
-  // Check if product belongs to 'motorised-eclipsecore' (priority category)
-  const priorityCategories = ['motorised-eclipsecore', 'motorized-eclipsecore'];
-  const priorityCategory = apiProduct.categories.find(c => priorityCategories.includes(c.slug));
-
-  // Use priority category if found, otherwise fall back to first category
-  const activeCategorySlug = priorityCategory
-    ? priorityCategory.slug
-    : (apiProduct.categories[0]?.slug || 'default');
+  
+  // Get all category slugs for the product (products can have multiple categories)
+  const categorySlugs = apiProduct.categories.map(c => c.slug);
 
   // Price is now the minimum band price (20x20) from the backend
   const price = typeof apiProduct.price === 'string' ? parseFloat(apiProduct.price) : apiProduct.price;
 
-  // Get category-specific customization features
-  const features = getCategoryCustomizations(activeCategorySlug);
+  // Get category-specific customization features (pass all categories to handle multiple)
+  const features = getCategoryCustomizations(categorySlugs);
 
   return {
     id: apiProduct.id,
