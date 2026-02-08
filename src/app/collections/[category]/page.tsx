@@ -5,7 +5,7 @@ import { Product, ApiProduct } from '@/types';
 import CategoryHero from '@/components/collection/CategoryHero';
 import ProductGridWithFilters from '@/components/collection/ProductGridWithFilters';
 import ComingSoon from '@/components/collection/ComingSoon';
-import { ALL_COLLECTION_SLUGS, COLLECTION_DISPLAY_NAMES, NAVIGATION_SLUG_MAPPING } from '@/data/navigation';
+import { ALL_COLLECTION_SLUGS, COLLECTION_DISPLAY_NAMES, NAVIGATION_SLUG_MAPPING, NAVIGATION_TAG_FILTERS, NAVIGATION_CATEGORY_FILTERS } from '@/data/navigation';
 
 interface PageProps {
   params: Promise<{ category: string }>;
@@ -69,12 +69,8 @@ export default async function CollectionPage({ params }: PageProps) {
       mappedSlug = NAVIGATION_SLUG_MAPPING[slug];
     }
 
-    // Then apply backend slug conversions (e.g., day-and-night-blinds -> day-night-blinds)
-    const backendSlugMap: Record<string, string> = {
-      'day-and-night-blinds': 'day-night-blinds', // Backend uses different format
-    };
-    
-    return backendSlugMap[mappedSlug] || mappedSlug;
+    // Backend uses 'day-and-night-blinds' (with 'and'), no conversion needed
+    return mappedSlug;
   };
 
   // Validate the slug exists in our defined collections
@@ -113,7 +109,11 @@ export default async function CollectionPage({ params }: PageProps) {
 
   if (backendCategory) {
     try {
-      apiProducts = await fetchProductsByCategory(backendSlug);
+      // Get required tags and categories for this navigation slug
+      const requiredTags = NAVIGATION_TAG_FILTERS[categorySlug];
+      const requiredCategories = NAVIGATION_CATEGORY_FILTERS[categorySlug];
+      
+      apiProducts = await fetchProductsByCategory(backendSlug, requiredTags, requiredCategories);
       products = apiProducts.map(transformProduct);
     } catch (error) {
       // Silently fail during build - backend may be unavailable

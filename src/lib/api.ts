@@ -40,20 +40,33 @@ if (typeof window === 'undefined' && process.env.NODE_ENV === 'development') {
 // ============================================
 
 async function apiFetch<T>(endpoint: string, options?: RequestInit, retries: number = 2): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
+  // Ensure endpoint starts with / and API_BASE_URL doesn't end with /
+  const normalizedEndpoint = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const normalizedBase = API_BASE_URL.endsWith('/') ? API_BASE_URL.slice(0, -1) : API_BASE_URL;
+  const url = `${normalizedBase}${normalizedEndpoint}`;
   const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
+  const isServerSide = typeof window === 'undefined';
 
   // Create AbortController for timeout
+  // Use longer timeout for server-side requests (30s) vs client-side (10s)
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout for build time
+  const timeout = isServerSide ? 30000 : 10000;
+  const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
-    const response = await fetch(url, {
-      next: { revalidate: 60 },
+    // Build fetch options - only include 'next' option for Next.js server-side fetches
+    const fetchOptions: RequestInit = {
       headers: { 'Content-Type': 'application/json' },
       signal: controller.signal,
       ...options,
-    });
+    };
+
+    // Only add Next.js cache options for server-side requests
+    if (isServerSide) {
+      (fetchOptions as any).next = { revalidate: 60 };
+    }
+
+    const response = await fetch(url, fetchOptions);
 
     clearTimeout(timeoutId);
 
@@ -213,25 +226,44 @@ export async function fetchProductBySlug(slug: string): Promise<ApiProductRespon
  * Handles cases where frontend and backend use different naming
  */
 function mapCategorySlug(frontendSlug: string): string {
-  const slugMap: Record<string, string> = {
-    'day-and-night-blinds': 'day-night-blinds', // Backend uses 'day-night-blinds' (no 'and')
-  };
-
-  return slugMap[frontendSlug] || frontendSlug;
+  // Backend uses 'day-and-night-blinds' (with 'and'), no conversion needed
+  return frontendSlug;
 }
 
 /**
- * Fetch products filtered by category slug
+ * Fetch products filtered by category slug and optional tags
  * Maps frontend slug to backend slug if needed
  */
-export async function fetchProductsByCategory(categorySlug: string): Promise<ApiProduct[]> {
+export async function fetchProductsByCategory(
+  categorySlug: string,
+  requiredTags?: string[],
+  requiredCategories?: string[]
+): Promise<ApiProduct[]> {
   try {
     const backendSlug = mapCategorySlug(categorySlug);
     const response = await fetchProducts({ limit: 500 });
 
-    return response.data.filter((product) =>
-      product.categories.some((cat) => cat.slug === backendSlug)
-    );
+    return response.data.filter((product) => {
+      // Must have the primary category
+      const hasPrimaryCategory = product.categories.some((cat) => cat.slug === backendSlug);
+      if (!hasPrimaryCategory) return false;
+
+      // Must have all required tags (if specified)
+      if (requiredTags && requiredTags.length > 0) {
+        const productTagSlugs = product.tags.map((tag) => tag.slug);
+        const hasAllTags = requiredTags.every((tag) => productTagSlugs.includes(tag));
+        if (!hasAllTags) return false;
+      }
+
+      // Must have all required secondary categories (if specified)
+      if (requiredCategories && requiredCategories.length > 0) {
+        const productCategorySlugs = product.categories.map((cat) => cat.slug);
+        const hasAllCategories = requiredCategories.every((cat) => productCategorySlugs.includes(cat));
+        if (!hasAllCategories) return false;
+      }
+
+      return true;
+    });
   } catch (error: any) {
     // Return empty array during build if backend is unavailable
     const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';

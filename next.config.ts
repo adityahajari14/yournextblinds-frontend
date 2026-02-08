@@ -25,6 +25,12 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
+    // Disable image optimization for development to avoid private IP issues
+    // In production, consider using a CDN or image proxy service
+    unoptimized: process.env.NODE_ENV === 'development',
+    // Allow SVG images
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
   // Suppress Turbopack warning about webpack config
   turbopack: {},

@@ -134,3 +134,24 @@ export const NAVIGATION_SLUG_MAPPING: Record<string, string> = {
   'shop-by-feature': 'roller-blinds', // Will filter by tags (thermal, blackout, etc.)
   'shop-by-room': 'roller-blinds', // Will filter by room tags
 };
+
+// Mapping of navigation slugs to required tags for filtering
+// Products must have ALL specified tags to appear on these pages
+export const NAVIGATION_TAG_FILTERS: Record<string, string[]> = {
+  'light-filtering-vertical-blinds': ['light-filtering'],
+  'blackout-vertical-blinds': ['blackout'],
+  'light-filtering-roller-shades': ['light-filtering'],
+  'blackout-roller-shades': ['blackout'],
+  'waterproof-blackout-roller-shades': ['waterproof', 'blackout'],
+  'blackout-roller-shades-category': ['blackout'],
+  'blackout-dual-zebra-shades': ['blackout'],
+  'blackout-vertical-blinds-category': ['blackout'],
+};
+
+// Mapping of navigation slugs to required secondary categories for filtering
+// Products must have the specified secondary category to appear on these pages
+export const NAVIGATION_CATEGORY_FILTERS: Record<string, string[]> = {
+  'motorised-roller-shades': ['motorized-blinds'],
+  'motorised-dual-zebra-shades': ['motorized-blinds'],
+  'motorised-eclipsecore': ['motorized-blinds'],
+};

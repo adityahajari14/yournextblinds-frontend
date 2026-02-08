@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { TopBar, Header, NavBar, Footer } from '@/components';
-import { transformProduct, extractFilterOptions } from '@/lib/api';
+import { transformProduct, extractFilterOptions, fetchProducts } from '@/lib/api';
 import { Product, ApiProduct } from '@/types';
 import CategoryHero from '@/components/collection/CategoryHero';
 import ProductGridWithFilters from '@/components/collection/ProductGridWithFilters';
@@ -33,42 +33,16 @@ function SearchContent() {
 
       setLoading(true);
       try {
-        // Use fetch directly for client-side search
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-        const queryParams = new URLSearchParams();
-        queryParams.append('limit', '500');
-        queryParams.append('search', query);
-        
-        const response = await fetch(`${API_BASE_URL}/api/products?${queryParams.toString()}`, {
-          headers: { 'Content-Type': 'application/json' },
+        // Use the fetchProducts function which properly handles URL construction
+        const response = await fetchProducts({
+          limit: 500,
+          search: query,
         });
         
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-        
-        const data = await response.json();
-        let apiProducts = data.data || [];
-        
-        // If backend doesn't support search, filter client-side
-        const queryLower = query.toLowerCase();
-        const filteredProducts = apiProducts.filter((product: ApiProduct) => {
-          const titleMatch = product.title.toLowerCase().includes(queryLower);
-          const descriptionMatch = product.description?.toLowerCase().includes(queryLower);
-          const categoryMatch = product.categories.some(cat => 
-            cat.name.toLowerCase().includes(queryLower) || 
-            cat.slug.toLowerCase().includes(queryLower)
-          );
-          const tagMatch = product.tags.some(tag => 
-            tag.name.toLowerCase().includes(queryLower) || 
-            tag.slug.toLowerCase().includes(queryLower)
-          );
-          return titleMatch || descriptionMatch || categoryMatch || tagMatch;
-        });
-        
-        const transformedProducts = filteredProducts.map(transformProduct);
+        const apiProducts = response.data || [];
+        const transformedProducts = apiProducts.map(transformProduct);
         setProducts(transformedProducts);
-        setFilterOptions(extractFilterOptions(filteredProducts));
+        setFilterOptions(extractFilterOptions(apiProducts));
       } catch (error) {
         console.error('Error searching products:', error);
         setProducts([]);
