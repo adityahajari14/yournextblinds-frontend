@@ -481,11 +481,25 @@ export function formatPriceWithCurrency(price: number, currency: string = 'USD')
 /**
  * Transform API product data to frontend Product type
  */
+/** Slug for EclipseCore / honeycomb blackout product - homepage links here; must use eclipsecore-shades features */
+const ECLIPSECORE_HONEYCOMB_SLUG = 'non-driii-honeycomb-blackout-blinds';
+
 export function transformProduct(apiProduct: ApiProduct): Product {
   const categoryName = apiProduct.categories[0]?.name || 'Blinds';
-  
+
   // Get all category slugs for the product (products can have multiple categories)
-  const categorySlugs = apiProduct.categories.map(c => c.slug);
+  let categorySlugs = apiProduct.categories.map(c => c.slug);
+
+  // EclipseCore / honeycomb blackout product: ensure we use eclipsecore-shades features so
+  // "Measure your window" and "Customize your blind" show Size, Blind Color, Frame Color, Opening Direction
+  if (apiProduct.slug === ECLIPSECORE_HONEYCOMB_SLUG) {
+    const hasEclipse = categorySlugs.some(
+      (s) => s.toLowerCase().includes('eclipse') || s === 'eclipsecore-shades'
+    );
+    if (!hasEclipse) {
+      categorySlugs = ['eclipsecore-shades', ...categorySlugs];
+    }
+  }
 
   // Price is now the minimum band price (20x20) from the backend
   const price = typeof apiProduct.price === 'string' ? parseFloat(apiProduct.price) : apiProduct.price;
