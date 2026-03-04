@@ -18,23 +18,25 @@ interface ProductCardProps {
     images?: string[];
   };
   className?: string;
+  preselectedMotorization?: boolean;
 }
 
-export default function ProductCard({ product, className = '' }: ProductCardProps) {
+export default function ProductCard({ product, className = '', preselectedMotorization = false }: ProductCardProps) {
   const router = useRouter();
   const imageUrl = product.image || product.images?.[0] || '';
   const currency = product.currency || 'USD';
+  const motorizedParam = preselectedMotorization ? '&motorized=true' : '';
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     // Navigate to product page with a flag to auto-open customization
-    router.push(`/product/${product.slug}?customize=true`);
+    router.push(`/product/${product.slug}?customize=true${motorizedParam}`);
   };
   
   return (
     <Link 
-      href={`/product/${product.slug}`} 
+      href={`/product/${product.slug}${preselectedMotorization ? '?motorized=true' : ''}`} 
       className={`flex flex-col group w-full h-full ${className}`}
     >
       {/* Image */}

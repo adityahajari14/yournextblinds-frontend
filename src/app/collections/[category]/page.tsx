@@ -129,6 +129,11 @@ export default async function CollectionPage({ params }: PageProps) {
   // Check if we should show coming soon (no backend category or no products)
   const showComingSoon = !backendCategory || products.length === 0;
 
+  // Pre-select motorization when browsing motorised collections
+  const preselectedMotorization =
+    categorySlug === 'motorised-roller-shades' ||
+    categorySlug === 'motorised-dual-zebra-shades';
+
   return (
     <div className="min-h-screen bg-[#fafafa]">
       <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -153,6 +158,7 @@ export default async function CollectionPage({ params }: PageProps) {
                 products={products}
                 filterOptions={filterOptions}
                 categoryName={categoryName}
+                preselectedMotorization={preselectedMotorization}
               />
             )}
           </div>

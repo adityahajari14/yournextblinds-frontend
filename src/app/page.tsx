@@ -31,7 +31,7 @@ export default function Home() {
         {/* <WindowTypes /> */}
         {/* <Categories /> */}
         <CategoryGrid />
-        <Installation />
+        {/* <Installation /> */}
         <BestSelling />
         <Craftsmanship />
         <FreeSamples />

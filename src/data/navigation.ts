@@ -38,7 +38,7 @@ export const navigationData: NavigationItem[] = [
     label: 'Motorization',
     submenu: [
       { label: 'Motorised roller shades', href: '/collections/motorised-roller-shades' },
-      { label: 'Motorised Dual / zebra shades', href: '/collections/motorised-dual-zebra-shades' },
+      { label: 'Motorised Dual zebra shades', href: '/collections/motorised-dual-zebra-shades' },
       { label: 'Motorised EclipseCore', href: '/collections/motorised-eclipsecore' },
     ]
   },
@@ -98,7 +98,7 @@ export const COLLECTION_DISPLAY_NAMES: Record<string, string> = {
   'waterproof-blackout-roller-shades': 'Waterproof Blackout roller Shades',
   'dual-zebra-shades': 'Dual zebra Shades',
   'motorised-roller-shades': 'Motorised roller shades',
-  'motorised-dual-zebra-shades': 'Motorised Dual / zebra shades',
+  'motorised-dual-zebra-shades': 'Motorised Dual zebra shades',
   'motorised-eclipsecore': 'Motorised EclipseCore',
   'blackout-roller-shades-category': 'Roller Shades',
   'blackout-dual-zebra-shades': 'Dual/ zebra shades',
@@ -156,7 +156,5 @@ export const NAVIGATION_TAG_FILTERS: Record<string, string[]> = {
 // Mapping of navigation slugs to required secondary categories for filtering
 // Products must have the specified secondary category to appear on these pages
 export const NAVIGATION_CATEGORY_FILTERS: Record<string, string[]> = {
-  'motorised-roller-shades': ['motorized-blinds'],
-  'motorised-dual-zebra-shades': ['motorized-blinds'],
   'motorised-eclipsecore': ['motorized-blinds'],
 };

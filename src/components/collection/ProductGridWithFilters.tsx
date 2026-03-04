@@ -13,6 +13,7 @@ interface ProductGridWithFiltersProps {
   products: Product[];
   filterOptions: FilterOptions;
   categoryName: string;
+  preselectedMotorization?: boolean;
 }
 
 type SortOption = 'best-selling' | 'price-low' | 'price-high' | 'name-az' | 'name-za';
@@ -20,7 +21,8 @@ type SortOption = 'best-selling' | 'price-low' | 'price-high' | 'name-az' | 'nam
 export default function ProductGridWithFilters({ 
   products, 
   filterOptions,
-  categoryName 
+  categoryName,
+  preselectedMotorization = false,
 }: ProductGridWithFiltersProps) {
   // Filter state
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -319,6 +321,7 @@ export default function ProductGridWithFilters({
                     ...product,
                     image: product.images[0],
                   }}
+                  preselectedMotorization={preselectedMotorization}
                 />
               ))}
             </div>

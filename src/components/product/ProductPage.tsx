@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Product, ProductConfiguration, DEFAULT_CONFIGURATION, PriceBandMatrix, CustomizationPricing as CustomizationPricingType } from '@/types';
 import { useCart } from '@/context/CartContext';
@@ -68,6 +69,7 @@ const ProductPage = ({
   relatedProducts,
 }: ProductPageProps) => {
   const { addToCart } = useCart();
+  const searchParams = useSearchParams();
 
   const [config, setConfig] = useState<ProductConfiguration>({
     ...DEFAULT_CONFIGURATION,
@@ -100,6 +102,19 @@ const ProductPage = ({
     motorization: false,
     bottomBar: false,
   });
+
+  // Pre-select motorization when arriving from a motorised collection page
+  useEffect(() => {
+    if (searchParams.get('motorized') === 'true' && product.features.hasMotorization) {
+      setSelectedOptionalCards((prev) => ({
+        ...prev,
+        motorization: true,
+        continuousChain: false,
+      }));
+      setConfig((prev) => ({ ...prev, chainColor: null, controlSide: null }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Fetch pricing data on mount
   useEffect(() => {
