@@ -88,44 +88,6 @@ export interface ShopifyCustomer {
   lastName: string | null;
   email: string;
   phone: string | null;
-  acceptsMarketing: boolean;
-  defaultAddress: {
-    address1: string | null;
-    address2: string | null;
-    city: string | null;
-    province: string | null;
-    zip: string | null;
-    country: string | null;
-  } | null;
-  orders: {
-    edges: Array<{
-      node: {
-        id: string;
-        orderNumber: number;
-        processedAt: string;
-        fulfillmentStatus: string;
-        financialStatus: string;
-        totalPrice: { amount: string; currencyCode: string };
-        lineItems: {
-          edges: Array<{
-            node: {
-              title: string;
-              quantity: number;
-              variant: {
-                price: { amount: string; currencyCode: string };
-                image: { url: string; altText: string | null } | null;
-              } | null;
-            };
-          }>;
-        };
-      };
-    }>;
-  };
-}
-
-interface CustomerUserError {
-  field: string[] | null;
-  message: string;
 }
 
 // ============================================
@@ -200,7 +162,7 @@ const COLLECTIONS_QUERY = `
 `;
 
 // ============================================
-// Customer GraphQL Mutations & Queries
+// Customer GraphQL Query
 // ============================================
 
 const CUSTOMER_FIELDS = `
@@ -209,92 +171,12 @@ const CUSTOMER_FIELDS = `
   lastName
   email
   phone
-  acceptsMarketing
-  defaultAddress {
-    address1
-    address2
-    city
-    province
-    zip
-    country
-  }
-  orders(first: 20, sortKey: PROCESSED_AT, reverse: true) {
-    edges {
-      node {
-        id
-        orderNumber
-        processedAt
-        fulfillmentStatus
-        financialStatus
-        totalPrice { amount currencyCode }
-        lineItems(first: 10) {
-          edges {
-            node {
-              title
-              quantity
-              variant {
-                price { amount currencyCode }
-                image { url altText }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-`;
-
-const CUSTOMER_CREATE_MUTATION = `
-  mutation customerCreate($input: CustomerCreateInput!) {
-    customerCreate(input: $input) {
-      customer { ${CUSTOMER_FIELDS} }
-      customerUserErrors { field message }
-    }
-  }
-`;
-
-const CUSTOMER_ACCESS_TOKEN_CREATE = `
-  mutation customerAccessTokenCreate($input: CustomerAccessTokenCreateInput!) {
-    customerAccessTokenCreate(input: $input) {
-      customerAccessToken {
-        accessToken
-        expiresAt
-      }
-      customerUserErrors { field message }
-    }
-  }
 `;
 
 const CUSTOMER_QUERY = `
   query customer($customerAccessToken: String!) {
     customer(customerAccessToken: $customerAccessToken) {
       ${CUSTOMER_FIELDS}
-    }
-  }
-`;
-
-const CUSTOMER_UPDATE_MUTATION = `
-  mutation customerUpdate($customerAccessToken: String!, $customer: CustomerUpdateInput!) {
-    customerUpdate(customerAccessToken: $customerAccessToken, customer: $customer) {
-      customer { ${CUSTOMER_FIELDS} }
-      customerUserErrors { field message }
-    }
-  }
-`;
-
-const CUSTOMER_RECOVER_MUTATION = `
-  mutation customerRecover($email: String!) {
-    customerRecover(email: $email) {
-      customerUserErrors { field message }
-    }
-  }
-`;
-
-const CUSTOMER_ACCESS_TOKEN_DELETE = `
-  mutation customerAccessTokenDelete($customerAccessToken: String!) {
-    customerAccessTokenDelete(customerAccessToken: $customerAccessToken) {
-      deletedAccessToken
-      userErrors { field message }
     }
   }
 `;
@@ -591,56 +473,7 @@ export async function fetchShopifyCollectionsMapped(): Promise<
 // ============================================
 
 /**
- * Register a new customer via Shopify Storefront API.
- */
-export async function shopifyCustomerCreate(input: {
-  email: string;
-  password: string;
-  firstName?: string;
-  lastName?: string;
-  acceptsMarketing?: boolean;
-}): Promise<{ customer: ShopifyCustomer | null; errors: CustomerUserError[] }> {
-  const data = await storefrontFetch<{
-    customerCreate: {
-      customer: ShopifyCustomer | null;
-      customerUserErrors: CustomerUserError[];
-    };
-  }>(CUSTOMER_CREATE_MUTATION, { input });
-
-  return {
-    customer: data.customerCreate.customer,
-    errors: data.customerCreate.customerUserErrors,
-  };
-}
-
-/**
- * Login: create a customer access token.
- */
-export async function shopifyCustomerLogin(
-  email: string,
-  password: string
-): Promise<{
-  accessToken: string | null;
-  expiresAt: string | null;
-  errors: CustomerUserError[];
-}> {
-  const data = await storefrontFetch<{
-    customerAccessTokenCreate: {
-      customerAccessToken: { accessToken: string; expiresAt: string } | null;
-      customerUserErrors: CustomerUserError[];
-    };
-  }>(CUSTOMER_ACCESS_TOKEN_CREATE, { input: { email, password } });
-
-  const result = data.customerAccessTokenCreate;
-  return {
-    accessToken: result.customerAccessToken?.accessToken || null,
-    expiresAt: result.customerAccessToken?.expiresAt || null,
-    errors: result.customerUserErrors,
-  };
-}
-
-/**
- * Fetch the currently authenticated customer's profile and orders.
+ * Fetch the currently authenticated customer's profile.
  */
 export async function shopifyCustomerFetch(
   accessToken: string
@@ -650,59 +483,4 @@ export async function shopifyCustomerFetch(
   }>(CUSTOMER_QUERY, { customerAccessToken: accessToken });
 
   return data.customer;
-}
-
-/**
- * Update customer profile.
- */
-export async function shopifyCustomerUpdate(
-  accessToken: string,
-  updates: {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-    acceptsMarketing?: boolean;
-  }
-): Promise<{ customer: ShopifyCustomer | null; errors: CustomerUserError[] }> {
-  const data = await storefrontFetch<{
-    customerUpdate: {
-      customer: ShopifyCustomer | null;
-      customerUserErrors: CustomerUserError[];
-    };
-  }>(CUSTOMER_UPDATE_MUTATION, {
-    customerAccessToken: accessToken,
-    customer: updates,
-  });
-
-  return {
-    customer: data.customerUpdate.customer,
-    errors: data.customerUpdate.customerUserErrors,
-  };
-}
-
-/**
- * Trigger password reset email.
- */
-export async function shopifyCustomerRecover(
-  email: string
-): Promise<{ errors: CustomerUserError[] }> {
-  const data = await storefrontFetch<{
-    customerRecover: {
-      customerUserErrors: CustomerUserError[];
-    };
-  }>(CUSTOMER_RECOVER_MUTATION, { email });
-
-  return { errors: data.customerRecover.customerUserErrors };
-}
-
-/**
- * Delete (invalidate) a customer access token (logout).
- */
-export async function shopifyCustomerLogout(
-  accessToken: string
-): Promise<void> {
-  await storefrontFetch(CUSTOMER_ACCESS_TOKEN_DELETE, {
-    customerAccessToken: accessToken,
-  });
 }
