@@ -1,15 +1,15 @@
 export const PRODUCT_GUIDES = {
   roller: {
-    installation: 'https://cdn.shopify.com/s/files/1/0729/6847/0563/files/roller_blinds_installation_guide_yournextblinds.pdf?v=1772649110',
-    measurement:  'https://cdn.shopify.com/s/files/1/0729/6847/0563/files/roller_shades_measurement_guide_yournextblinds.pdf?v=1772649109',
+    installation: '/guides/roller_blinds_installation_guide_yournextblinds.pdf',
+    measurement:  '/guides/roller_shades_measurement_guide_yournextblinds.pdf',
   },
   zebra: {
-    installation: 'https://cdn.shopify.com/s/files/1/0729/6847/0563/files/dual_zebra_installation_guide_yournextblinds.pdf?v=1772649110',
-    measurement:  'https://cdn.shopify.com/s/files/1/0729/6847/0563/files/dual_zebra_measurement_guide_yournextblinds.pdf?v=1772649109',
+    installation: '/guides/dual_zebra_installation_guide_yournextblinds.pdf',
+    measurement:  '/guides/dual_zebra_measurement_guide_yournextblinds.pdf',
   },
   vertical: {
-    installation: 'https://cdn.shopify.com/s/files/1/0729/6847/0563/files/vertical_blinds_installation_guide_yournextblinds.pdf?v=1772649111',
-    measurement:  'https://cdn.shopify.com/s/files/1/0729/6847/0563/files/vertical_blinds_measurement_guide_yournextblinds.pdf?v=1772649108',
+    installation: '/guides/vertical_blinds_installation_guide_yournextblinds.pdf',
+    measurement:  '/guides/vertical_blinds_measurement_guide_yournextblinds.pdf',
   },
 } as const;
 
