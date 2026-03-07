@@ -17,7 +17,7 @@ import {
   ROLLER_INSTALLATION_OPTIONS,
   CONTROL_OPTIONS,
   ROLLER_CONTROL_OPTIONS,
-  STACKING_OPTIONS,
+  VERTICAL_STACKING_OPTIONS,
   CONTROL_SIDE_OPTIONS,
   BOTTOM_CHAIN_OPTIONS,
   BRACKET_TYPE_OPTIONS,
@@ -143,7 +143,7 @@ export default function CartPage() {
 
     // Stacking
     if (config.stacking) {
-      const stackingOption = STACKING_OPTIONS.find(opt => opt.id === config.stacking);
+      const stackingOption = Object.values(VERTICAL_STACKING_OPTIONS).flat().find((opt: { id: string; name: string }) => opt.id === config.stacking);
       parts.push(`Stacking: ${stackingOption?.name || config.stacking}`);
     }
 
@@ -227,9 +227,9 @@ export default function CartPage() {
 
     // Stacking
     if (config.stacking) {
-      const option = STACKING_OPTIONS.find(opt => opt.id === config.stacking);
+      const option = Object.values(VERTICAL_STACKING_OPTIONS).flat().find((opt: { id: string; price: number }) => opt.id === config.stacking);
       if (option?.price && option.price > 0) {
-        costs.push({ label: option.name, price: option.price });
+        costs.push({ label: 'Stacking', price: option.price });
       }
     }
 

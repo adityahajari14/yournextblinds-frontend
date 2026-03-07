@@ -27,7 +27,7 @@ const StackingSelector = ({ options, selectedStacking, onStackingChange }: Stack
             </div>
 
             {/* Options Grid */}
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
                 {options.map((option) => (
                     <button
                         key={option.id}

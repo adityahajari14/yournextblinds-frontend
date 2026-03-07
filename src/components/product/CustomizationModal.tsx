@@ -36,7 +36,7 @@ import {
   ZEBRA_INSTALLATION_OPTIONS,
   CONTROL_OPTIONS,
   ROLLER_CONTROL_OPTIONS,
-  STACKING_OPTIONS,
+  VERTICAL_STACKING_OPTIONS,
   CONTROL_SIDE_OPTIONS,
   BOTTOM_CHAIN_OPTIONS,
   BRACKET_TYPE_OPTIONS,
@@ -140,6 +140,21 @@ const CustomizationModal = ({
     ? ROLLER_INSTALLATION_OPTIONS
     : INSTALLATION_METHOD_OPTIONS;
   const controlOptions = isRollerOrDayNight ? ROLLER_CONTROL_OPTIONS : CONTROL_OPTIONS;
+
+  // Dynamic stacking options for vertical blinds — combination-specific images per control type
+  const stackingOptions = useMemo(() => {
+    return VERTICAL_STACKING_OPTIONS[config.controlOption ?? ''] ?? [];
+  }, [config.controlOption]);
+
+  // Reset stacking when control changes and selected stack is no longer valid
+  useEffect(() => {
+    if (!config.controlOption) return;
+    const validIds = (VERTICAL_STACKING_OPTIONS[config.controlOption] ?? []).map((o) => o.id);
+    if (config.stacking && !validIds.includes(config.stacking)) {
+      setConfig((prev) => ({ ...prev, stacking: null }));
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [config.controlOption]);
 
   // Determine which options should be visible based on product type and selected headrail
   const visibleOptions = useMemo(() => {
@@ -432,7 +447,7 @@ const CustomizationModal = ({
                 {product.features.hasStacking && visibleOptions.showStacking && (
                   <div className="pt-6 relative z-[35]">
                     <StackingSelector
-                      options={STACKING_OPTIONS}
+                      options={stackingOptions}
                       selectedStacking={config.stacking}
                       onStackingChange={(stackingId) => setConfig({ ...config, stacking: stackingId })}
                     />

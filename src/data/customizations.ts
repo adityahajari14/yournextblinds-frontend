@@ -114,48 +114,57 @@ export const ROLLER_CONTROL_OPTIONS = [
   },
 ];
 
-// Stacking options (used for vertical blinds)
-export const STACKING_OPTIONS = [
-  {
-    id: 'left',
-    name: 'Left',
-    description: 'Blinds stack to the left when opened.',
-    price: 0,
-    image: '/products/stacking/left.png',
-  },
-  {
-    id: 'right',
-    name: 'Right',
-    description: 'Blinds stack to the right when opened.',
-    price: 0,
-    image: '/products/stacking/right.png',
-  },
-];
-
-// Stacking options including split (available when chain chord control is selected)
-export const STACKING_OPTIONS_WITH_SPLIT = [
-  {
-    id: 'left',
-    name: 'Left',
-    description: 'Blinds stack to the left when opened.',
-    price: 0,
-    image: '/products/stacking/left.png',
-  },
-  {
-    id: 'right',
-    name: 'Right',
-    description: 'Blinds stack to the right when opened.',
-    price: 0,
-    image: '/products/stacking/right.png',
-  },
-  {
-    id: 'split',
-    name: 'Split',
-    description: 'Blinds split and stack to both sides when opened.',
-    price: 0,
-    image: '/products/stacking/split.png',
-  },
-];
+// Stacking options for vertical blinds — combination-specific images per control type
+export const VERTICAL_STACKING_OPTIONS: Record<string, { id: string; name: string; description: string; price: number; image: string }[]> = {
+  'wand-control': [
+    {
+      id: 'left',
+      name: 'Left Stack',
+      description: 'Blinds stack to the left when opened (wand control).',
+      price: 0,
+      image: '/products/stacking/wand-left-stack.png',
+    },
+    {
+      id: 'right',
+      name: 'Right Stack',
+      description: 'Blinds stack to the right when opened (wand control).',
+      price: 0,
+      image: '/products/stacking/wand-right-stack.png',
+    },
+  ],
+  'chain-chord-left': [
+    {
+      id: 'left',
+      name: 'Left Stack',
+      description: 'Blinds stack to the left — chain control on the left.',
+      price: 0,
+      image: '/products/stacking/left-control-left-stack.png',
+    },
+    {
+      id: 'split',
+      name: 'Split Stack',
+      description: 'Blinds split open from the left — chain control on the left.',
+      price: 0,
+      image: '/products/stacking/left-control-split-stack.png',
+    },
+  ],
+  'chain-chord-right': [
+    {
+      id: 'right',
+      name: 'Right Stack',
+      description: 'Blinds stack to the right — chain control on the right.',
+      price: 0,
+      image: '/products/stacking/right-control-right-stack.png',
+    },
+    {
+      id: 'split',
+      name: 'Split Stack',
+      description: 'Blinds split open from the right — chain control on the right.',
+      price: 0,
+      image: '/products/stacking/right-control-split-stack.png',
+    },
+  ],
+};
 
 // Control side options (used for vertical blinds)
 export const CONTROL_SIDE_OPTIONS = [

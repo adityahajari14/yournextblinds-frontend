@@ -44,8 +44,7 @@ import {
   ZEBRA_INSTALLATION_OPTIONS,
   CONTROL_OPTIONS,
   ROLLER_CONTROL_OPTIONS,
-  STACKING_OPTIONS,
-  STACKING_OPTIONS_WITH_SPLIT,
+  VERTICAL_STACKING_OPTIONS,
   CONTROL_SIDE_OPTIONS,
   BOTTOM_CHAIN_OPTIONS,
   BRACKET_TYPE_OPTIONS,
@@ -61,7 +60,7 @@ import {
   ROLL_STYLE_OPTIONS
 } from '@/data/customizations';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
-import { CONTINUOUS_CHAIN_CARD, CASSETTE_CARD, MOTORIZATION_CARD, BOTTOM_BAR_CARD } from '@/data/optionalCustomizations';
+import { CONTINUOUS_CHAIN_CARD, CONTINUOUS_CHAIN_CARD_ROLLER, CONTINUOUS_CHAIN_CARD_ZEBRA, CASSETTE_CARD, CASSETTE_CARD_ROLLER, CASSETTE_CARD_ZEBRA, MOTORIZATION_CARD, BOTTOM_BAR_CARD } from '@/data/optionalCustomizations';
 import Image from 'next/image';
 
 interface ProductPageProps {
@@ -202,16 +201,19 @@ const ProductPage = ({
     ? ROLLER_INSTALLATION_OPTIONS
     : INSTALLATION_METHOD_OPTIONS;
   const controlOptions = isRollerOrDayNight ? ROLLER_CONTROL_OPTIONS : CONTROL_OPTIONS;
+  const continuousChainCard = isDayNight ? CONTINUOUS_CHAIN_CARD_ZEBRA : isRollerOrDayNight ? CONTINUOUS_CHAIN_CARD_ROLLER : CONTINUOUS_CHAIN_CARD;
+  const cassetteCard = isDayNight ? CASSETTE_CARD_ZEBRA : isRollerOrDayNight ? CASSETTE_CARD_ROLLER : CASSETTE_CARD;
 
-  // Dynamic stacking options for vertical blinds: chain chord controls unlock the split option
+  // Dynamic stacking options for vertical blinds — combination-specific images per control type
   const stackingOptions = useMemo(() => {
-    const isChainChord = config.controlOption === 'chain-chord-right' || config.controlOption === 'chain-chord-left';
-    return isChainChord ? STACKING_OPTIONS_WITH_SPLIT : STACKING_OPTIONS;
+    return VERTICAL_STACKING_OPTIONS[config.controlOption ?? ''] ?? [];
   }, [config.controlOption]);
 
-  // Reset stacking to null if the user switches to wand-control and had split selected
+  // Reset stacking when control changes and selected stack is no longer valid
   useEffect(() => {
-    if (config.controlOption === 'wand-control' && config.stacking === 'split') {
+    if (!config.controlOption) return;
+    const validIds = (VERTICAL_STACKING_OPTIONS[config.controlOption] ?? []).map((o) => o.id);
+    if (config.stacking && !validIds.includes(config.stacking)) {
       setConfig((prev) => ({ ...prev, stacking: null }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -818,14 +820,14 @@ const ProductPage = ({
                                   </svg>
                                 </div>
                               )}
-                              {CONTINUOUS_CHAIN_CARD.image && (
+                              {continuousChainCard.image && (
                                 <div className={`relative h-[120px] w-full mb-3 rounded-lg overflow-hidden flex items-center justify-center transition-all duration-300 ${selectedOptionalCards.continuousChain
                                   ? 'bg-gradient-to-br from-[#e8f5f3] to-[#d0ebe8] shadow-inner'
                                   : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-150'
                                   }`}>
                                   <Image
-                                    src={CONTINUOUS_CHAIN_CARD.image}
-                                    alt={CONTINUOUS_CHAIN_CARD.name}
+                                    src={continuousChainCard.image}
+                                    alt={continuousChainCard.name}
                                     width={120}
                                     height={120}
                                     className="object-contain"
@@ -833,14 +835,14 @@ const ProductPage = ({
                                 </div>
                               )}
                               <h4 className="text-base font-semibold text-[#3a3a3a] mb-1.5 pr-8">
-                                {CONTINUOUS_CHAIN_CARD.name}
+                                {continuousChainCard.name}
                               </h4>
-                              {CONTINUOUS_CHAIN_CARD.description && (
-                                <p className="text-xs text-gray-600 leading-relaxed mb-2">{CONTINUOUS_CHAIN_CARD.description}</p>
+                              {continuousChainCard.description && (
+                                <p className="text-xs text-gray-600 leading-relaxed mb-2">{continuousChainCard.description}</p>
                               )}
-                              {CONTINUOUS_CHAIN_CARD.price > 0 && (
+                              {continuousChainCard.price > 0 && (
                                 <span className="absolute bottom-4 right-4 bg-[#00473c] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md">
-                                  +${CONTINUOUS_CHAIN_CARD.price.toFixed(2)}
+                                  +${continuousChainCard.price.toFixed(2)}
                                 </span>
                               )}
 
@@ -898,14 +900,14 @@ const ProductPage = ({
                                   </svg>
                                 </div>
                               )}
-                              {CASSETTE_CARD.image && (
+                              {cassetteCard.image && (
                                 <div className={`relative h-[120px] w-full mb-3 rounded-lg overflow-hidden flex items-center justify-center transition-all duration-300 ${selectedOptionalCards.cassette
                                   ? 'bg-gradient-to-br from-[#e8f5f3] to-[#d0ebe8] shadow-inner'
                                   : 'bg-gradient-to-br from-gray-50 to-gray-100 group-hover:from-gray-100 group-hover:to-gray-150'
                                   }`}>
                                   <Image
-                                    src={CASSETTE_CARD.image}
-                                    alt={CASSETTE_CARD.name}
+                                    src={cassetteCard.image}
+                                    alt={cassetteCard.name}
                                     width={120}
                                     height={120}
                                     className="object-contain"
@@ -913,14 +915,14 @@ const ProductPage = ({
                                 </div>
                               )}
                               <h4 className="text-base font-semibold text-[#3a3a3a] mb-1.5 pr-8">
-                                {CASSETTE_CARD.name}
+                                {cassetteCard.name}
                               </h4>
-                              {CASSETTE_CARD.description && (
-                                <p className="text-xs text-gray-600 leading-relaxed mb-2">{CASSETTE_CARD.description}</p>
+                              {cassetteCard.description && (
+                                <p className="text-xs text-gray-600 leading-relaxed mb-2">{cassetteCard.description}</p>
                               )}
-                              {CASSETTE_CARD.price > 0 && (
+                              {cassetteCard.price > 0 && (
                                 <span className="absolute bottom-4 right-4 bg-[#00473c] text-white text-xs font-semibold px-3 py-1.5 rounded-lg shadow-md">
-                                  +${CASSETTE_CARD.price.toFixed(2)}
+                                  +${cassetteCard.price.toFixed(2)}
                                 </span>
                               )}
 
@@ -1075,6 +1077,56 @@ const ProductPage = ({
                   </a>
                 </div>
               )}
+
+              {/* Trust Badges */}
+              <div className="mt-6 border border-gray-200 rounded-xl p-4">
+                {/* Payment logos */}
+                <div className="flex justify-center mb-4">
+                  <Image
+                    src="/products/payment-badge.png"
+                    alt="Accepted payment methods"
+                    width={500}
+                    height={80}
+                    className="h-12 w-auto object-contain"
+                  />
+                </div>
+                {/* Trust cards */}
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="flex flex-col items-center text-center p-3 border border-gray-100 rounded-lg">
+                    <Image
+                      src="/products/warranty.webp"
+                      alt="Warranty"
+                      width={48}
+                      height={48}
+                      className="w-10 h-10 object-contain mb-2"
+                    />
+                    <span className="text-xs font-semibold text-gray-800 leading-tight">Warranty</span>
+                    <span className="text-xs text-gray-500 mt-0.5 leading-tight">5 Years Warranty</span>
+                  </div>
+                  <div className="flex flex-col items-center text-center p-3 border border-gray-100 rounded-lg">
+                    <Image
+                      src="/products/easyAssembly.webp"
+                      alt="Easy Assembly"
+                      width={48}
+                      height={48}
+                      className="w-10 h-10 object-contain mb-2"
+                    />
+                    <span className="text-xs font-semibold text-gray-800 leading-tight">Easy Assembly</span>
+                    <span className="text-xs text-gray-500 mt-0.5 leading-tight">Minimal no hassle assembly. All Fittings included</span>
+                  </div>
+                  <div className="flex flex-col items-center text-center p-3 border border-gray-100 rounded-lg">
+                    <Image
+                      src="/products/review.png"
+                      alt="Trustpilot reviews"
+                      width={80}
+                      height={40}
+                      className="w-16 h-auto object-contain mb-2"
+                    />
+                    <span className="text-xs font-semibold text-gray-800 leading-tight">4.5/5 Stars</span>
+                    <span className="text-xs text-gray-500 mt-0.5 leading-tight">Rated Excellent on Trustpilot</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
