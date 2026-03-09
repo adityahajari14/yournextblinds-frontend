@@ -262,8 +262,8 @@ export default function CategoryInfoSection({ categorySlug, productTags }: Categ
           <p className="text-sm text-[#484848] leading-relaxed">
             Every blind we make is backed by a {warrantyYears}-Year Manufacturer Guarantee. If you experience a manufacturing
             defect, contact us at{' '}
-            <a href="mailto:info@yournextblinds.com" className="text-[#00473c] hover:underline">
-              info@yournextblinds.com
+            <a href="mailto:enquiries@yournextblinds.com" className="text-[#00473c] hover:underline">
+              enquiries@yournextblinds.com
             </a>{' '}
             and we&apos;ll make it right. <span className="text-[#aaa]">(Photos may be required. Accidental damage not covered.)</span>
           </p>
