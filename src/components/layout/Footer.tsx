@@ -15,7 +15,7 @@ const Footer = () => {
               </span>
             </Link>
             <p className="text-sm text-[#666] leading-relaxed">
-              The first free end-to-end analytics service for the site, designed to work with enterprises of various levels and business segments.
+              Premium custom blinds and shades, manufactured in Texas. Over 15 years of expertise — designed for light, built for life.
             </p>
           </div>
           <nav className="flex flex-wrap gap-6 lg:gap-8 text-sm text-[#484848] justify-center lg:justify-start">
