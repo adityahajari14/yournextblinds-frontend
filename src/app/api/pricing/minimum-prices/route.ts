@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import * as pricingService from '@/lib/server/pricing.service';
 
+export const maxDuration = 30;
+
 export async function GET() {
   try {
     const prices = await pricingService.getMinimumPricesByHandle();

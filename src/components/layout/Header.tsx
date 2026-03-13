@@ -4,7 +4,11 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 
-const SHOPIFY_ACCOUNT_URL = `https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN}/account`;
+const SHOPIFY_ACCOUNT_DOMAIN =
+  process.env.NEXT_PUBLIC_SHOPIFY_ACCOUNT_DOMAIN ||
+  process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN?.replace(/^orders\./, 'account.') ||
+  'account.yournextblinds.com';
+const SHOPIFY_ACCOUNT_URL = `https://${SHOPIFY_ACCOUNT_DOMAIN}`;
 
 const Header = () => {
   const { cart } = useCart();

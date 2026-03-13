@@ -1,7 +1,10 @@
 import { redirect } from 'next/navigation';
 
-const SHOPIFY_STORE_DOMAIN = process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || '';
+const SHOPIFY_ACCOUNT_DOMAIN =
+  process.env.NEXT_PUBLIC_SHOPIFY_ACCOUNT_DOMAIN ||
+  process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN?.replace(/^orders\./, 'account.') ||
+  'account.yournextblinds.com';
 
 export default function AccountPage() {
-  redirect(`https://${SHOPIFY_STORE_DOMAIN}/account`);
+  redirect(`https://${SHOPIFY_ACCOUNT_DOMAIN}`);
 }
