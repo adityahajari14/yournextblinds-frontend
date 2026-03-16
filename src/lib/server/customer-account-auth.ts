@@ -245,19 +245,9 @@ export async function clearCustomerAuthCookies(): Promise<void> {
   }
 }
 
-export async function getStoredIdToken(): Promise<string | null> {
-  const cookieStore = await cookies();
-  return cookieStore.get(CUSTOMER_ID_TOKEN_COOKIE)?.value || null;
-}
-
 export async function buildCustomerLogoutUrl(postLogoutRedirectUri?: string): Promise<string> {
   const config = await getOpenIdConfiguration();
   const logoutUrl = new URL(config.end_session_endpoint);
-  const idToken = await getStoredIdToken();
-
-  if (idToken) {
-    logoutUrl.searchParams.set('id_token_hint', idToken);
-  }
 
   logoutUrl.searchParams.set(
     'post_logout_redirect_uri',
