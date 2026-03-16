@@ -6,5 +6,5 @@ const SHOPIFY_ACCOUNT_DOMAIN =
   'account.yournextblinds.com';
 
 export default function AccountPage() {
-  redirect(`https://${SHOPIFY_ACCOUNT_DOMAIN}`);
+  redirect(`/api/auth/shopify/login?return_to=${encodeURIComponent(`https://${SHOPIFY_ACCOUNT_DOMAIN}`)}`);
 }
