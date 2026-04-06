@@ -14,11 +14,24 @@ function cartItemKey(item: SerializedCartItem): string {
   return `${product?.slug || 'unknown'}::${JSON.stringify(item.configuration || {})}`;
 }
 
+const CART_SCOPE = 'yournextblinds';
+
+function getScopedCustomerEmail(customerEmail: string): string {
+  return `${CART_SCOPE}:${customerEmail.trim().toLowerCase()}`;
+}
+
 export async function getCustomerCart(customerEmail: string): Promise<SerializedCartItem[]> {
-  const cart = await prisma.customerCart.findUnique({
-    where: { customerEmail },
-    select: { items: true },
-  });
+  const scopedCustomerEmail = getScopedCustomerEmail(customerEmail);
+
+  const cart =
+    (await prisma.customerCart.findUnique({
+      where: { customerEmail: scopedCustomerEmail },
+      select: { items: true },
+    })) ||
+    (await prisma.customerCart.findUnique({
+      where: { customerEmail },
+      select: { items: true },
+    }));
 
   if (!cart || !Array.isArray(cart.items)) return [];
   return cart.items as unknown as SerializedCartItem[];
@@ -28,11 +41,27 @@ export async function saveCustomerCart(
   customerEmail: string,
   items: SerializedCartItem[]
 ): Promise<SerializedCartItem[]> {
-  await prisma.customerCart.upsert({
+  const scopedCustomerEmail = getScopedCustomerEmail(customerEmail);
+
+  const existingLegacyCart = await prisma.customerCart.findUnique({
     where: { customerEmail },
-    update: { items: items as unknown as Prisma.InputJsonValue },
-    create: { customerEmail, items: items as unknown as Prisma.InputJsonValue },
+    select: { items: true },
   });
+
+  await prisma.customerCart.upsert({
+    where: { customerEmail: scopedCustomerEmail },
+    update: { items: items as unknown as Prisma.InputJsonValue },
+    create: {
+      customerEmail: scopedCustomerEmail,
+      items: items as unknown as Prisma.InputJsonValue,
+    },
+  });
+
+  if (existingLegacyCart && customerEmail !== scopedCustomerEmail) {
+    await prisma.customerCart.delete({
+      where: { customerEmail },
+    });
+  }
 
   return items;
 }

@@ -1,6 +1,7 @@
 import { calculateProductPrice, type PricingRequest } from './pricing.service';
 import { getAdminApiUrl, getAdminHeaders, validateShopifyConfig } from './shopify-admin';
 import { getCachedProduct } from './product-cache';
+import { SOURCE_SITE, SOURCE_TAG } from './shopify-order-source';
 
 // ============================================
 // Types
@@ -144,6 +145,7 @@ function buildLineItemProperties(
   }
 
   properties.push({ name: '_calculatedPrice', value: calculatedPrice.toFixed(2) });
+  properties.push({ name: '_sourceSite', value: SOURCE_SITE });
 
   return properties;
 }
@@ -193,7 +195,7 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
       throw new CheckoutError(`Product not found: ${item.handle}`, 404);
     }
 
-    const productTitle = cachedProduct.title;
+    const productTitle = item.configuration.blindName?.trim() || cachedProduct.title;
     const customizations = configToCustomizations(item.configuration);
 
     const pricing = await calculateProductPrice({
@@ -238,8 +240,13 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
     draft_order: {
       line_items: lineItems,
       use_customer_default_address: true,
+      tags: SOURCE_TAG,
+      note: [SOURCE_SITE, request.note].filter(Boolean).join(' | '),
       ...(request.customerEmail && { email: request.customerEmail }),
-      ...(request.note && { note: request.note }),
+      note_attributes: [
+        { name: 'sourceSite', value: SOURCE_SITE },
+        { name: 'sourceTag', value: SOURCE_TAG },
+      ],
     },
   };
 
