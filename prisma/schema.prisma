@@ -122,6 +122,52 @@ model CustomerCart {
   @@index([customerEmail])
 }
 
+model CustomerAuth {
+  id                     String        @id @default(cuid())
+  email                  String        @unique
+  shopifyCustomerId      String?
+  passwordHash           String?
+  passwordSetupSkippedAt DateTime?
+  lastLoginAt            DateTime?
+  createdAt              DateTime      @default(now())
+  updatedAt              DateTime      @updatedAt
+  sessions               AuthSession[]
+  otpChallenges          OtpChallenge[]
+
+  @@index([email])
+  @@index([shopifyCustomerId])
+}
+
+model AuthSession {
+  id             String       @id @default(cuid())
+  tokenHash      String       @unique
+  customerAuthId String
+  expiresAt      DateTime
+  lastAccessedAt DateTime     @default(now())
+  userAgent      String?
+  ipAddress      String?
+  createdAt      DateTime     @default(now())
+  customerAuth   CustomerAuth @relation(fields: [customerAuthId], references: [id], onDelete: Cascade)
+
+  @@index([customerAuthId])
+  @@index([expiresAt])
+}
+
+model OtpChallenge {
+  id             String       @id @default(cuid())
+  customerAuthId String
+  codeHash       String
+  expiresAt      DateTime
+  consumedAt     DateTime?
+  attempts       Int          @default(0)
+  createdAt      DateTime     @default(now())
+  customerAuth   CustomerAuth @relation(fields: [customerAuthId], references: [id], onDelete: Cascade)
+
+  @@index([customerAuthId])
+  @@index([expiresAt])
+  @@index([consumedAt])
+}
+
 enum OrderStatus {
   PENDING
   CONFIRMED

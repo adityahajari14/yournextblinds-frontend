@@ -3,11 +3,9 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
-import { useAuth } from '@/context/AuthContext';
 
 const Header = () => {
   const { cart } = useCart();
-  const { customer } = useAuth();
 
   return (
     <div className="bg-white backdrop-blur-sm px-4 md:px-6 lg:px-20 py-4 md:py-5 lg:py-6 flex items-center justify-between">
@@ -27,15 +25,6 @@ const Header = () => {
         <Link href="/account" aria-label="Account" className="hover:opacity-70 transition-opacity">
           <Image src="/icons/profile.svg" alt="Profile" width={20} height={20} className="md:w-6 md:h-6" />
         </Link>
-        {customer && (
-          <Link
-            href="/api/auth/shopify/logout?return_to=/"
-            aria-label="Logout"
-            className="text-sm font-medium text-[#00473c] hover:opacity-70 transition-opacity"
-          >
-            Logout
-          </Link>
-        )}
         <Link href="/cart" aria-label="Cart" className="hover:opacity-70 transition-opacity relative">
           <Image src="/icons/cart.svg" alt="Cart" width={20} height={20} className="md:w-6 md:h-6" />
           {cart.itemCount > 0 && (

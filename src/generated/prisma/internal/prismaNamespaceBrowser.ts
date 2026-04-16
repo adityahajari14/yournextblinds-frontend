@@ -58,7 +58,10 @@ export const ModelName = {
   CustomizationOption: 'CustomizationOption',
   CustomizationPricing: 'CustomizationPricing',
   Order: 'Order',
-  CustomerCart: 'CustomerCart'
+  CustomerCart: 'CustomerCart',
+  CustomerAuth: 'CustomerAuth',
+  AuthSession: 'AuthSession',
+  OtpChallenge: 'OtpChallenge'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -177,6 +180,47 @@ export const CustomerCartScalarFieldEnum = {
 } as const
 
 export type CustomerCartScalarFieldEnum = (typeof CustomerCartScalarFieldEnum)[keyof typeof CustomerCartScalarFieldEnum]
+
+
+export const CustomerAuthScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  shopifyCustomerId: 'shopifyCustomerId',
+  passwordHash: 'passwordHash',
+  passwordSetupSkippedAt: 'passwordSetupSkippedAt',
+  lastLoginAt: 'lastLoginAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerAuthScalarFieldEnum = (typeof CustomerAuthScalarFieldEnum)[keyof typeof CustomerAuthScalarFieldEnum]
+
+
+export const AuthSessionScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  customerAuthId: 'customerAuthId',
+  expiresAt: 'expiresAt',
+  lastAccessedAt: 'lastAccessedAt',
+  userAgent: 'userAgent',
+  ipAddress: 'ipAddress',
+  createdAt: 'createdAt'
+} as const
+
+export type AuthSessionScalarFieldEnum = (typeof AuthSessionScalarFieldEnum)[keyof typeof AuthSessionScalarFieldEnum]
+
+
+export const OtpChallengeScalarFieldEnum = {
+  id: 'id',
+  customerAuthId: 'customerAuthId',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  attempts: 'attempts',
+  createdAt: 'createdAt'
+} as const
+
+export type OtpChallengeScalarFieldEnum = (typeof OtpChallengeScalarFieldEnum)[keyof typeof OtpChallengeScalarFieldEnum]
 
 
 export const SortOrder = {

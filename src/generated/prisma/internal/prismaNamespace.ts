@@ -391,7 +391,10 @@ export const ModelName = {
   CustomizationOption: 'CustomizationOption',
   CustomizationPricing: 'CustomizationPricing',
   Order: 'Order',
-  CustomerCart: 'CustomerCart'
+  CustomerCart: 'CustomerCart',
+  CustomerAuth: 'CustomerAuth',
+  AuthSession: 'AuthSession',
+  OtpChallenge: 'OtpChallenge'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -407,7 +410,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "priceBand" | "widthBand" | "heightBand" | "priceCell" | "customizationOption" | "customizationPricing" | "order" | "customerCart"
+    modelProps: "priceBand" | "widthBand" | "heightBand" | "priceCell" | "customizationOption" | "customizationPricing" | "order" | "customerCart" | "customerAuth" | "authSession" | "otpChallenge"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1003,6 +1006,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    CustomerAuth: {
+      payload: Prisma.$CustomerAuthPayload<ExtArgs>
+      fields: Prisma.CustomerAuthFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CustomerAuthFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CustomerAuthFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload>
+        }
+        findFirst: {
+          args: Prisma.CustomerAuthFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CustomerAuthFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload>
+        }
+        findMany: {
+          args: Prisma.CustomerAuthFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload>[]
+        }
+        create: {
+          args: Prisma.CustomerAuthCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload>
+        }
+        createMany: {
+          args: Prisma.CustomerAuthCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CustomerAuthCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload>[]
+        }
+        delete: {
+          args: Prisma.CustomerAuthDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload>
+        }
+        update: {
+          args: Prisma.CustomerAuthUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload>
+        }
+        deleteMany: {
+          args: Prisma.CustomerAuthDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CustomerAuthUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CustomerAuthUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload>[]
+        }
+        upsert: {
+          args: Prisma.CustomerAuthUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CustomerAuthPayload>
+        }
+        aggregate: {
+          args: Prisma.CustomerAuthAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCustomerAuth>
+        }
+        groupBy: {
+          args: Prisma.CustomerAuthGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CustomerAuthGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CustomerAuthCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CustomerAuthCountAggregateOutputType> | number
+        }
+      }
+    }
+    AuthSession: {
+      payload: Prisma.$AuthSessionPayload<ExtArgs>
+      fields: Prisma.AuthSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.AuthSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.AuthSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.AuthSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.AuthSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        findMany: {
+          args: Prisma.AuthSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>[]
+        }
+        create: {
+          args: Prisma.AuthSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        createMany: {
+          args: Prisma.AuthSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.AuthSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.AuthSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        update: {
+          args: Prisma.AuthSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.AuthSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.AuthSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.AuthSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.AuthSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$AuthSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.AuthSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateAuthSession>
+        }
+        groupBy: {
+          args: Prisma.AuthSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.AuthSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AuthSessionCountAggregateOutputType> | number
+        }
+      }
+    }
+    OtpChallenge: {
+      payload: Prisma.$OtpChallengePayload<ExtArgs>
+      fields: Prisma.OtpChallengeFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.OtpChallengeFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.OtpChallengeFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload>
+        }
+        findFirst: {
+          args: Prisma.OtpChallengeFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.OtpChallengeFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload>
+        }
+        findMany: {
+          args: Prisma.OtpChallengeFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload>[]
+        }
+        create: {
+          args: Prisma.OtpChallengeCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload>
+        }
+        createMany: {
+          args: Prisma.OtpChallengeCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.OtpChallengeCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload>[]
+        }
+        delete: {
+          args: Prisma.OtpChallengeDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload>
+        }
+        update: {
+          args: Prisma.OtpChallengeUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload>
+        }
+        deleteMany: {
+          args: Prisma.OtpChallengeDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.OtpChallengeUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.OtpChallengeUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload>[]
+        }
+        upsert: {
+          args: Prisma.OtpChallengeUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$OtpChallengePayload>
+        }
+        aggregate: {
+          args: Prisma.OtpChallengeAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateOtpChallenge>
+        }
+        groupBy: {
+          args: Prisma.OtpChallengeGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OtpChallengeGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.OtpChallengeCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.OtpChallengeCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1142,6 +1367,47 @@ export const CustomerCartScalarFieldEnum = {
 } as const
 
 export type CustomerCartScalarFieldEnum = (typeof CustomerCartScalarFieldEnum)[keyof typeof CustomerCartScalarFieldEnum]
+
+
+export const CustomerAuthScalarFieldEnum = {
+  id: 'id',
+  email: 'email',
+  shopifyCustomerId: 'shopifyCustomerId',
+  passwordHash: 'passwordHash',
+  passwordSetupSkippedAt: 'passwordSetupSkippedAt',
+  lastLoginAt: 'lastLoginAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerAuthScalarFieldEnum = (typeof CustomerAuthScalarFieldEnum)[keyof typeof CustomerAuthScalarFieldEnum]
+
+
+export const AuthSessionScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  customerAuthId: 'customerAuthId',
+  expiresAt: 'expiresAt',
+  lastAccessedAt: 'lastAccessedAt',
+  userAgent: 'userAgent',
+  ipAddress: 'ipAddress',
+  createdAt: 'createdAt'
+} as const
+
+export type AuthSessionScalarFieldEnum = (typeof AuthSessionScalarFieldEnum)[keyof typeof AuthSessionScalarFieldEnum]
+
+
+export const OtpChallengeScalarFieldEnum = {
+  id: 'id',
+  customerAuthId: 'customerAuthId',
+  codeHash: 'codeHash',
+  expiresAt: 'expiresAt',
+  consumedAt: 'consumedAt',
+  attempts: 'attempts',
+  createdAt: 'createdAt'
+} as const
+
+export type OtpChallengeScalarFieldEnum = (typeof OtpChallengeScalarFieldEnum)[keyof typeof OtpChallengeScalarFieldEnum]
 
 
 export const SortOrder = {
@@ -1405,6 +1671,9 @@ export type GlobalOmitConfig = {
   customizationPricing?: Prisma.CustomizationPricingOmit
   order?: Prisma.OrderOmit
   customerCart?: Prisma.CustomerCartOmit
+  customerAuth?: Prisma.CustomerAuthOmit
+  authSession?: Prisma.AuthSessionOmit
+  otpChallenge?: Prisma.OtpChallengeOmit
 }
 
 /* Types for Logging */

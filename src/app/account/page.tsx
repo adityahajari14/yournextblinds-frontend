@@ -1,10 +1,20 @@
 import { redirect } from 'next/navigation';
+import { getCustomer } from '@/lib/auth';
 
-const SHOPIFY_ACCOUNT_DOMAIN =
-  process.env.NEXT_PUBLIC_SHOPIFY_ACCOUNT_DOMAIN ||
-  process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN?.replace(/^orders\./, 'account.') ||
-  'account.yournextblinds.com';
+export default async function AccountPage() {
+  const accountDomain =
+    process.env.NEXT_PUBLIC_SHOPIFY_ACCOUNT_DOMAIN ||
+    process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN?.replace(/^orders\./, 'account.') ||
+    '';
 
-export default function AccountPage() {
-  redirect(`/api/auth/shopify/login?return_to=${encodeURIComponent(`https://${SHOPIFY_ACCOUNT_DOMAIN}`)}`);
+  if (!accountDomain) {
+    redirect('/');
+  }
+
+  const customer = await getCustomer();
+  if (!customer) {
+    redirect(`/api/auth/shopify/login?return_to=${encodeURIComponent(`https://${accountDomain}`)}`);
+  }
+
+  redirect(`https://${accountDomain}`);
 }

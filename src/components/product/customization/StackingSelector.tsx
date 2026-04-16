@@ -80,11 +80,11 @@ const StackingSelector = ({ options, selectedStacking, onStackingChange }: Stack
             {imagePreview && (
                 <>
                     <div
-                        className="fixed inset-0 z-[100000] bg-black/50"
+                        className="fixed inset-0 z-[80] bg-black/50"
                         onClick={() => setImagePreview(null)}
                         aria-hidden="true"
                     />
-                    <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[100001] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden max-w-[90vw] max-h-[90vh] flex flex-col">
+                    <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[81] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden max-w-[90vw] max-h-[90vh] flex flex-col">
                         <div className="relative w-[280px] sm:w-[320px] aspect-[4/3] bg-gray-50 flex items-center justify-center p-4">
                             <Image src={imagePreview.image} alt={imagePreview.name} width={320} height={240} className="object-contain max-w-full max-h-full" />
                         </div>

@@ -57,3 +57,18 @@ export type Order = Prisma.OrderModel
  * 
  */
 export type CustomerCart = Prisma.CustomerCartModel
+/**
+ * Model CustomerAuth
+ * 
+ */
+export type CustomerAuth = Prisma.CustomerAuthModel
+/**
+ * Model AuthSession
+ * 
+ */
+export type AuthSession = Prisma.AuthSessionModel
+/**
+ * Model OtpChallenge
+ * 
+ */
+export type OtpChallenge = Prisma.OtpChallengeModel

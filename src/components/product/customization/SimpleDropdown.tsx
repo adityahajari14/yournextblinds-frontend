@@ -106,13 +106,13 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
           <>
             {/* Backdrop to capture clicks outside */}
             <div
-              className="fixed inset-0 z-[99998]"
+              className="fixed inset-0 z-[70]"
               onClick={() => setIsOpen(false)}
             />
             {/* Dropdown menu with fixed positioning to escape overflow constraints - always opens below */}
             <div
               ref={menuRef}
-              className="fixed z-[99999] bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto"
+              className="fixed z-[71] bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto"
               style={{
                 top: `${menuPosition.top}px`,
                 left: `${menuPosition.left}px`,
@@ -177,11 +177,11 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
         {imagePreview && (
           <>
             <div
-              className="fixed inset-0 z-[100000] bg-black/50"
+              className="fixed inset-0 z-[80] bg-black/50"
               onClick={() => setImagePreview(null)}
               aria-hidden="true"
             />
-            <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[100001] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden max-w-[90vw] max-h-[90vh] flex flex-col">
+            <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[81] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden max-w-[90vw] max-h-[90vh] flex flex-col">
               <div className="relative w-[280px] sm:w-[320px] aspect-[4/3] bg-gray-50 flex items-center justify-center p-4">
                 <Image
                   src={imagePreview.image}

@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import Image from 'next/image';
 
 interface ProductGalleryProps {
@@ -14,6 +15,11 @@ const MAX_VISIBLE_THUMBNAILS = 5;
 const ProductGallery = ({ images, videos = [], productName }: ProductGalleryProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showAllImages, setShowAllImages] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // Combine images and videos
   // Videos come after images unless we want to prioritize them (leaving as appended for now)
@@ -216,8 +222,8 @@ const ProductGallery = ({ images, videos = [], productName }: ProductGalleryProp
       </div>
 
       {/* All Images Modal */}
-      {showAllImages && (
-        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+      {showAllImages && isMounted && createPortal(
+        <div className="fixed inset-0 z-2147483647 bg-black/80 flex items-center justify-center p-4">
           {/* Close button */}
           <button
             onClick={() => setShowAllImages(false)}
@@ -273,7 +279,8 @@ const ProductGallery = ({ images, videos = [], productName }: ProductGalleryProp
               </div>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </>
   );

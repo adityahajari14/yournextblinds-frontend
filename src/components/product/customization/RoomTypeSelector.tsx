@@ -107,13 +107,13 @@ const RoomTypeSelector = ({
             <>
               {/* Backdrop to capture clicks outside */}
               <div
-                className="fixed inset-0 z-[99998]"
+                className="fixed inset-0 z-[70]"
                 onClick={() => setIsOpen(false)}
               />
               {/* Dropdown menu with fixed positioning to escape overflow constraints - always opens below */}
               <div
                 ref={menuRef}
-                className="fixed z-[99999] bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto"
+                className="fixed z-[71] bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto"
                 style={{
                   top: `${menuPosition.top}px`,
                   left: `${menuPosition.left}px`,
