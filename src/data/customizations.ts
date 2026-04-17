@@ -414,13 +414,13 @@ export const OPENING_DIRECTION_OPTIONS = [
     id: 'left-right',
     name: 'Left & Right',
     price: 0,
-    image: '/products/openingDirection/leftRight.png',
+    image: '/products/openingDirection/left-right-realistic.png',
   },
   {
     id: 'up-down',
     name: 'Up & Down',
     price: 0,
-    image: '/products/openingDirection/upDown.png',
+    image: '/products/openingDirection/up-down-realistic.png',
   },
 ];
 
