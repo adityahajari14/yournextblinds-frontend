@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 const sections = [
   {
     title: 'Overview',
-    content: `Welcome to yournextblinds! The terms "we", "us" and "our" refer to yournextblinds. yournextblinds operates this store and website, including all related information, content, features, tools, products and services in order to provide you, the customer, with a curated shopping experience (the "Services"). yournextblinds is powered by Shopify, which enables us to provide the Services to you.\n\nThe below terms and conditions, together with any policies referenced herein (these "Terms of Service" or "Terms") describe your rights and responsibilities when you use the Services.\n\nPlease read these Terms of Service carefully, as they include important information about your legal rights and cover areas such as warranty disclaimers and limitations of liability.\n\nBy visiting, interacting with or using our Services, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these Terms of Service or Privacy Policy, you should not use or access our Services.`,
+    content: `Welcome to yournextblinds! The terms "we", "us" and "our" refer to yournextblinds, a trading name of YOUR NEXT BLINDS LLC. yournextblinds operates this store and website, including all related information, content, features, tools, products and services in order to provide you, the customer, with a curated shopping experience (the "Services"). yournextblinds is powered by Shopify, which enables us to provide the Services to you.\n\nThe below terms and conditions, together with any policies referenced herein (these "Terms of Service" or "Terms") describe your rights and responsibilities when you use the Services.\n\nPlease read these Terms of Service carefully, as they include important information about your legal rights and cover areas such as warranty disclaimers and limitations of liability.\n\nBy visiting, interacting with or using our Services, you agree to be bound by these Terms of Service and our Privacy Policy. If you do not agree to these Terms of Service or Privacy Policy, you should not use or access our Services.`,
   },
   {
     title: 'Section 1 — Access and Account',
@@ -179,7 +179,7 @@ export default function TermsAndConditionsPage() {
                 .
               </p>
               <div className="text-[#444] leading-relaxed text-base md:text-[17px] space-y-1">
-                <p className="font-medium">Your Next Blinds</p>
+                <p className="font-medium">YOUR NEXT BLINDS LLC</p>
                 <p>
                   <a
                     href="mailto:enquiries@yournextblinds.com"
