@@ -25,6 +25,7 @@ import {
   WRAPPED_CASSETTE_OPTIONS,
   CASSETTE_MATCHING_BAR_OPTIONS,
 } from '@/data/customizations';
+import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 
 export default function CartPage() {
   const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
@@ -113,6 +114,12 @@ export default function CartPage() {
       const widthStr = `${config.width}${config.widthFraction !== '0' ? ` ${config.widthFraction}` : ''}`;
       const heightStr = `${config.height}${config.heightFraction !== '0' ? ` ${config.heightFraction}` : ''}`;
       parts.push(`Size: ${widthStr}" × ${heightStr}"`);
+    }
+
+    // Room Type
+    if (config.roomType) {
+      const roomTypeOption = ROOM_TYPE_OPTIONS.find(opt => opt.id === config.roomType);
+      parts.push(`Room Type: ${roomTypeOption?.name || config.roomType}`);
     }
 
     // Headrail Type

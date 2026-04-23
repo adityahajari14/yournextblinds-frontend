@@ -48,27 +48,7 @@ export type CustomizationOption = Prisma.CustomizationOptionModel
  */
 export type CustomizationPricing = Prisma.CustomizationPricingModel
 /**
- * Model Order
- * 
- */
-export type Order = Prisma.OrderModel
-/**
  * Model CustomerCart
  * 
  */
 export type CustomerCart = Prisma.CustomerCartModel
-/**
- * Model CustomerAuth
- * 
- */
-export type CustomerAuth = Prisma.CustomerAuthModel
-/**
- * Model AuthSession
- * 
- */
-export type AuthSession = Prisma.AuthSessionModel
-/**
- * Model OtpChallenge
- * 
- */
-export type OtpChallenge = Prisma.OtpChallengeModel

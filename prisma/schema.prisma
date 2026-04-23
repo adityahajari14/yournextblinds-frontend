@@ -86,32 +86,6 @@ model CustomizationPricing {
   @@unique([customizationOptionId, widthBandId])
 }
 
-// ============================================
-// Order Tracking (synced from Shopify webhooks)
-// ============================================
-
-model Order {
-  id              String      @id @default(cuid())
-  orderNumber     String      @unique
-  status          OrderStatus @default(PENDING)
-
-  customerEmail   String?
-  customerName    String?
-  shippingAddress Json?
-
-  subtotal        Decimal     @db.Decimal(10, 2)
-  tax             Decimal?    @db.Decimal(10, 2)
-  shipping        Decimal?    @db.Decimal(10, 2)
-  total           Decimal     @db.Decimal(10, 2)
-
-  createdAt       DateTime    @default(now())
-  updatedAt       DateTime    @updatedAt
-
-  @@index([orderNumber])
-  @@index([status])
-  @@index([createdAt])
-}
-
 model CustomerCart {
   id            String   @id @default(cuid())
   customerEmail String   @unique
@@ -120,60 +94,4 @@ model CustomerCart {
   updatedAt     DateTime @updatedAt
 
   @@index([customerEmail])
-}
-
-model CustomerAuth {
-  id                     String        @id @default(cuid())
-  email                  String        @unique
-  shopifyCustomerId      String?
-  passwordHash           String?
-  passwordSetupSkippedAt DateTime?
-  lastLoginAt            DateTime?
-  createdAt              DateTime      @default(now())
-  updatedAt              DateTime      @updatedAt
-  sessions               AuthSession[]
-  otpChallenges          OtpChallenge[]
-
-  @@index([email])
-  @@index([shopifyCustomerId])
-}
-
-model AuthSession {
-  id             String       @id @default(cuid())
-  tokenHash      String       @unique
-  customerAuthId String
-  expiresAt      DateTime
-  lastAccessedAt DateTime     @default(now())
-  userAgent      String?
-  ipAddress      String?
-  createdAt      DateTime     @default(now())
-  customerAuth   CustomerAuth @relation(fields: [customerAuthId], references: [id], onDelete: Cascade)
-
-  @@index([customerAuthId])
-  @@index([expiresAt])
-}
-
-model OtpChallenge {
-  id             String       @id @default(cuid())
-  customerAuthId String
-  codeHash       String
-  expiresAt      DateTime
-  consumedAt     DateTime?
-  attempts       Int          @default(0)
-  createdAt      DateTime     @default(now())
-  customerAuth   CustomerAuth @relation(fields: [customerAuthId], references: [id], onDelete: Cascade)
-
-  @@index([customerAuthId])
-  @@index([expiresAt])
-  @@index([consumedAt])
-}
-
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  PROCESSING
-  SHIPPED
-  DELIVERED
-  CANCELLED
-  REFUNDED
 }

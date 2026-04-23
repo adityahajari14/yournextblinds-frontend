@@ -76,6 +76,15 @@ const Footer = () => {
             <span className="hover:text-[#00473c] transition-colors cursor-pointer">Ru</span>
           </div>
         </div>
+
+        {/* Legal Row */}
+        <div className="flex flex-col items-center gap-3 mt-8 pt-6 border-t border-[#e5e5e5]">
+          <div className="flex gap-6 text-sm text-[#484848]">
+            <Link href="/privacy-policy" className="hover:text-[#00473c] transition-colors">Privacy Policy</Link>
+            <Link href="/terms-and-conditions" className="hover:text-[#00473c] transition-colors">Terms &amp; Conditions</Link>
+          </div>
+          <p className="text-xs text-[#999]">© {new Date().getFullYear()} Your Next Blinds. All rights reserved.</p>
+        </div>
       </div>
     </footer>
   );

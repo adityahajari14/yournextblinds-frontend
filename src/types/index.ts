@@ -182,11 +182,23 @@ export interface ApiProduct {
   slug: string;
   title: string;
   description: string | null;
+  descriptionHtml?: string | null;
   images: string[];
+  imageAlts?: string[];
   videos?: string[];
   price: number; // Minimum price from 20x20 band
   createdAt: string;
   updatedAt: string;
+  vendor?: string | null;
+  productType?: string | null;
+  subtitle?: string | null;
+  estimatedDelivery?: string | null;
+  rating?: number | null;
+  reviewCount?: number | null;
+  productDetails?: string | null;
+  specifications?: string | null;
+  measuringInstallation?: string | null;
+  deliveryReturns?: string | null;
   categories: ApiCategory[];
   tags: ApiTag[];
 }

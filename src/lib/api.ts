@@ -46,7 +46,7 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit, retries: num
   const isServerSide = typeof window === 'undefined';
 
   const controller = new AbortController();
-  const timeout = isServerSide ? 30000 : 10000;
+  const timeout = 30000;
   const timeoutId = setTimeout(() => controller.abort(), timeout);
 
   try {
