@@ -3,7 +3,7 @@ import Image from 'next/image';
 
 const Footer = () => {
   return (
-    <footer className="bg-white px-4 md:px-6 lg:px-20 py-12 lg:py-16">
+    <footer className="bg-white px-4 md:px-6 lg:px-20 pt-12 lg:pt-16 pb-4">
       <div className="max-w-[1200px] mx-auto flex flex-col">
         {/* Top Section */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-0 justify-between items-center lg:items-start">
@@ -84,6 +84,13 @@ const Footer = () => {
             <Link href="/terms-and-conditions" className="hover:text-[#00473c] transition-colors">Terms &amp; Conditions</Link>
           </div>
           <p className="text-xs text-[#999]">© {new Date().getFullYear()} Your Next Blinds. All rights reserved.</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center text-[11px] uppercase tracking-[0.18em] text-[#8a8a8a]">
+            <span>Made in Texas, USA</span>
+            <span className="hidden sm:inline text-[#cfcfcf]">•</span>
+            <span>Leeds, UK</span>
+            <span className="hidden sm:inline text-[#cfcfcf]">•</span>
+            <span>Guangdong, China</span>
+          </div>
         </div>
       </div>
     </footer>

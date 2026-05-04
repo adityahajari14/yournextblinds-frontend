@@ -1,8 +1,7 @@
 'use client';
 
-import Image from 'next/image';
-import { useState } from 'react';
 import { PriceOption } from '@/types';
+import HoverPreviewImage from './HoverPreviewImage';
 
 interface BottomBarSelectorProps {
     options: PriceOption[];
@@ -11,8 +10,6 @@ interface BottomBarSelectorProps {
 }
 
 const BottomBarSelector = ({ options, selectedBottomBar, onBottomBarChange }: BottomBarSelectorProps) => {
-    const [hoveredOption, setHoveredOption] = useState<PriceOption | null>(null);
-
     return (
         <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
@@ -21,12 +18,7 @@ const BottomBarSelector = ({ options, selectedBottomBar, onBottomBarChange }: Bo
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {options.map((option) => (
-                    <div
-                        key={option.id}
-                        className="relative"
-                        onMouseEnter={() => setHoveredOption(option)}
-                        onMouseLeave={() => setHoveredOption(null)}
-                    >
+                    <div key={option.id} className="relative">
                         <button
                             type="button"
                             onClick={() => onBottomBarChange(option.id)}
@@ -38,11 +30,13 @@ const BottomBarSelector = ({ options, selectedBottomBar, onBottomBarChange }: Bo
                             {/* Thumbnail / placeholder when not hovering */}
                             <div className="relative w-full aspect-video mb-3 bg-gray-50 rounded-md overflow-hidden flex items-center justify-center">
                                 {option.image ? (
-                                    <Image
+                                    <HoverPreviewImage
                                         src={option.image}
                                         alt={option.name}
                                         fill
-                                        className="object-contain p-2"
+                                        sizes="(min-width: 768px) 220px, 100vw"
+                                        containerClassName="relative h-full w-full"
+                                        imageClassName="object-contain p-2"
                                     />
                                 ) : (
                                     <div className="w-full h-full bg-gray-100 flex items-center justify-center text-gray-300">
@@ -51,7 +45,7 @@ const BottomBarSelector = ({ options, selectedBottomBar, onBottomBarChange }: Bo
                                 )}
                             </div>
 
-                            {/* Content - hover over this text to see larger image */}
+                            {/* Content */}
                             <div className="flex flex-col grow justify-between w-full gap-2">
                                 <span className="text-sm font-medium text-[#3a3a3a] leading-tight">
                                     {option.name}
@@ -72,26 +66,6 @@ const BottomBarSelector = ({ options, selectedBottomBar, onBottomBarChange }: Bo
                                 </div>
                             )}
                         </button>
-
-                        {/* Hover popover: show larger image when hovering over the option */}
-                        {hoveredOption?.id === option.id && option.image && (
-                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-20 pointer-events-none">
-                                <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-2 max-w-[280px]">
-                                    <div className="relative w-[260px] aspect-[4/3] rounded-md overflow-hidden bg-gray-50">
-                                        <Image
-                                            src={option.image}
-                                            alt={option.name}
-                                            fill
-                                            className="object-contain"
-                                            sizes="260px"
-                                        />
-                                    </div>
-                                    <p className="text-center text-sm font-medium text-[#3a3a3a] mt-2">
-                                        {option.name}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 ))}
             </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
+import HoverPreviewImage from './HoverPreviewImage';
 
 interface BottomChainOption {
     id: string;
@@ -18,7 +18,6 @@ interface BottomChainSelectorProps {
 
 const BottomChainSelector = ({ options, selectedChain, onChainChange }: BottomChainSelectorProps) => {
     const [isOpen, setIsOpen] = useState(false);
-    const [imagePreview, setImagePreview] = useState<{ name: string; image: string } | null>(null);
     const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 });
     const dropdownRef = useRef<HTMLDivElement>(null);
     const buttonRef = useRef<HTMLButtonElement>(null);
@@ -129,18 +128,14 @@ const BottomChainSelector = ({ options, selectedChain, onChainChange }: BottomCh
                             >
                                 {/* Thumbnail Image */}
                                 {option.image && (
-                                    <div
-                                        className="w-10 h-10 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 border border-gray-200 cursor-zoom-in"
-                                        onClick={(e) => { e.stopPropagation(); setIsOpen(false); setImagePreview({ name: option.name, image: option.image! }); }}
-                                    >
-                                        <Image
-                                            src={option.image}
-                                            alt={option.name}
-                                            width={40}
-                                            height={40}
-                                            className="object-cover w-full h-full"
-                                        />
-                                    </div>
+                                    <HoverPreviewImage
+                                        src={option.image}
+                                        alt={option.name}
+                                        width={40}
+                                        height={40}
+                                        containerClassName="w-10 h-10 bg-gray-100 rounded-md overflow-hidden flex-shrink-0 border border-gray-200"
+                                        imageClassName="object-cover w-full h-full"
+                                    />
                                 )}
 
                                 <div className="flex-grow">
@@ -160,29 +155,6 @@ const BottomChainSelector = ({ options, selectedChain, onChainChange }: BottomCh
                     </>
                 )}
             </div>
-
-            {imagePreview && (
-                <>
-                    <div
-                        className="fixed inset-0 z-[80] bg-black/50"
-                        onClick={() => setImagePreview(null)}
-                        aria-hidden="true"
-                    />
-                    <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[81] bg-white rounded-xl shadow-2xl border border-gray-200 overflow-hidden max-w-[90vw] max-h-[90vh] flex flex-col">
-                        <div className="relative w-[280px] sm:w-[320px] aspect-[4/3] bg-gray-50 flex items-center justify-center p-4">
-                            <Image src={imagePreview.image} alt={imagePreview.name} width={320} height={240} className="object-contain max-w-full max-h-full" />
-                        </div>
-                        <p className="text-center text-sm font-medium text-[#3a3a3a] px-4 py-3 border-t border-gray-100">
-                            {imagePreview.name}
-                        </p>
-                        <button type="button" onClick={() => setImagePreview(null)} className="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/90 hover:bg-white border border-gray-200 flex items-center justify-center text-gray-600 hover:text-gray-900 shadow-sm" aria-label="Close">
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-                    </div>
-                </>
-            )}
         </div>
     );
 };

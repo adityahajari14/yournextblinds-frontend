@@ -1,7 +1,6 @@
 'use client';
 
-import Image from 'next/image';
-import { useState } from 'react';
+import HoverPreviewImage from './HoverPreviewImage';
 
 interface CassetteMatchingBarOption {
     id: string;
@@ -17,8 +16,6 @@ interface CassetteMatchingBarSelectorProps {
 }
 
 const CassetteMatchingBarSelector = ({ options, selectedBar, onBarChange }: CassetteMatchingBarSelectorProps) => {
-    const [hoveredOption, setHoveredOption] = useState<CassetteMatchingBarOption | null>(null);
-
     return (
         <div className="flex flex-col gap-4">
             <div className="flex items-center gap-2">
@@ -27,12 +24,7 @@ const CassetteMatchingBarSelector = ({ options, selectedBar, onBarChange }: Cass
 
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                 {options.map((option) => (
-                    <div
-                        key={option.id}
-                        className="relative"
-                        onMouseEnter={() => setHoveredOption(option)}
-                        onMouseLeave={() => setHoveredOption(null)}
-                    >
+                    <div key={option.id} className="relative">
                         <button
                             type="button"
                             onClick={() => onBarChange(option.id)}
@@ -45,11 +37,13 @@ const CassetteMatchingBarSelector = ({ options, selectedBar, onBarChange }: Cass
                             {/* Image */}
                             <div className="relative w-full aspect-video mb-3 bg-gray-50 rounded-md overflow-hidden flex items-center justify-center">
                                 {option.image ? (
-                                    <Image
+                                    <HoverPreviewImage
                                         src={option.image}
                                         alt={option.name}
                                         fill
-                                        className="object-contain p-2"
+                                        sizes="(min-width: 768px) 220px, 100vw"
+                                        containerClassName="relative h-full w-full"
+                                        imageClassName="object-contain p-2"
                                     />
                                 ) : (
                                     <div className="w-full h-full bg-gray-100 flex items-center justify-center">
@@ -80,26 +74,6 @@ const CassetteMatchingBarSelector = ({ options, selectedBar, onBarChange }: Cass
                                 </div>
                             )}
                         </button>
-
-                        {/* Hover popover */}
-                        {hoveredOption?.id === option.id && option.image && (
-                            <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 z-20 pointer-events-none">
-                                <div className="bg-white rounded-lg shadow-xl border border-gray-200 p-2 max-w-[280px]">
-                                    <div className="relative w-[260px] aspect-4/3 rounded-md overflow-hidden bg-gray-50">
-                                        <Image
-                                            src={option.image}
-                                            alt={option.name}
-                                            fill
-                                            className="object-contain"
-                                            sizes="260px"
-                                        />
-                                    </div>
-                                    <p className="text-center text-sm font-medium text-[#3a3a3a] mt-2">
-                                        {option.name}
-                                    </p>
-                                </div>
-                            </div>
-                        )}
                     </div>
                 ))}
             </div>
