@@ -243,25 +243,25 @@ export const CHAIN_COLOR_OPTIONS = [
     id: 'white-plastic',
     name: 'White',
     price: 0, // FREE
-    image: '/products/chainColor/whitePlastic.png',
+    hex: '#ffffff',
   },
   {
     id: 'grey-plastic',
     name: 'Grey',
     price: 4.00, // $4
-    image: '/products/chainColor/whitePlastic.png',
+    hex: '#8a8f98',
   },
   {
     id: 'black-plastic',
     name: 'Black',
     price: 4.00, // $4
-    image: '/products/chainColor/blackPlastic.png',
+    hex: '#111111',
   },
   {
     id: 'chrome-metal',
     name: 'Chrome Metal',
     price: 7.00, // $7
-    image: '/products/chainColor/chromeMetal.png',
+    hex: '#c8ccd1',
   },
 ];
 
@@ -376,19 +376,19 @@ export const BLIND_COLOR_OPTIONS = [
     id: 'white',
     name: 'White',
     price: 0,
-    image: '/products/blindColor/white.png',
+    hex: '#ffffff',
   },
   {
     id: 'cream',
     name: 'Cream',
     price: 0,
-    image: '/products/blindColor/cream.png',
+    hex: '#fffdd0',
   },
   {
     id: 'anthracite',
     name: 'Anthracite',
     price: 0,
-    image: '/products/blindColor/anthracite.png',
+    hex: '#36454f',
   },
 ];
 
@@ -398,13 +398,13 @@ export const FRAME_COLOR_OPTIONS = [
     id: 'white',
     name: 'White',
     price: 0,
-    image: '/products/frameColor/white.png',
+    hex: '#ffffff',
   },
   {
     id: 'graphite',
     name: 'Graphite',
     price: 0,
-    image: '/products/frameColor/graphite.png',
+    hex: '#53565b',
   },
 ];
 

@@ -12,7 +12,7 @@ export const CONTINUOUS_CHAIN_CARD: OptionalCustomizationCard = {
   name: 'Continuous Chain - Select Location',
   description: 'Choose the location of your control chain',
   price: 0,
-  image: '/products/chainColor/continuous-chain.png',
+  image: '/products/chainColor/continuous-chain-roller.png',
 };
 
 export const CONTINUOUS_CHAIN_CARD_ROLLER: OptionalCustomizationCard = {
@@ -30,7 +30,7 @@ export const CASSETTE_CARD: OptionalCustomizationCard = {
   name: 'Cassette and Bottom Matching Bar',
   description: 'Select cassette color options',
   price: 0,
-  image: '/products/cassette/casette.png',
+  image: '/products/cassette/cassette-roller.png',
 };
 
 export const CASSETTE_CARD_ROLLER: OptionalCustomizationCard = {

@@ -1,14 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import Image from 'next/image';
-import HoverPreviewImage from './HoverPreviewImage';
 
 interface ChainColorOption {
     id: string;
     name: string;
     price?: number;
-    image?: string;
+    hex: string;
 }
 
 interface ChainColorSelectorProps {
@@ -69,10 +67,11 @@ const ChainColorSelector = ({ options, selectedColor, onColorChange }: ChainColo
                     className="w-full border-2 border-gray-300 rounded-lg p-3 bg-white text-left flex items-center justify-between hover:border-[#00473c] transition-colors"
                 >
                     <div className="flex items-center gap-3 flex-1 min-w-0">
-                        {selectedOption?.image && (
-                            <div className="w-8 h-8 rounded-md overflow-hidden shrink-0 border border-gray-200 bg-gray-50">
-                                <Image src={selectedOption.image} alt={selectedOption.name} width={32} height={32} className="object-cover w-full h-full" />
-                            </div>
+                        {selectedOption?.hex && (
+                            <div
+                                className="w-8 h-8 rounded-md shrink-0 border border-gray-200"
+                                style={{ backgroundColor: selectedOption.hex }}
+                            />
                         )}
                         <span className="text-[#3a3a3a] font-medium truncate">
                             {selectedOption ? selectedOption.name : 'Select chain color'}
@@ -101,14 +100,10 @@ const ChainColorSelector = ({ options, selectedColor, onColorChange }: ChainColo
                                     onClick={() => { onColorChange(option.id); setIsOpen(false); }}
                                     className={`w-full px-4 py-3 text-left flex items-center gap-3 border-b border-gray-100 last:border-0 transition-colors ${selectedColor === option.id ? 'bg-[#f6fffd]' : 'hover:bg-gray-50'}`}
                                 >
-                                    {option.image && (
-                                        <HoverPreviewImage
-                                            src={option.image}
-                                            alt={option.name}
-                                            width={40}
-                                            height={40}
-                                            containerClassName="w-10 h-10 rounded-md overflow-hidden shrink-0 border border-gray-200 bg-gray-50"
-                                            imageClassName="object-cover w-full h-full"
+                                    {option.hex && (
+                                        <div
+                                            className="w-10 h-10 rounded-md shrink-0 border border-gray-200"
+                                            style={{ backgroundColor: option.hex }}
                                         />
                                     )}
                                     <div className="grow min-w-0 text-left">

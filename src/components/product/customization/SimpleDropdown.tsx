@@ -9,6 +9,7 @@ interface DropdownOption {
   name: string;
   price?: number;
   image?: string;
+  hex?: string;
 }
 
 interface SimpleDropdownProps {
@@ -83,7 +84,12 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
           className="w-full border-2 border-gray-300 rounded-lg p-3 bg-white text-left flex items-center justify-between hover:border-[#00473c] transition-colors"
         >
           <div className="flex items-center gap-3 flex-1 min-w-0">
-            {selectedOption?.image && (
+            {selectedOption?.hex ? (
+              <div
+                className="w-8 h-8 rounded-md shrink-0 border border-gray-200"
+                style={{ backgroundColor: selectedOption.hex }}
+              />
+            ) : selectedOption?.image && (
               <div className="w-8 h-8 rounded-md overflow-hidden shrink-0 border border-gray-200 bg-gray-50">
                 <Image src={selectedOption.image} alt={selectedOption.name} width={32} height={32} className="object-cover w-full h-full" />
               </div>
@@ -130,7 +136,12 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
                   }}
                   className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0 transition-colors ${selectedValue === option.id ? 'bg-[#f6fffd]' : ''}`}
                 >
-                  {option.image && (
+                  {option.hex ? (
+                    <div
+                      className="w-10 h-10 rounded-md shrink-0 border border-gray-200"
+                      style={{ backgroundColor: option.hex }}
+                    />
+                  ) : option.image && (
                     <HoverPreviewImage
                       src={option.image}
                       alt={option.name}
