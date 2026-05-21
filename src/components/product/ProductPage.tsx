@@ -12,6 +12,7 @@ import StarRating from './StarRating';
 import CategoryInfoSection from '@/components/collection/CategoryInfoSection';
 import { formatPrice, formatPriceWithCurrency, fetchPriceMatrix, fetchCustomizationPricing, validateCartPrice } from '@/lib/api';
 import { PRODUCT_GUIDES } from '@/data/guides';
+import { trackShopifyProductView } from '@/lib/shopify-analytics';
 import {
   calculateTotalPrice,
   configToCustomizations,
@@ -77,6 +78,10 @@ const ProductPage = ({
 }: ProductPageProps) => {
   const { addToCart } = useCart();
   const searchParams = useSearchParams();
+
+  useEffect(() => {
+    trackShopifyProductView(product);
+  }, [product]);
 
   const [config, setConfig] = useState<ProductConfiguration>({
     ...DEFAULT_CONFIGURATION,

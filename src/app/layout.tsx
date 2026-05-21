@@ -1,8 +1,10 @@
 import type { Metadata } from 'next';
 import { Inter, Montserrat } from 'next/font/google';
+import { Suspense } from 'react';
 import './globals.css';
 import { CartProvider } from '@/context/CartContext';
 import { AuthProvider } from '@/context/AuthContext';
+import ShopifyAnalytics from '@/components/analytics/ShopifyAnalytics';
 
 const inter = Inter({
   variable: '--font-inter',
@@ -30,6 +32,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} ${montserrat.variable} antialiased font-sans`}>
+        <Suspense fallback={null}>
+          <ShopifyAnalytics />
+        </Suspense>
         <AuthProvider>
           <CartProvider>
             {children}

@@ -17,6 +17,7 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.5.0",
     "@prisma/client": "^7.5.0",
+    "@shopify/hydrogen-react": "^2026.4.2",
     "next": "^16.0.8",
     "pg": "^8.20.0",
     "react": "^19.2.1",

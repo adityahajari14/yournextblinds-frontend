@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useRe
 import { useRouter } from 'next/navigation';
 import { Product, ProductConfiguration, Cart, CartItem, CartContextType } from '@/types';
 import { useAuth } from '@/context/AuthContext';
+import { trackShopifyAddToCart } from '@/lib/shopify-analytics';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -185,6 +186,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
     const updatedItems = [...cart.items, newItem];
     applyCartItems(updatedItems);
+    trackShopifyAddToCart(product);
     router.push('/cart');
   };
 
