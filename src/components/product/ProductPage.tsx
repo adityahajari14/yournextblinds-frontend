@@ -18,6 +18,9 @@ import {
   getTotalInches,
 } from '@/lib/pricing';
 import {
+  getMissingRequiredCustomizations,
+} from '@/lib/product-customization-validation';
+import {
   SizeSelector,
   RoomTypeSelector,
   HeadrailSelector,
@@ -300,6 +303,55 @@ const ProductPage = ({
     });
   }, [config, visibleOptions]);
 
+  const requiredCustomizationVisibility = useMemo(() => {
+    const requiresManualChain =
+      product.features.hasChainColor &&
+      !forceMotorization &&
+      (!selectedOptionalCards.motorization || config.motorization === 'none');
+
+    return {
+      ...visibleOptions,
+      showControlSide: product.features.hasChainColor
+        ? requiresManualChain
+        : visibleOptions.showControlSide,
+      showChainColor: requiresManualChain,
+      showWrappedCassette: selectedOptionalCards.cassette && product.features.hasWrappedCassette,
+      showCassetteMatchingBar:
+        selectedOptionalCards.cassette &&
+        (product.features.hasCassetteMatchingBar || product.features.hasRollerCassette),
+      showMotorization: forceMotorization || selectedOptionalCards.motorization,
+      showBottomBar: selectedOptionalCards.bottomBar && visibleOptions.showBottomBar,
+    };
+  }, [
+    config.motorization,
+    forceMotorization,
+    product.features.hasCassetteMatchingBar,
+    product.features.hasChainColor,
+    product.features.hasRollerCassette,
+    product.features.hasWrappedCassette,
+    selectedOptionalCards,
+    visibleOptions,
+  ]);
+
+  const missingRequiredCustomizations = useMemo(() => {
+    const missingCustomizations = getMissingRequiredCustomizations(
+      config,
+      requiredCustomizationVisibility
+    );
+
+    if (
+      forceMotorization &&
+      config.motorization === 'none' &&
+      !missingCustomizations.includes('motorization option')
+    ) {
+      missingCustomizations.push('motorization option');
+    }
+
+    return missingCustomizations;
+  }, [config, forceMotorization, requiredCustomizationVisibility]);
+
+  const isAddToCartDisabled = isValidating || missingRequiredCustomizations.length > 0;
+
   // Calculate price using new pricing system
   const priceCalculation = useMemo(() => {
     // Need valid dimensions to calculate price
@@ -363,9 +415,7 @@ const ProductPage = ({
   }, [priceMatrix]);
 
   const handleAddToCart = async () => {
-    // Validate dimensions are selected
-    if (config.width === 0 || config.height === 0) {
-      alert('Please select width and height before adding to cart.');
+    if (missingRequiredCustomizations.length > 0) {
       return;
     }
 
@@ -1047,8 +1097,8 @@ const ProductPage = ({
               {/* Add to Cart Button */}
               <button
                 onClick={handleAddToCart}
-                disabled={isValidating || showMinPriceIndicator}
-                className={`w-full mt-4 md:mt-6 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors ${isValidating || showMinPriceIndicator
+                disabled={isAddToCartDisabled}
+                className={`w-full mt-4 md:mt-6 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors ${isAddToCartDisabled
                   ? 'bg-gray-400 text-white cursor-not-allowed'
                   : 'bg-[#00473c] text-white hover:bg-[#003830]'
                   }`}

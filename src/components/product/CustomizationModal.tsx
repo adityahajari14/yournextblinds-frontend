@@ -13,6 +13,9 @@ import {
   getTotalInches,
 } from '@/lib/pricing';
 import {
+  getMissingRequiredCustomizations,
+} from '@/lib/product-customization-validation';
+import {
   SizeSelector,
   HeadrailSelector,
   HeadrailColourSelector,
@@ -228,6 +231,29 @@ const CustomizationModal = ({
     });
   }, [config, visibleOptions]);
 
+  const requiredCustomizationVisibility = useMemo(() => ({
+    ...visibleOptions,
+    showChainColor: product.features.hasChainColor,
+    showWrappedCassette: product.features.hasWrappedCassette,
+    showCassetteMatchingBar:
+      product.features.hasCassetteMatchingBar || product.features.hasRollerCassette,
+    showMotorization: product.features.hasMotorization,
+  }), [
+    product.features.hasCassetteMatchingBar,
+    product.features.hasChainColor,
+    product.features.hasMotorization,
+    product.features.hasRollerCassette,
+    product.features.hasWrappedCassette,
+    visibleOptions,
+  ]);
+
+  const missingRequiredCustomizations = useMemo(
+    () => getMissingRequiredCustomizations(config, requiredCustomizationVisibility),
+    [config, requiredCustomizationVisibility]
+  );
+
+  const isAddToCartDisabled = isValidating || missingRequiredCustomizations.length > 0;
+
   // Calculate price using new pricing system
   const priceCalculation = useMemo(() => {
     // Need valid dimensions to calculate price
@@ -282,9 +308,7 @@ const CustomizationModal = ({
   const showMinPriceIndicator = config.width === 0 || config.height === 0;
 
   const handleAddToCart = async () => {
-    // Validate dimensions are selected
-    if (config.width === 0 || config.height === 0) {
-      alert('Please select width and height before adding to cart.');
+    if (missingRequiredCustomizations.length > 0) {
       return;
     }
 
@@ -584,8 +608,8 @@ const CustomizationModal = ({
             </div>
             <button
               onClick={handleAddToCart}
-              disabled={isValidating || showMinPriceIndicator}
-              className={`py-2.5 md:py-3 px-6 md:px-8 rounded text-sm md:text-base font-medium transition-colors ${isValidating || showMinPriceIndicator
+              disabled={isAddToCartDisabled}
+              className={`py-2.5 md:py-3 px-6 md:px-8 rounded text-sm md:text-base font-medium transition-colors ${isAddToCartDisabled
                 ? 'bg-gray-400 text-white cursor-not-allowed'
                 : 'bg-[#00473c] text-white hover:bg-[#003830]'
                 }`}
