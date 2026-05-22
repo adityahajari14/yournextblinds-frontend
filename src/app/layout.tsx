@@ -17,7 +17,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = {
-  title: 'Your Next Blinds - Drill-free Shutters Built for a Perfect Fit',
+  title: 'Your Next Blinds - Made-to-Measure Blinds & Shutters | Drill-Free Fitting',
   description: 'Discover blinds designed to complement your space and lifestyle, crafted for beauty, built to last.',
   icons: {
     icon: '/icons/logo.svg',

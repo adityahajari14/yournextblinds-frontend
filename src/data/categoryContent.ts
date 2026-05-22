@@ -159,7 +159,7 @@ const categoryContent: Record<string, CategoryContent> = {
       'Perfect for large windows, sliding doors, and patio doors',
       'Adjustable slats allow full control over light and privacy',
       'Durable headrail system designed for long-term smooth operation',
-      '10-year warranty for peace of mind',
+      '5-year warranty for peace of mind',
     ],
     specifications: [
       { label: 'Product Type', value: 'Waterproof Blackout Vertical Blinds' },
@@ -171,7 +171,7 @@ const categoryContent: Record<string, CategoryContent> = {
       { label: 'Headrail Options', value: 'Classic or Platinum finish' },
       { label: 'Operation', value: 'Smooth Easy Glide system' },
       { label: 'Manufacturing', value: 'Custom made to measure' },
-      { label: 'Warranty', value: '10 Years' },
+      { label: 'Warranty', value: '5 Years' },
       { label: 'Use', value: 'Indoor window covering' },
     ],
     perfectFor: [

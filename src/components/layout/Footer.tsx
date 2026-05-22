@@ -19,37 +19,25 @@ const Footer = () => {
             </p>
           </div>
           <nav className="flex flex-wrap gap-6 lg:gap-8 text-sm text-[#484848] justify-center lg:justify-start">
-            <a href="#" className="hover:text-[#00473c] transition-colors">About.</a>
-            <a href="#" className="hover:text-[#00473c] transition-colors">Testimonials.</a>
-            <a href="#" className="hover:text-[#00473c] transition-colors">Pricing.</a>
-            <a href="#" className="hover:text-[#00473c] transition-colors">Contacts.</a>
+            <Link href="/about" className="hover:text-[#00473c] transition-colors">About.</Link>
+            <Link href="/collections" className="hover:text-[#00473c] transition-colors">Shop.</Link>
+            <Link href="/guides" className="hover:text-[#00473c] transition-colors">Measure Guides.</Link>
+            <a href="mailto:enquiries@yournextblinds.com" className="hover:text-[#00473c] transition-colors">Contact.</a>
           </nav>
         </div>
         
         {/* Bottom Section */}
         <div className="flex flex-col lg:flex-row justify-between items-center lg:items-end gap-8 mt-12 md:mt-16 lg:mt-24">
-          <div className="flex flex-col gap-3 items-center lg:items-start">
-            <div className="flex gap-5">
-              <a href="#" className="hover:opacity-70 transition-opacity">
-                <Image src="/icons/okru.svg" alt="OK.ru" width={12} height={18} />
-              </a>
-            </div>
-            <div className="flex gap-5">
-              <a href="#" className="hover:opacity-70 transition-opacity">
-                <Image src="/icons/vk.svg" alt="VK" width={18} height={11} />
-              </a>
-              <a href="#" className="hover:opacity-70 transition-opacity">
-                <Image src="/icons/facebook.svg" alt="Facebook" width={16} height={16} />
-              </a>
-            </div>
-            <div className="flex gap-5">
-              <a href="#" className="hover:opacity-70 transition-opacity">
-                <Image src="/icons/telegram.svg" alt="Telegram" width={17} height={14} />
-              </a>
-              <a href="#" className="hover:opacity-70 transition-opacity">
-                <Image src="/icons/instagram.svg" alt="Instagram" width={16} height={16} />
-              </a>
-            </div>
+          <div className="flex items-center justify-center lg:justify-start gap-5">
+            <a href="#" className="hover:opacity-70 transition-opacity">
+              <Image src="/icons/facebook.svg" alt="Facebook" width={16} height={16} />
+            </a>
+            <a href="#" className="hover:opacity-70 transition-opacity">
+              <Image src="/icons/telegram.svg" alt="Telegram" width={17} height={14} />
+            </a>
+            <a href="#" className="hover:opacity-70 transition-opacity">
+              <Image src="/icons/instagram.svg" alt="Instagram" width={16} height={16} />
+            </a>
           </div>
           
           <div className="text-xs text-[#666] leading-relaxed text-center">
@@ -57,7 +45,7 @@ const Footer = () => {
             <p>All Rights reserved</p>
           </div>
           
-          <div className="flex flex-col gap-4 text-center lg:text-left">
+          <div className="flex flex-col gap-4 text-center lg:text-right">
             <div className="text-sm text-[#484848] leading-relaxed">
               <a href="tel:+18326706705" className="hover:text-[#00473c] transition-colors">+1 832-670-6705</a>
               <br />
@@ -69,18 +57,14 @@ const Footer = () => {
             </div>
           </div>
           
-          <div className="flex gap-4 text-sm text-[#666] justify-center lg:justify-start">
-            <span className="hover:text-[#00473c] transition-colors cursor-pointer">Es</span>
-            <span className="hover:text-[#00473c] transition-colors cursor-pointer">Fr</span>
-            <span className="hover:text-[#00473c] transition-colors cursor-pointer">De</span>
-            <span className="hover:text-[#00473c] transition-colors cursor-pointer">Ru</span>
-          </div>
         </div>
 
         {/* Legal Row */}
         <div className="flex flex-col items-center gap-3 mt-8 pt-6 border-t border-[#e5e5e5]">
           <div className="flex gap-6 text-sm text-[#484848]">
             <Link href="/privacy-policy" className="hover:text-[#00473c] transition-colors">Privacy Policy</Link>
+            <Link href="/shipping-policy" className="hover:text-[#00473c] transition-colors">Shipping Policy</Link>
+            <Link href="/refund-policy" className="hover:text-[#00473c] transition-colors">Refund Policy</Link>
             <Link href="/terms-and-conditions" className="hover:text-[#00473c] transition-colors">Terms &amp; Conditions</Link>
           </div>
           <p className="text-xs text-[#999]">© {new Date().getFullYear()} Your Next Blinds. All rights reserved.</p>

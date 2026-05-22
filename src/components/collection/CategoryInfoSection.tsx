@@ -237,7 +237,7 @@ export default function CategoryInfoSection({ categorySlug, productTags }: Categ
     },
   ];
 
-  const warrantyYears = resolvedSlug === 'waterproof-blackout-vertical-blinds' ? 10 : 5;
+  const warrantyYears = 5;
 
   return (
     <section className="bg-white border-t border-gray-100">

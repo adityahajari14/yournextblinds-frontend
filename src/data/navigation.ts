@@ -93,7 +93,7 @@ export const ALL_COLLECTION_SLUGS = [
 export const COLLECTION_DESCRIPTIONS: Record<string, string> = {
   'light-filtering-vertical-blinds': 'Custom made-to-measure light filtering vertical blinds that softly diffuse natural light while maintaining privacy. Perfect for modern homes with quality materials and easy installation.',
   'blackout-vertical-blinds': 'Made-to-measure blackout vertical blinds providing complete privacy, light control, and modern style. Custom sized for a perfect fit with quality materials and easy installation.',
-  'waterproof-blackout-vertical-blinds': 'Durable waterproof blackout vertical blinds crafted from premium PVC soft fabric with 89mm slats. Custom made, easy to install, and backed by a 10-year warranty.',
+  'waterproof-blackout-vertical-blinds': 'Durable waterproof blackout vertical blinds crafted from premium PVC soft fabric with 89mm slats. Custom made, easy to install, and backed by a 5-year warranty.',
   'light-filtering-roller-shades': 'Elegant light filtering roller shades that soften sunlight while maintaining natural brightness and privacy. Custom sized with premium fabrics for a perfect fit in any room.',
   'blackout-roller-shades': 'Stylish blackout roller shades designed to block sunlight, improve privacy, and enhance comfort. Custom made to measure with premium fabrics for the perfect window treatment.',
   'waterproof-blackout-roller-shades': 'Durable waterproof blackout roller shades ideal for moisture-prone environments. Custom made with premium materials for excellent light control, privacy, and long-lasting performance.',

@@ -1158,11 +1158,7 @@ const ProductPage = ({
                       className="w-10 h-10 object-contain mb-2"
                     />
                     <span className="text-xs font-semibold text-gray-800 leading-tight">Warranty</span>
-                    <span className="text-xs text-gray-500 mt-0.5 leading-tight">
-                      {product.category.toLowerCase() === 'vertical blinds' && product.tags.includes('waterproof') && product.tags.includes('blackout')
-                        ? '10 Years Warranty'
-                        : '5 Years Warranty'}
-                    </span>
+                    <span className="text-xs text-gray-500 mt-0.5 leading-tight">5 Years Warranty</span>
                   </div>
                   <div className="flex flex-col items-center text-center p-3 border border-gray-100 rounded-lg">
                     <Image
