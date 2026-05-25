@@ -4,35 +4,28 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "prisma generate && next build",
+    "prebuild": "node -e \"require('fs').rmSync('.next/dev', { recursive: true, force: true })\"",
+    "build": "node scripts/validate-pricing-data.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "export:products": "node scripts/export-shopify-products.mjs",
-    "db:generate": "prisma generate",
-    "db:push": "prisma db push",
-    "db:migrate": "prisma migrate dev",
-    "db:studio": "prisma studio",
-    "db:seed": "tsx prisma/seed.ts"
+    "pricing:validate": "node scripts/validate-pricing-data.mjs",
+    "pricing:validate:shopify": "node scripts/validate-pricing-data.mjs --shopify"
   },
   "dependencies": {
-    "@prisma/adapter-pg": "^7.5.0",
-    "@prisma/client": "^7.5.0",
     "@shopify/hydrogen-react": "^2026.4.2",
     "next": "^16.0.8",
-    "pg": "^8.20.0",
     "react": "^19.2.1",
     "react-dom": "^19.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
-    "@types/pg": "^8.11.11",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "baseline-browser-mapping": "^2.9.19",
     "eslint": "^9",
     "eslint-config-next": "16.0.6",
-    "prisma": "^7.5.0",
     "tailwindcss": "^4",
     "typescript": "^5"
   }

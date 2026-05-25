@@ -11,6 +11,8 @@ interface PageProps {
   params: Promise<{ category: string }>;
 }
 
+export const revalidate = 3_600;
+
 // Generate static params from all possible collection slugs
 export async function generateStaticParams() {
   // Combine backend categories with frontend-defined slugs

@@ -1,10 +1,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
-import pg from 'pg';
-
-const { Pool } = pg;
 
 const OUTPUT_FILE = path.join(process.cwd(), 'exports', 'shopify-products.csv');
+const PRICING_DATA_FILE = path.join(process.cwd(), 'src', 'data', 'pricing', 'pricing-data.json');
 const SHOPIFY_API_VERSION = '2025-01';
 
 const STOREFRONT_PRODUCTS_QUERY = `
@@ -244,40 +242,44 @@ async function fetchAdminProductPricingData(storeDomain, adminToken) {
 async function getMinimumPricesByBandName(bandNames) {
   if (bandNames.length === 0) return new Map();
 
-  const connectionString = requiredEnv('DATABASE_URL');
-  const isCloudDb =
-    connectionString.includes('render.com') ||
-    connectionString.includes('onrender.com') ||
-    connectionString.includes('neon.tech') ||
-    process.env.NODE_ENV === 'production';
+  const pricingData = JSON.parse(fs.readFileSync(PRICING_DATA_FILE, 'utf8'));
+  const priceBandsByName = new Map(pricingData.priceBands.map((band) => [band.name, band]));
+  const widthBandsById = new Map(pricingData.widthBands.map((band) => [band.id, band]));
+  const heightBandsById = new Map(pricingData.heightBands.map((band) => [band.id, band]));
+  const priceCellsByBandId = new Map();
 
-  const pool = new Pool({
-    connectionString,
-    ssl: isCloudDb ? { rejectUnauthorized: false } : false,
-  });
-
-  try {
-    const query = `
-      SELECT DISTINCT ON (pb.name)
-        pb.name,
-        pc.price
-      FROM "PriceBand" pb
-      JOIN "PriceCell" pc ON pc."priceBandId" = pb.id
-      JOIN "WidthBand" wb ON wb.id = pc."widthBandId"
-      JOIN "HeightBand" hb ON hb.id = pc."heightBandId"
-      WHERE pb.name = ANY($1)
-      ORDER BY
-        pb.name,
-        wb."widthMm" * hb."heightMm" ASC,
-        wb."widthMm" ASC,
-        hb."heightMm" ASC
-    `;
-
-    const result = await pool.query(query, [bandNames]);
-    return new Map(result.rows.map((row) => [row.name, Number(row.price)]));
-  } finally {
-    await pool.end();
+  for (const cell of pricingData.priceCells) {
+    if (!priceCellsByBandId.has(cell.priceBandId)) {
+      priceCellsByBandId.set(cell.priceBandId, []);
+    }
+    priceCellsByBandId.get(cell.priceBandId).push(cell);
   }
+
+  const result = new Map();
+
+  for (const bandName of bandNames) {
+    const priceBand = priceBandsByName.get(bandName);
+    if (!priceBand) continue;
+
+    const cells = priceCellsByBandId.get(priceBand.id) || [];
+    if (cells.length === 0) continue;
+
+    const [minimumCell] = [...cells].sort((a, b) => {
+      const aWidth = widthBandsById.get(a.widthBandId);
+      const aHeight = heightBandsById.get(a.heightBandId);
+      const bWidth = widthBandsById.get(b.widthBandId);
+      const bHeight = heightBandsById.get(b.heightBandId);
+      const areaA = aWidth.widthMm * aHeight.heightMm;
+      const areaB = bWidth.widthMm * bHeight.heightMm;
+      if (areaA !== areaB) return areaA - areaB;
+      if (aWidth.widthMm !== bWidth.widthMm) return aWidth.widthMm - bWidth.widthMm;
+      return aHeight.heightMm - bHeight.heightMm;
+    });
+
+    result.set(bandName, Number(minimumCell.price));
+  }
+
+  return result;
 }
 
 function csvEscape(value) {

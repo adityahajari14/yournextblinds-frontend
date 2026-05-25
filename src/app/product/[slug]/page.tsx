@@ -1,9 +1,12 @@
 import { notFound } from 'next/navigation';
 import { Suspense } from 'react';
-import { Product } from '@/types';
+import { CustomizationPricing, PriceBandMatrix, Product } from '@/types';
 import { ProductPage, CustomerReviewsSection, ProductFeatureSection, ProductComparisonSection, HowItWorksSection, ProductRechargeSection, ProductWarrantySection, ProductComparisonTableSection } from '@/components/product';
 import { TopBar, Header, FlashSale, FAQ, Footer, NavBar } from '@/components';
 import { fetchProductBySlug, fetchProducts, transformProduct } from '@/lib/api';
+import { getCustomizationPricing, getPriceBandMatrix, resolveHandleToPriceBand } from '@/lib/server/pricing.service';
+
+export const revalidate = 3_600;
 
 interface ProductPageProps {
   params: Promise<{
@@ -62,6 +65,32 @@ export default async function ProductPageRoute({ params }: ProductPageProps) {
   }
 
   const product = transformProduct(productData);
+  let initialPriceMatrix: PriceBandMatrix | null = null;
+  let initialCustomizationPricing: CustomizationPricing[] = [];
+
+  try {
+    const priceBand = await resolveHandleToPriceBand(product.slug);
+
+    if (priceBand) {
+      const matrix = await getPriceBandMatrix(priceBand.id);
+      initialPriceMatrix =
+        matrix && matrix.widthBands.length > 0 && matrix.heightBands.length > 0
+          ? matrix
+          : null;
+    }
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching product price matrix:', error);
+    }
+  }
+
+  try {
+    initialCustomizationPricing = await getCustomizationPricing();
+  } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error('Error fetching customization pricing:', error);
+    }
+  }
 
   let relatedProducts: Product[] = [];
   try {
@@ -116,6 +145,8 @@ export default async function ProductPageRoute({ params }: ProductPageProps) {
           <ProductPage
             product={product}
             relatedProducts={relatedProducts}
+            initialPriceMatrix={initialPriceMatrix}
+            initialCustomizationPricing={initialCustomizationPricing}
           />
         </Suspense>
         {slug !== 'non-driii-honeycomb-blackout-blinds' && (

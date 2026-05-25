@@ -5,7 +5,8 @@ import { useAuth } from '@/context/AuthContext';
 import { TopBar, Header, NavBar, Footer } from '@/components';
 import { formatPriceWithCurrency, createCheckout } from '@/lib/api';
 import { getTotalInches } from '@/lib/pricing';
-import { CheckoutItemRequest } from '@/types';
+import { CheckoutItemRequest, PriceOption } from '@/types';
+import CartItemEditModal from '@/components/cart/CartItemEditModal';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -24,13 +25,21 @@ import {
   CHAIN_COLOR_OPTIONS,
   WRAPPED_CASSETTE_OPTIONS,
   CASSETTE_MATCHING_BAR_OPTIONS,
+  ROLLER_CASSETTE_OPTIONS,
+  MOTORIZATION_OPTIONS,
+  BLIND_COLOR_OPTIONS,
+  FRAME_COLOR_OPTIONS,
+  OPENING_DIRECTION_OPTIONS,
+  BOTTOM_BAR_OPTIONS,
+  ROLL_STYLE_OPTIONS,
 } from '@/data/customizations';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateQuantity, clearCart } = useCart();
+  const { cart, removeFromCart, updateQuantity, updateCartItem, clearCart } = useCart();
   const { customer } = useAuth();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
 
@@ -105,9 +114,23 @@ export default function CartPage() {
   };
 
   const finalTotal = cart.total;
+  const editingItem = editingItemId
+    ? cart.items.find((item) => item.id === editingItemId) ?? null
+    : null;
+
+  const getOptionName = (value: string, options: PriceOption[]) =>
+    options.find(opt => opt.id === value)?.name || value;
 
   const formatConfiguration = (config: any) => {
     const parts = [];
+    const displayedKeys = new Set([
+      'width',
+      'widthFraction',
+      'widthUnit',
+      'height',
+      'heightFraction',
+      'heightUnit',
+    ]);
 
     // Size (always show if available)
     if (config.width && config.height) {
@@ -116,79 +139,34 @@ export default function CartPage() {
       parts.push(`Size: ${widthStr}" × ${heightStr}"`);
     }
 
-    // Room Type
-    if (config.roomType) {
-      const roomTypeOption = ROOM_TYPE_OPTIONS.find(opt => opt.id === config.roomType);
-      parts.push(`Room Type: ${roomTypeOption?.name || config.roomType}`);
-    }
+    const details: Array<{ key: string; label: string; options?: PriceOption[] }> = [
+      { key: 'roomType', label: 'Room Type', options: ROOM_TYPE_OPTIONS },
+      { key: 'blindName', label: 'Blind Name' },
+      { key: 'headrail', label: 'Headrail', options: HEADRAIL_OPTIONS },
+      { key: 'headrailColour', label: 'Headrail Colour', options: HEADRAIL_COLOUR_OPTIONS },
+      { key: 'installationMethod', label: 'Installation', options: [...INSTALLATION_METHOD_OPTIONS, ...ROLLER_INSTALLATION_OPTIONS] },
+      { key: 'controlOption', label: 'Control', options: [...CONTROL_OPTIONS, ...ROLLER_CONTROL_OPTIONS] },
+      { key: 'stacking', label: 'Stacking', options: Object.values(VERTICAL_STACKING_OPTIONS).flat() },
+      { key: 'controlSide', label: 'Control Side', options: CONTROL_SIDE_OPTIONS },
+      { key: 'bottomChain', label: 'Bottom Weight/Chain', options: BOTTOM_CHAIN_OPTIONS },
+      { key: 'bracketType', label: 'Bracket Type', options: BRACKET_TYPE_OPTIONS },
+      { key: 'chainColor', label: 'Chain Color', options: CHAIN_COLOR_OPTIONS },
+      { key: 'wrappedCassette', label: 'Wrapped Cassette', options: WRAPPED_CASSETTE_OPTIONS },
+      { key: 'cassetteMatchingBar', label: 'Cassette Bar', options: [...CASSETTE_MATCHING_BAR_OPTIONS, ...ROLLER_CASSETTE_OPTIONS] },
+      { key: 'motorization', label: 'Motorisation', options: MOTORIZATION_OPTIONS },
+      { key: 'blindColor', label: 'Blind Color', options: BLIND_COLOR_OPTIONS },
+      { key: 'frameColor', label: 'Frame Color', options: FRAME_COLOR_OPTIONS },
+      { key: 'openingDirection', label: 'Opening Direction', options: OPENING_DIRECTION_OPTIONS },
+      { key: 'bottomBar', label: 'Bottom Bar', options: BOTTOM_BAR_OPTIONS },
+      { key: 'rollStyle', label: 'Roll Style', options: ROLL_STYLE_OPTIONS },
+    ];
 
-    // Headrail Type
-    if (config.headrail) {
-      const headrailOption = HEADRAIL_OPTIONS.find(opt => opt.id === config.headrail);
-      parts.push(`Headrail: ${headrailOption?.name || config.headrail}`);
-    }
-
-    // Headrail Colour
-    if (config.headrailColour) {
-      const colourOption = HEADRAIL_COLOUR_OPTIONS.find(opt => opt.id === config.headrailColour);
-      parts.push(`Headrail Colour: ${colourOption?.name || config.headrailColour}`);
-    }
-
-    // Installation Method
-    if (config.installationMethod) {
-      const methodOption = INSTALLATION_METHOD_OPTIONS.find(opt => opt.id === config.installationMethod) ||
-        ROLLER_INSTALLATION_OPTIONS.find(opt => opt.id === config.installationMethod);
-      parts.push(`Installation: ${methodOption?.name || config.installationMethod}`);
-    }
-
-    // Control Option
-    if (config.controlOption) {
-      const controlOpt = CONTROL_OPTIONS.find(opt => opt.id === config.controlOption) ||
-        ROLLER_CONTROL_OPTIONS.find(opt => opt.id === config.controlOption);
-      parts.push(`Control: ${controlOpt?.name || config.controlOption}`);
-    }
-
-    // Stacking
-    if (config.stacking) {
-      const stackingOption = Object.values(VERTICAL_STACKING_OPTIONS).flat().find((opt: { id: string; name: string }) => opt.id === config.stacking);
-      parts.push(`Stacking: ${stackingOption?.name || config.stacking}`);
-    }
-
-    // Control Side
-    if (config.controlSide) {
-      const sideOption = CONTROL_SIDE_OPTIONS.find(opt => opt.id === config.controlSide);
-      parts.push(`Control Side: ${sideOption?.name || config.controlSide}`);
-    }
-
-    // Bottom Chain
-    if (config.bottomChain) {
-      const chainOption = BOTTOM_CHAIN_OPTIONS.find(opt => opt.id === config.bottomChain);
-      parts.push(`Bottom Weight/Chain: ${chainOption?.name || config.bottomChain}`);
-    }
-
-    // Bracket Type
-    if (config.bracketType) {
-      const bracketOption = BRACKET_TYPE_OPTIONS.find(opt => opt.id === config.bracketType);
-      parts.push(`Bracket Type: ${bracketOption?.name || config.bracketType}`);
-    }
-
-    // Chain Color
-    if (config.chainColor) {
-      const colorOption = CHAIN_COLOR_OPTIONS.find(opt => opt.id === config.chainColor);
-      parts.push(`Chain Color: ${colorOption?.name || config.chainColor}`);
-    }
-
-    // Wrapped Cassette
-    if (config.wrappedCassette) {
-      const cassetteOption = WRAPPED_CASSETTE_OPTIONS.find(opt => opt.id === config.wrappedCassette);
-      parts.push(`Wrapped Cassette: ${cassetteOption?.name || config.wrappedCassette}`);
-    }
-
-    // Cassette Matching Bar
-    if (config.cassetteMatchingBar) {
-      const barOption = CASSETTE_MATCHING_BAR_OPTIONS.find(opt => opt.id === config.cassetteMatchingBar);
-      parts.push(`Cassette Bar: ${barOption?.name || config.cassetteMatchingBar}`);
-    }
+    details.forEach(({ key, label, options }) => {
+      displayedKeys.add(key);
+      const value = config[key];
+      if (!value || value === 'none') return;
+      parts.push(`${label}: ${options ? getOptionName(value, options) : value}`);
+    });
 
     // Legacy fields (for backwards compatibility)
     if (config.mount) {
@@ -199,6 +177,12 @@ export default function CartPage() {
     if (config.valance) parts.push(`Valance: ${config.valance}`);
     if (config.control) parts.push(`Control: ${config.control}`);
     if (config.lift) parts.push(`Lift: ${config.lift}`);
+
+    Object.entries(config).forEach(([key, value]) => {
+      if (displayedKeys.has(key) || !value || value === 'none') return;
+      const label = key.replace(/([A-Z])/g, ' $1').replace(/^./, char => char.toUpperCase());
+      parts.push(`${label}: ${value}`);
+    });
 
     return parts;
   };
@@ -282,7 +266,22 @@ export default function CartPage() {
 
     // Cassette Matching Bar
     if (config.cassetteMatchingBar) {
-      const option = CASSETTE_MATCHING_BAR_OPTIONS.find(opt => opt.id === config.cassetteMatchingBar);
+      const option = [...CASSETTE_MATCHING_BAR_OPTIONS, ...ROLLER_CASSETTE_OPTIONS].find(opt => opt.id === config.cassetteMatchingBar);
+      if (option?.price && option.price > 0) {
+        costs.push({ label: option.name, price: option.price });
+      }
+    }
+
+    if (config.motorization && config.motorization !== 'none') {
+      const option = MOTORIZATION_OPTIONS.find(opt => opt.id === config.motorization);
+      costs.push({ label: 'Motorisation motor', price: 95 });
+      if (option?.price && option.price > 0) {
+        costs.push({ label: option.name, price: option.price });
+      }
+    }
+
+    if (config.bottomBar) {
+      const option = BOTTOM_BAR_OPTIONS.find(opt => opt.id === config.bottomBar);
       if (option?.price && option.price > 0) {
         costs.push({ label: option.name, price: option.price });
       }
@@ -386,15 +385,23 @@ export default function CartPage() {
                               </Link>
                               <p className="text-sm text-gray-500 mt-1">{item.product.category}</p>
                             </div>
-                            <button
-                              onClick={() => removeFromCart(item.id)}
-                              className="text-gray-400 hover:text-red-600 transition-colors flex-shrink-0"
-                              aria-label="Remove item"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                              </svg>
-                            </button>
+                            <div className="flex flex-shrink-0 items-center gap-2">
+                              <button
+                                onClick={() => setEditingItemId(item.id)}
+                                className="rounded-md border border-gray-300 px-3 py-1.5 text-xs font-medium text-[#00473c] hover:bg-[#f0fdf9]"
+                              >
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => removeFromCart(item.id)}
+                                className="text-gray-400 hover:text-red-600 transition-colors"
+                                aria-label="Remove item"
+                              >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                              </button>
+                            </div>
                           </div>
 
                           <div className="mb-3">
@@ -573,6 +580,14 @@ export default function CartPage() {
             </div>
           </div>
         </div>
+      )}
+
+      {editingItem && (
+        <CartItemEditModal
+          item={editingItem}
+          onClose={() => setEditingItemId(null)}
+          onSave={updateCartItem}
+        />
       )}
 
       <Footer />

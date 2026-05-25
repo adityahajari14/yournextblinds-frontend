@@ -18,6 +18,8 @@ const SHOPIFY_STOREFRONT_TOKEN =
 const SHOPIFY_API_VERSION = '2025-01';
 
 const STOREFRONT_URL = `https://${SHOPIFY_STORE_DOMAIN}/api/${SHOPIFY_API_VERSION}/graphql.json`;
+const SHOPIFY_CACHE_REVALIDATE_SECONDS =
+  Number(process.env.SHOPIFY_CACHE_REVALIDATE_SECONDS || 3_600);
 
 // ============================================
 // Storefront GraphQL Types
@@ -207,7 +209,10 @@ const CUSTOMER_FIELDS = `
 
 async function storefrontFetch<T>(
   query: string,
-  variables?: Record<string, unknown>
+  variables?: Record<string, unknown>,
+  options?: {
+    revalidate?: number | false;
+  }
 ): Promise<T> {
   if (!SHOPIFY_STORE_DOMAIN || !SHOPIFY_STOREFRONT_TOKEN) {
     throw new Error(
@@ -226,9 +231,16 @@ async function storefrontFetch<T>(
     body: JSON.stringify({ query, variables }),
   };
 
-  // Use Next.js ISR cache for server-side requests
+  // Use Next.js data cache for normal server-side requests, but allow opting out
+  // for large bulk catalog fetches that exceed the persistent cache size limit.
   if (isServerSide) {
-    fetchOptions.next = { revalidate: 60 };
+    if (options?.revalidate === false) {
+      fetchOptions.cache = 'no-store';
+    } else {
+      fetchOptions.next = {
+        revalidate: options?.revalidate ?? SHOPIFY_CACHE_REVALIDATE_SECONDS,
+      };
+    }
   }
 
   const response = await fetch(STOREFRONT_URL, fetchOptions);
@@ -442,7 +454,7 @@ async function getMinimumPrices(): Promise<Record<string, number>> {
       if (Object.keys(cachedMinimumPrices).length === 0) {
         console.warn(
           '[Pricing] getMinimumPricesByHandle returned no prices. ' +
-          'Check that: (1) price band data is seeded in the DB, ' +
+          'Check that: (1) pricing data is present in src/data/pricing/pricing-data.json, ' +
           '(2) SHOPIFY_ADMIN_ACCESS_TOKEN is set, and ' +
           '(3) the custom.price_band_name metafield is set on Shopify products.'
         );
@@ -450,7 +462,7 @@ async function getMinimumPrices(): Promise<Record<string, number>> {
       pricesCacheTime = now;
       return cachedMinimumPrices;
     } catch (err) {
-      console.error('[Pricing] Failed to fetch minimum prices from service:', err);
+      console.error('[Pricing] Failed to fetch minimum prices from pricing data:', err);
       cachedMinimumPrices = {};
       pricesCacheTime = now;
       return cachedMinimumPrices;

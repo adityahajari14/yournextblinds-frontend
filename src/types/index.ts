@@ -156,6 +156,7 @@ export interface CartContextType {
   addToCart: (product: Product, configuration: ProductConfiguration) => void;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
+  updateCartItem: (itemId: string, product: Product, configuration: ProductConfiguration) => void;
   clearCart: () => void;
 }
 
@@ -363,4 +364,3 @@ export interface CheckoutResponse {
   }[];
   subtotal: number;
 }
-

@@ -3,7 +3,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { Product, ProductConfiguration, Cart, CartItem, CartContextType } from '@/types';
-import { useAuth } from '@/context/AuthContext';
 import { trackShopifyAddToCart } from '@/lib/shopify-analytics';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -22,53 +21,31 @@ interface CartProviderProps {
 
 const CART_STORAGE_KEY = 'cart';
 
-interface CartApiResponse {
-  success: boolean;
-  data?: { items: SerializableCartItem[] };
-  error?: { message: string };
-}
-
 interface SerializableCartItem extends Omit<CartItem, 'addedAt'> {
   addedAt: string;
 }
 
+const calculateCartTotals = (items: CartItem[]) => ({
+  total: items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
+  itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+});
+
 export const CartProvider = ({ children }: CartProviderProps) => {
   const router = useRouter();
-  const { customer, isLoading } = useAuth();
   const hasInitializedRef = useRef(false);
-  const lastSyncedCustomerRef = useRef<string | null>(null);
   const [cart, setCart] = useState<Cart>({
     items: [],
     total: 0,
     itemCount: 0,
   });
 
-  const calculateTotals = (items: CartItem[]) => ({
-    total: items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
-    itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
-  });
-
-  const toSerializableItems = (items: CartItem[]): SerializableCartItem[] =>
-    items.map((item) => ({
-      ...item,
-      addedAt: item.addedAt.toISOString(),
-    }));
-
-  const fromSerializableItems = (items: SerializableCartItem[]): CartItem[] =>
-    items.map((item) => ({
-      ...item,
-      addedAt: new Date(item.addedAt),
-    }));
-
   const applyCartItems = (items: CartItem[]) => {
-    const { total, itemCount } = calculateTotals(items);
+    const { total, itemCount } = calculateCartTotals(items);
     setCart({ items, total, itemCount });
   };
 
-  // Load local cart for guests, and merge local cart into account cart on login.
+  // Cart state is intentionally local-only to avoid a runtime database dependency.
   useEffect(() => {
-    if (isLoading) return;
-
     const loadLocalCart = (): CartItem[] => {
       const savedCart = localStorage.getItem(CART_STORAGE_KEY);
       if (!savedCart) return [];
@@ -89,62 +66,15 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       }
     };
 
-    if (!customer?.email) {
-      lastSyncedCustomerRef.current = null;
-      applyCartItems(loadLocalCart());
+    const localItems = loadLocalCart();
+    queueMicrotask(() => {
+      const { total, itemCount } = calculateCartTotals(localItems);
+      setCart({ items: localItems, total, itemCount });
       hasInitializedRef.current = true;
-      return;
-    }
+    });
+  }, []);
 
-    if (lastSyncedCustomerRef.current === customer.email) {
-      hasInitializedRef.current = true;
-      return;
-    }
-
-    const syncCustomerCart = async () => {
-      const localItems = loadLocalCart();
-
-      try {
-        let serverItems: CartItem[] = [];
-        const serverRes = await fetch('/api/cart', { cache: 'no-store' });
-        if (serverRes.ok) {
-          const payload = (await serverRes.json()) as CartApiResponse;
-          serverItems = fromSerializableItems(payload.data?.items || []);
-        }
-
-        const shouldMerge = localItems.length > 0;
-        if (shouldMerge) {
-          const mergeRes = await fetch('/api/cart/merge', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ items: toSerializableItems(localItems) }),
-          });
-
-          if (mergeRes.ok) {
-            const payload = (await mergeRes.json()) as CartApiResponse;
-            const mergedItems = fromSerializableItems(payload.data?.items || []);
-            applyCartItems(mergedItems);
-            localStorage.removeItem(CART_STORAGE_KEY);
-            lastSyncedCustomerRef.current = customer.email;
-            hasInitializedRef.current = true;
-            return;
-          }
-        }
-
-        applyCartItems(serverItems.length > 0 ? serverItems : localItems);
-        lastSyncedCustomerRef.current = customer.email;
-      } catch (error) {
-        console.error('Cart sync error:', error);
-        applyCartItems(localItems);
-      } finally {
-        hasInitializedRef.current = true;
-      }
-    };
-
-    syncCustomerCart();
-  }, [customer?.email, isLoading]);
-
-  // Persist cart locally for guests, and as fallback cache for signed-in users.
+  // Persist cart locally for guests and signed-in users.
   useEffect(() => {
     if (!hasInitializedRef.current) return;
 
@@ -154,26 +84,6 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       localStorage.removeItem(CART_STORAGE_KEY);
     }
   }, [cart]);
-
-  // Persist cart to account store whenever signed-in cart changes.
-  useEffect(() => {
-    if (!hasInitializedRef.current) return;
-    if (isLoading || !customer?.email) return;
-
-    const timeout = setTimeout(async () => {
-      try {
-        await fetch('/api/cart', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ items: toSerializableItems(cart.items) }),
-        });
-      } catch (error) {
-        console.error('Failed to persist account cart:', error);
-      }
-    }, 250);
-
-    return () => clearTimeout(timeout);
-  }, [cart.items, customer?.email, isLoading]);
 
   const addToCart = (product: Product, configuration: ProductConfiguration) => {
     const newItem: CartItem = {
@@ -211,6 +121,17 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     applyCartItems(updatedItems);
   };
 
+  const updateCartItem = (
+    itemId: string,
+    product: Product,
+    configuration: ProductConfiguration
+  ) => {
+    const updatedItems = cart.items.map((item) =>
+      item.id === itemId ? { ...item, product, configuration } : item
+    );
+    applyCartItems(updatedItems);
+  };
+
   const clearCart = () => {
     setCart({ items: [], total: 0, itemCount: 0 });
     localStorage.removeItem(CART_STORAGE_KEY);
@@ -218,7 +139,7 @@ export const CartProvider = ({ children }: CartProviderProps) => {
 
   return (
     <CartContext.Provider
-      value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart }}
+      value={{ cart, addToCart, removeFromCart, updateQuantity, updateCartItem, clearCart }}
     >
       {children}
     </CartContext.Provider>

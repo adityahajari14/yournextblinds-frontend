@@ -70,11 +70,15 @@ import Image from 'next/image';
 interface ProductPageProps {
   product: Product;
   relatedProducts: Product[];
+  initialPriceMatrix?: PriceBandMatrix | null;
+  initialCustomizationPricing?: CustomizationPricingType[];
 }
 
 const ProductPage = ({
   product,
   relatedProducts,
+  initialPriceMatrix = null,
+  initialCustomizationPricing = [],
 }: ProductPageProps) => {
   const { addToCart } = useCart();
   const searchParams = useSearchParams();
@@ -92,9 +96,18 @@ const ProductPage = ({
   });
 
   // State for pricing data from backend
-  const [priceMatrix, setPriceMatrix] = useState<PriceBandMatrix | null>(null);
-  const [customizationPricing, setCustomizationPricing] = useState<CustomizationPricingType[]>([]);
-  const [pricingLoaded, setPricingLoaded] = useState(false);
+  const initialBottomBarPricing = BOTTOM_BAR_OPTIONS.map(option => ({
+    category: 'bottom-bar',
+    optionId: option.id,
+    name: option.name,
+    prices: [{ widthMm: null, price: option.price || 0 }]
+  }));
+  const hasInitialPricing = Boolean(initialPriceMatrix) && initialCustomizationPricing.length > 0;
+  const [priceMatrix, setPriceMatrix] = useState<PriceBandMatrix | null>(initialPriceMatrix);
+  const [customizationPricing, setCustomizationPricing] = useState<CustomizationPricingType[]>(
+    hasInitialPricing ? [...initialCustomizationPricing, ...initialBottomBarPricing] : []
+  );
+  const [pricingLoaded, setPricingLoaded] = useState(hasInitialPricing);
   const [isValidating, setIsValidating] = useState(false);
   const fetchingRef = useRef(false);
 
@@ -115,24 +128,53 @@ const ProductPage = ({
     bottomBar: false,
   });
 
-  // Force motorization when arriving from a motorised collection page (e.g. Motorised EclipseCore)
-  const forceMotorization = searchParams.get('motorized') === 'true';
+  // Preselect motorization when arriving from a motorised collection page (e.g. Motorised EclipseCore)
+  const preselectMotorization = searchParams.get('motorized') === 'true';
+  const defaultMotorizationOption = MOTORIZATION_OPTIONS.find((option) => option.id !== 'none')?.id ?? null;
+  const activeMotorizationOptions = MOTORIZATION_OPTIONS.filter((option) => option.id !== 'none');
+  const canUseMotorization = product.features.hasMotorization || preselectMotorization;
+  const isMotorizationActive =
+    canUseMotorization && selectedOptionalCards.motorization;
+  const cartConfiguration = useMemo<ProductConfiguration>(() => ({
+    ...config,
+    controlSide: isMotorizationActive && product.features.hasChainColor ? null : config.controlSide,
+    chainColor: isMotorizationActive ? null : config.chainColor,
+    motorization: isMotorizationActive
+      ? (config.motorization && config.motorization !== 'none' ? config.motorization : defaultMotorizationOption)
+      : null,
+  }), [
+    config,
+    defaultMotorizationOption,
+    isMotorizationActive,
+    product.features.hasChainColor,
+  ]);
 
   // Pre-select motorization when arriving from a motorised collection page
   useEffect(() => {
-    if (forceMotorization) {
+    if (preselectMotorization) {
       setSelectedOptionalCards((prev) => ({
         ...prev,
         motorization: true,
         continuousChain: false,
       }));
-      setConfig((prev) => ({ ...prev, chainColor: null, controlSide: null }));
+      setConfig((prev) => ({
+        ...prev,
+        chainColor: null,
+        controlSide: null,
+        motorization: prev.motorization && prev.motorization !== 'none'
+          ? prev.motorization
+          : defaultMotorizationOption,
+      }));
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Fetch pricing data on mount
   useEffect(() => {
+    if (hasInitialPricing) {
+      return;
+    }
+
     // Prevent multiple simultaneous fetches
     if (fetchingRef.current) {
       return;
@@ -182,7 +224,7 @@ const ProductPage = ({
       isMounted = false;
       fetchingRef.current = false;
     };
-  }, [product.slug]);
+  }, [hasInitialPricing, product.slug]);
 
   // Determine which options to use based on product category
   const isRollerOrDayNight = useMemo(() => {
@@ -295,24 +337,26 @@ const ProductPage = ({
       installationMethod: visibleOptions.showInstallationMethod ? config.installationMethod : null,
       controlOption: visibleOptions.showControlOption ? config.controlOption : null,
       stacking: visibleOptions.showStacking ? config.stacking : null,
-      controlSide: visibleOptions.showControlSide ? config.controlSide : null,
+      controlSide: visibleOptions.showControlSide ? cartConfiguration.controlSide : null,
       bottomChain: visibleOptions.showBottomChain ? config.bottomChain : null,
       bracketType: visibleOptions.showBracketType ? config.bracketType : null,
-      chainColor: config.chainColor,
+      chainColor: cartConfiguration.chainColor,
       wrappedCassette: config.wrappedCassette,
       cassetteMatchingBar: config.cassetteMatchingBar,
       isRollerCassette: product.features.hasRollerCassette,
-      motorization: config.motorization,
+      motorization: cartConfiguration.motorization,
+      blindColor: visibleOptions.showBlindColor ? config.blindColor : null,
+      frameColor: visibleOptions.showFrameColor ? config.frameColor : null,
+      openingDirection: visibleOptions.showOpeningDirection ? config.openingDirection : null,
       bottomBar: visibleOptions.showBottomBar ? config.bottomBar : null,
       rollStyle: visibleOptions.showRollStyle ? config.rollStyle : null,
     });
-  }, [config, visibleOptions]);
+  }, [cartConfiguration.motorization, config, product.features.hasRollerCassette, visibleOptions]);
 
   const requiredCustomizationVisibility = useMemo(() => {
     const requiresManualChain =
       product.features.hasChainColor &&
-      !forceMotorization &&
-      (!selectedOptionalCards.motorization || config.motorization === 'none');
+      !isMotorizationActive;
 
     return {
       ...visibleOptions,
@@ -324,12 +368,11 @@ const ProductPage = ({
       showCassetteMatchingBar:
         selectedOptionalCards.cassette &&
         (product.features.hasCassetteMatchingBar || product.features.hasRollerCassette),
-      showMotorization: forceMotorization || selectedOptionalCards.motorization,
+      showMotorization: isMotorizationActive,
       showBottomBar: selectedOptionalCards.bottomBar && visibleOptions.showBottomBar,
     };
   }, [
-    config.motorization,
-    forceMotorization,
+    isMotorizationActive,
     product.features.hasCassetteMatchingBar,
     product.features.hasChainColor,
     product.features.hasRollerCassette,
@@ -340,20 +383,12 @@ const ProductPage = ({
 
   const missingRequiredCustomizations = useMemo(() => {
     const missingCustomizations = getMissingRequiredCustomizations(
-      config,
+      cartConfiguration,
       requiredCustomizationVisibility
     );
 
-    if (
-      forceMotorization &&
-      config.motorization === 'none' &&
-      !missingCustomizations.includes('motorization option')
-    ) {
-      missingCustomizations.push('motorization option');
-    }
-
     return missingCustomizations;
-  }, [config, forceMotorization, requiredCustomizationVisibility]);
+  }, [cartConfiguration, requiredCustomizationVisibility]);
 
   const isAddToCartDisabled = isValidating || missingRequiredCustomizations.length > 0;
 
@@ -452,14 +487,14 @@ const ProductPage = ({
           ...product,
           price: validation.calculatedPrice,
         };
-        addToCart(productWithPrice, config);
+        addToCart(productWithPrice, cartConfiguration);
       } else {
         // Price matches, proceed with cart
         const productWithPrice = {
           ...product,
           price: totalPrice,
         };
-        addToCart(productWithPrice, config);
+        addToCart(productWithPrice, cartConfiguration);
       }
     } catch (error) {
       console.error('Price validation failed:', error);
@@ -468,7 +503,7 @@ const ProductPage = ({
         ...product,
         price: totalPrice,
       };
-      addToCart(productWithPrice, config);
+      addToCart(productWithPrice, cartConfiguration);
     } finally {
       setIsValidating(false);
     }
@@ -854,15 +889,15 @@ const ProductPage = ({
                             <div
                               onClick={() => {
                                 const newValue = !selectedOptionalCards.continuousChain;
-                                setSelectedOptionalCards({
-                                  ...selectedOptionalCards,
+                                setSelectedOptionalCards((prev) => ({
+                                  ...prev,
                                   continuousChain: newValue,
-                                  motorization: newValue ? false : selectedOptionalCards.motorization,
-                                });
+                                  motorization: newValue ? false : prev.motorization,
+                                }));
                                 if (newValue) {
-                                  setConfig({ ...config, motorization: null });
+                                  setConfig((prev) => ({ ...prev, motorization: null }));
                                 } else {
-                                  setConfig({ ...config, chainColor: null, controlSide: null });
+                                  setConfig((prev) => ({ ...prev, chainColor: null, controlSide: null }));
                                 }
                               }}
                               className={`relative border-2 rounded-lg p-5 transition-all duration-300 text-left group cursor-pointer h-full flex flex-col ${selectedOptionalCards.continuousChain
@@ -1022,21 +1057,26 @@ const ProductPage = ({
                           )}
 
                           {/* Motorization Card */}
-                          {(product.features.hasMotorization || forceMotorization) && (
+                          {canUseMotorization && (
                             <div
                               onClick={() => {
-                                // When forced (e.g. Motorised EclipseCore), don't allow toggling off
-                                if (forceMotorization) return;
                                 const newValue = !selectedOptionalCards.motorization;
-                                setSelectedOptionalCards({
-                                  ...selectedOptionalCards,
+                                setSelectedOptionalCards((prev) => ({
+                                  ...prev,
                                   motorization: newValue,
-                                  continuousChain: newValue ? false : selectedOptionalCards.continuousChain,
-                                });
+                                  continuousChain: newValue ? false : prev.continuousChain,
+                                }));
                                 if (newValue) {
-                                  setConfig({ ...config, chainColor: null, controlSide: null });
+                                  setConfig((prev) => ({
+                                    ...prev,
+                                    chainColor: null,
+                                    controlSide: null,
+                                    motorization: prev.motorization && prev.motorization !== 'none'
+                                      ? prev.motorization
+                                      : defaultMotorizationOption,
+                                  }));
                                 } else {
-                                  setConfig({ ...config, motorization: null });
+                                  setConfig((prev) => ({ ...prev, motorization: null }));
                                 }
                               }}
                               className={`relative border-2 rounded-lg p-5 transition-all duration-300 text-left group cursor-pointer h-full flex flex-col ${selectedOptionalCards.motorization
@@ -1085,7 +1125,7 @@ const ProductPage = ({
                                 >
                                   <SimpleDropdown
                                     label="Motorization Option"
-                                    options={MOTORIZATION_OPTIONS}
+                                    options={activeMotorizationOptions}
                                     selectedValue={config.motorization}
                                     onChange={(optionId) => setConfig({ ...config, motorization: optionId })}
                                     placeholder="Select motorization"
@@ -1192,7 +1232,7 @@ const ProductPage = ({
       {/* Product Details Section - Full Width */}
       <CategoryInfoSection
         categorySlug={
-          forceMotorization
+          preselectMotorization
             ? (({ 'roller-blinds': 'motorised-roller-shades', 'day-and-night-blinds': 'motorised-dual-zebra-shades', 'pleated-blinds': 'motorised-eclipsecore' } as Record<string, string>)[product.category.toLowerCase().replace(/\s+/g, '-')] ?? product.category.toLowerCase().replace(/\s+/g, '-'))
             : product.category.toLowerCase().replace(/\s+/g, '-')
         }

@@ -25,9 +25,9 @@ const nextConfig: NextConfig = {
         pathname: '/**',
       },
     ],
-    // Disable image optimization for development to avoid private IP issues
-    // In production, consider using a CDN or image proxy service
-    unoptimized: process.env.NODE_ENV === 'development',
+    // Serve images directly from their source CDN (Shopify CDN handles optimization natively).
+    // This avoids Next.js image proxy issues in various deployment environments.
+    unoptimized: true,
     // Allow SVG images
     dangerouslyAllowSVG: true,
     contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",

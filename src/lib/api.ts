@@ -17,6 +17,9 @@ import {
 } from '@/types';
 import { getCategoryCustomizations } from '@/data/categoryCustomizations';
 
+const SERVER_API_CACHE_REVALIDATE_SECONDS =
+  Number(process.env.SERVER_API_CACHE_REVALIDATE_SECONDS || 3_600);
+
 // ============================================
 // API Configuration
 // ============================================
@@ -56,8 +59,9 @@ async function apiFetch<T>(endpoint: string, options?: RequestInit, retries: num
       ...options,
     };
 
-    if (isServerSide) {
-      (fetchOptions as any).next = { revalidate: 60 };
+    const method = (fetchOptions.method || 'GET').toUpperCase();
+    if (isServerSide && method === 'GET') {
+      (fetchOptions as any).next = { revalidate: SERVER_API_CACHE_REVALIDATE_SECONDS };
     }
 
     const response = await fetch(url, fetchOptions);

@@ -18,11 +18,12 @@ interface SimpleDropdownProps {
   selectedValue: string | null;
   onChange: (value: string) => void;
   placeholder?: string;
+  portal?: boolean;
 }
 
-const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder = 'Select' }: SimpleDropdownProps) => {
+const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder = 'Select', portal = true }: SimpleDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 320 });
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -42,19 +43,38 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
   }, []);
 
   useEffect(() => {
-    if (isOpen && buttonRef.current) {
+    if (portal && isOpen && buttonRef.current) {
       const updateMenuPosition = () => {
         if (buttonRef.current) {
           const buttonRect = buttonRef.current.getBoundingClientRect();
+          const viewportPadding = 16;
+          const menuGap = 4;
+          const preferredMaxHeight = 320;
+          const availableBelow = window.innerHeight - buttonRect.bottom - viewportPadding;
+          const availableAbove = buttonRect.top - viewportPadding;
+          const shouldOpenAbove =
+            availableBelow < preferredMaxHeight && availableAbove > availableBelow;
+          const maxHeight = Math.max(
+            160,
+            Math.min(
+              preferredMaxHeight,
+              (shouldOpenAbove ? availableAbove : availableBelow) - menuGap
+            )
+          );
 
-          // Calculate position - always open below
-          const left = buttonRect.left;
-          const width = buttonRect.width;
+          const width = Math.min(buttonRect.width, window.innerWidth - viewportPadding * 2);
+          const left = Math.min(
+            Math.max(viewportPadding, buttonRect.left),
+            window.innerWidth - width - viewportPadding
+          );
 
           setMenuPosition({
-            top: buttonRect.bottom + 4,
+            top: shouldOpenAbove
+              ? Math.max(viewportPadding, buttonRect.top - menuGap - maxHeight)
+              : buttonRect.bottom + menuGap,
             left,
             width,
+            maxHeight,
           });
         }
       };
@@ -69,7 +89,7 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
         window.removeEventListener('resize', updateMenuPosition);
       };
     }
-  }, [isOpen]);
+  }, [isOpen, portal]);
 
   const selectedOption = options.find(opt => opt.id === selectedValue);
 
@@ -108,22 +128,76 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
           </svg>
         </button>
 
-        {isOpen && (
+        {isOpen && !portal && (
+          <div
+            ref={menuRef}
+            className="absolute left-0 right-0 top-full z-[30] mt-1 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl"
+          >
+            {options.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => {
+                  onChange(option.id);
+                  setIsOpen(false);
+                }}
+                className={`w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 border-b border-gray-100 last:border-0 transition-colors ${selectedValue === option.id ? 'bg-[#f6fffd]' : ''}`}
+              >
+                {option.hex ? (
+                  <div
+                    className="w-10 h-10 rounded-md shrink-0 border border-gray-200"
+                    style={{ backgroundColor: option.hex }}
+                  />
+                ) : option.image && (
+                  <HoverPreviewImage
+                    src={option.image}
+                    alt={option.name}
+                    width={40}
+                    height={40}
+                    containerClassName="w-10 h-10 rounded-md overflow-hidden shrink-0 border border-gray-200 bg-gray-50"
+                    imageClassName="object-cover w-full h-full"
+                  />
+                )}
+                <div className="grow min-w-0 flex items-center gap-3 text-left">
+                  <p className={`text-sm font-medium ${selectedValue === option.id ? 'text-[#00473c]' : 'text-[#3a3a3a]'}`}>
+                    {option.name}
+                  </p>
+                </div>
+                {option.price && option.price > 0 ? (
+                  <span className="text-xs font-semibold bg-[#00473c] text-white px-2.5 py-1 rounded-md shrink-0">
+                    +${option.price.toFixed(2)}
+                  </span>
+                ) : null}
+                {selectedValue === option.id && (
+                  <div className="w-5 h-5 shrink-0 flex items-center justify-center">
+                    <div className="w-4 h-4 bg-[#00473c] rounded-sm flex items-center justify-center">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                  </div>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {isOpen && portal && (
           <>
             {/* Backdrop to capture clicks outside */}
             <div
-              className="fixed inset-0 z-[70]"
+              className="fixed inset-0 z-[90]"
               onClick={() => setIsOpen(false)}
             />
-            {/* Dropdown menu with fixed positioning to escape overflow constraints - always opens below */}
+            {/* Dropdown menu with fixed positioning to escape overflow constraints. */}
             <div
               ref={menuRef}
-              className="fixed z-[71] bg-white border border-gray-200 rounded-lg shadow-xl max-h-80 overflow-y-auto"
+              className="fixed z-[100] bg-white border border-gray-200 rounded-lg shadow-xl overflow-y-auto"
               style={{
                 top: `${menuPosition.top}px`,
                 left: `${menuPosition.left}px`,
                 minWidth: `${menuPosition.width}px`,
-                maxHeight: '320px',
+                maxHeight: `${menuPosition.maxHeight}px`,
               }}
             >
               {options.map((option) => (

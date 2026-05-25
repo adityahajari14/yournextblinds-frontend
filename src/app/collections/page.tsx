@@ -9,6 +9,8 @@ export const metadata = {
   description: 'Browse our complete range of premium window blinds. Find the perfect blinds for your home.',
 };
 
+export const revalidate = 3_600;
+
 export default async function CollectionsPage() {
   let products: Product[] = [];
   let filterOptions: { colors: string[]; patterns: string[] } = { colors: [], patterns: [] };
