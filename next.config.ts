@@ -13,7 +13,7 @@ const nextConfig: NextConfig = {
         hostname: '1clickblinds.co.uk',
         pathname: '/**',
       },
-      // Allow localhost for local development
+      // Allow localhost for local development.
       {
         protocol: 'http',
         hostname: 'localhost',
