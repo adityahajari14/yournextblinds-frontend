@@ -879,6 +879,9 @@ const ProductPage = ({
                                     selectedValue={config.bottomBar}
                                     onChange={(optionId) => setConfig({ ...config, bottomBar: optionId })}
                                     placeholder="Select bottom bar style"
+                                    portal
+                                    menuMinWidth={360}
+                                    portalPlacement="bottom"
                                   />
                                 </div>
                               )}
@@ -950,6 +953,9 @@ const ProductPage = ({
                                     selectedValue={config.controlSide}
                                     onChange={(sideId) => setConfig({ ...config, controlSide: sideId })}
                                     placeholder="Select location"
+                                    portal
+                                    menuMinWidth={320}
+                                    portalPlacement="bottom"
                                   />
                                   <SimpleDropdown
                                     label="Chain Color"
@@ -957,6 +963,9 @@ const ProductPage = ({
                                     selectedValue={config.chainColor}
                                     onChange={(colorId) => setConfig({ ...config, chainColor: colorId })}
                                     placeholder="Select chain color"
+                                    portal
+                                    menuMinWidth={320}
+                                    portalPlacement="bottom"
                                   />
                                 </div>
                               )}
@@ -1031,6 +1040,9 @@ const ProductPage = ({
                                       selectedValue={config.wrappedCassette}
                                       onChange={(optionId) => setConfig({ ...config, wrappedCassette: optionId })}
                                       placeholder="Select cassette color"
+                                      portal
+                                      menuMinWidth={360}
+                                      portalPlacement="bottom"
                                     />
                                   )}
                                   {product.features.hasCassetteMatchingBar && (
@@ -1040,6 +1052,9 @@ const ProductPage = ({
                                       selectedValue={config.cassetteMatchingBar}
                                       onChange={(optionId) => setConfig({ ...config, cassetteMatchingBar: optionId })}
                                       placeholder="Select cassette and bottom bar"
+                                      portal
+                                      menuMinWidth={360}
+                                      portalPlacement="bottom"
                                     />
                                   )}
                                   {product.features.hasRollerCassette && (
@@ -1049,6 +1064,9 @@ const ProductPage = ({
                                       selectedValue={config.cassetteMatchingBar}
                                       onChange={(optionId) => setConfig({ ...config, cassetteMatchingBar: optionId })}
                                       placeholder="Select cassette color"
+                                      portal
+                                      menuMinWidth={360}
+                                      portalPlacement="bottom"
                                     />
                                   )}
                                 </div>
@@ -1129,6 +1147,9 @@ const ProductPage = ({
                                     selectedValue={config.motorization}
                                     onChange={(optionId) => setConfig({ ...config, motorization: optionId })}
                                     placeholder="Select motorization"
+                                    portal
+                                    menuMinWidth={360}
+                                    portalPlacement="bottom"
                                   />
                                 </div>
                               )}

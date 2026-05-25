@@ -79,7 +79,9 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     : INSTALLATION_METHOD_OPTIONS;
   const controlOptions = isRollerOrDayNight ? ROLLER_CONTROL_OPTIONS : CONTROL_OPTIONS;
   const stackingOptions = VERTICAL_STACKING_OPTIONS[config.controlOption ?? ''] ?? [];
-  const canUseMotorization = product.features.hasMotorization;
+  const canUseMotorization =
+    product.features.hasMotorization ||
+    Boolean(item.configuration.motorization && item.configuration.motorization !== 'none');
   const isMotorizationActive = canUseMotorization && selectedOptionalCards.motorization;
 
   useEffect(() => {

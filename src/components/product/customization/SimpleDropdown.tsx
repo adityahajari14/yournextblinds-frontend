@@ -19,9 +19,20 @@ interface SimpleDropdownProps {
   onChange: (value: string) => void;
   placeholder?: string;
   portal?: boolean;
+  menuMinWidth?: number;
+  portalPlacement?: 'auto' | 'bottom';
 }
 
-const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder = 'Select', portal = true }: SimpleDropdownProps) => {
+const SimpleDropdown = ({
+  label,
+  options,
+  selectedValue,
+  onChange,
+  placeholder = 'Select',
+  portal = false,
+  menuMinWidth,
+  portalPlacement = 'auto',
+}: SimpleDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 320 });
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -53,6 +64,7 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
           const availableBelow = window.innerHeight - buttonRect.bottom - viewportPadding;
           const availableAbove = buttonRect.top - viewportPadding;
           const shouldOpenAbove =
+            portalPlacement === 'auto' &&
             availableBelow < preferredMaxHeight && availableAbove > availableBelow;
           const maxHeight = Math.max(
             160,
@@ -62,7 +74,10 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
             )
           );
 
-          const width = Math.min(buttonRect.width, window.innerWidth - viewportPadding * 2);
+          const width = Math.min(
+            Math.max(buttonRect.width, menuMinWidth ?? buttonRect.width),
+            window.innerWidth - viewportPadding * 2
+          );
           const left = Math.min(
             Math.max(viewportPadding, buttonRect.left),
             window.innerWidth - width - viewportPadding
@@ -131,7 +146,7 @@ const SimpleDropdown = ({ label, options, selectedValue, onChange, placeholder =
         {isOpen && !portal && (
           <div
             ref={menuRef}
-            className="absolute left-0 right-0 top-full z-[30] mt-1 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl"
+            className="relative z-[30] mt-1 max-h-64 overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-xl"
           >
             {options.map((option) => (
               <button
