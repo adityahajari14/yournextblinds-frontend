@@ -39,6 +39,7 @@ import {
   SimpleDropdown,
   BottomBarSelector,
   RollStyleSelector,
+  DayNightBandHSelector,
 } from './customization';
 import {
   HEADRAIL_OPTIONS,
@@ -63,6 +64,12 @@ import {
   BOTTOM_BAR_OPTIONS,
   ROLL_STYLE_OPTIONS
 } from '@/data/customizations';
+import {
+  DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS,
+  DAY_NIGHT_BAND_H_SIZE_LIMITS,
+  isDayNightBandHProduct,
+  supportsBandHWrappedCassette,
+} from '@/data/dayNightBandH';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 import { CONTINUOUS_CHAIN_CARD, CONTINUOUS_CHAIN_CARD_ROLLER, CONTINUOUS_CHAIN_CARD_ZEBRA, CASSETTE_CARD, CASSETTE_CARD_ROLLER, CASSETTE_CARD_ZEBRA, MOTORIZATION_CARD, BOTTOM_BAR_CARD } from '@/data/optionalCustomizations';
 import Image from 'next/image';
@@ -82,6 +89,7 @@ const ProductPage = ({
 }: ProductPageProps) => {
   const { addToCart } = useCart();
   const searchParams = useSearchParams();
+  const isBandHProduct = useMemo(() => isDayNightBandHProduct(product), [product]);
 
   useEffect(() => {
     trackShopifyProductView(product);
@@ -130,21 +138,32 @@ const ProductPage = ({
 
   // Preselect motorization when arriving from a motorised collection page (e.g. Motorised EclipseCore)
   const preselectMotorization = searchParams.get('motorized') === 'true';
-  const defaultMotorizationOption = MOTORIZATION_OPTIONS.find((option) => option.id !== 'none')?.id ?? null;
-  const activeMotorizationOptions = MOTORIZATION_OPTIONS.filter((option) => option.id !== 'none');
+  const defaultMotorizationOption = isBandHProduct
+    ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS[0]?.id ?? null
+    : MOTORIZATION_OPTIONS.find((option) => option.id !== 'none')?.id ?? null;
+  const activeMotorizationOptions = isBandHProduct
+    ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS
+    : MOTORIZATION_OPTIONS.filter((option) => option.id !== 'none');
   const canUseMotorization = product.features.hasMotorization || preselectMotorization;
   const isMotorizationActive =
     canUseMotorization && selectedOptionalCards.motorization;
   const cartConfiguration = useMemo<ProductConfiguration>(() => ({
     ...config,
-    controlSide: isMotorizationActive && product.features.hasChainColor ? null : config.controlSide,
-    chainColor: isMotorizationActive ? null : config.chainColor,
+    controlSide: isBandHProduct
+      ? (config.controlOption === 'continuous-chain' && !isMotorizationActive ? config.controlSide : null)
+      : isMotorizationActive && product.features.hasChainColor ? null : config.controlSide,
+    chainColor: isBandHProduct || isMotorizationActive ? null : config.chainColor,
+    wrappedCassette: isBandHProduct && !supportsBandHWrappedCassette(config.headrail)
+      ? null
+      : config.wrappedCassette,
+    cassetteMatchingBar: isBandHProduct ? null : config.cassetteMatchingBar,
     motorization: isMotorizationActive
       ? (config.motorization && config.motorization !== 'none' ? config.motorization : defaultMotorizationOption)
       : null,
   }), [
     config,
     defaultMotorizationOption,
+    isBandHProduct,
     isMotorizationActive,
     product.features.hasChainColor,
   ]);
@@ -273,6 +292,26 @@ const ProductPage = ({
   const visibleOptions = useMemo(() => {
     const headrail = config.headrail;
 
+    if (isBandHProduct) {
+      return {
+        showSize: product.features.hasSize,
+        showHeadrail: true,
+        showHeadrailColour: false,
+        showInstallationMethod: true,
+        showControlOption: !isMotorizationActive,
+        showStacking: false,
+        showControlSide: config.controlOption === 'continuous-chain' && !isMotorizationActive,
+        showBottomChain: false,
+        showBracketType: false,
+        showMotorization: isMotorizationActive,
+        showBlindColor: false,
+        showFrameColor: false,
+        showOpeningDirection: false,
+        showBottomBar: false,
+        showRollStyle: false,
+      };
+    }
+
     // For roller blinds and day/night blinds - use product.features settings
     if (isRollerOrDayNight) {
       return {
@@ -327,7 +366,7 @@ const ProductPage = ({
       showBottomBar: product.features.hasBottomBar,
       showRollStyle: product.features.hasRollStyle,
     };
-  }, [config.headrail, isRollerOrDayNight, product.features]);
+  }, [config.controlOption, config.headrail, isBandHProduct, isMotorizationActive, isRollerOrDayNight, product.features]);
 
   // Build list of selected customizations for pricing
   const selectedCustomizations = useMemo(() => {
@@ -340,9 +379,11 @@ const ProductPage = ({
       controlSide: visibleOptions.showControlSide ? cartConfiguration.controlSide : null,
       bottomChain: visibleOptions.showBottomChain ? config.bottomChain : null,
       bracketType: visibleOptions.showBracketType ? config.bracketType : null,
-      chainColor: cartConfiguration.chainColor,
-      wrappedCassette: config.wrappedCassette,
-      cassetteMatchingBar: config.cassetteMatchingBar,
+      chainColor: isBandHProduct ? null : cartConfiguration.chainColor,
+      wrappedCassette: isBandHProduct
+        ? (supportsBandHWrappedCassette(config.headrail) ? cartConfiguration.wrappedCassette : null)
+        : config.wrappedCassette,
+      cassetteMatchingBar: isBandHProduct ? null : config.cassetteMatchingBar,
       isRollerCassette: product.features.hasRollerCassette,
       motorization: cartConfiguration.motorization,
       blindColor: visibleOptions.showBlindColor ? config.blindColor : null,
@@ -351,9 +392,19 @@ const ProductPage = ({
       bottomBar: visibleOptions.showBottomBar ? config.bottomBar : null,
       rollStyle: visibleOptions.showRollStyle ? config.rollStyle : null,
     });
-  }, [cartConfiguration.motorization, config, product.features.hasRollerCassette, visibleOptions]);
+  }, [cartConfiguration, config, isBandHProduct, product.features.hasRollerCassette, visibleOptions]);
 
   const requiredCustomizationVisibility = useMemo(() => {
+    if (isBandHProduct) {
+      return {
+        ...visibleOptions,
+        showWrappedCassette: supportsBandHWrappedCassette(config.headrail),
+        showChainColor: false,
+        showCassetteMatchingBar: false,
+        showMotorization: isMotorizationActive,
+      };
+    }
+
     const requiresManualChain =
       product.features.hasChainColor &&
       !isMotorizationActive;
@@ -372,6 +423,8 @@ const ProductPage = ({
       showBottomBar: selectedOptionalCards.bottomBar && visibleOptions.showBottomBar,
     };
   }, [
+    config.headrail,
+    isBandHProduct,
     isMotorizationActive,
     product.features.hasCassetteMatchingBar,
     product.features.hasChainColor,
@@ -387,8 +440,30 @@ const ProductPage = ({
       requiredCustomizationVisibility
     );
 
-    return missingCustomizations;
-  }, [cartConfiguration, requiredCustomizationVisibility]);
+    if (!isBandHProduct || cartConfiguration.width <= 0 || cartConfiguration.height <= 0) {
+      return missingCustomizations;
+    }
+
+    const widthInches = getTotalInches(
+      cartConfiguration.width,
+      cartConfiguration.widthFraction,
+      cartConfiguration.widthUnit
+    );
+    const heightInches = getTotalInches(
+      cartConfiguration.height,
+      cartConfiguration.heightFraction,
+      cartConfiguration.heightUnit
+    );
+    const isOutOfRange =
+      widthInches < DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth ||
+      widthInches > DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth ||
+      heightInches < DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight ||
+      heightInches > DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight;
+
+    return isOutOfRange
+      ? [...missingCustomizations, 'valid Band H size']
+      : missingCustomizations;
+  }, [cartConfiguration, isBandHProduct, requiredCustomizationVisibility]);
 
   const isAddToCartDisabled = isValidating || missingRequiredCustomizations.length > 0;
 
@@ -618,10 +693,10 @@ const ProductPage = ({
                           onHeightChange={(value) => setConfig({ ...config, height: value })}
                           onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
                           onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
-                          minWidth={sizeRanges?.minWidth}
-                          maxWidth={sizeRanges?.maxWidth}
-                          minHeight={sizeRanges?.minHeight}
-                          maxHeight={sizeRanges?.maxHeight}
+                          minWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : sizeRanges?.minWidth}
+                          maxWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : sizeRanges?.maxWidth}
+                          minHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : sizeRanges?.minHeight}
+                          maxHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : sizeRanges?.maxHeight}
                         />
                       )}
 
@@ -680,6 +755,23 @@ const ProductPage = ({
 
                   {isCustomizeOpen && (
                     <div className="p-4 md:p-6 space-y-6 divide-y divide-gray-100">
+                      {isBandHProduct ? (
+                        <DayNightBandHSelector
+                          config={config}
+                          updateConfig={(updates) => setConfig((prev) => ({ ...prev, ...updates }))}
+                          isMotorizationSelected={selectedOptionalCards.motorization}
+                          onMotorizationSelectedChange={(selected) =>
+                            setSelectedOptionalCards((prev) => ({
+                              ...prev,
+                              motorization: selected,
+                              continuousChain: false,
+                              cassette: false,
+                              bottomBar: false,
+                            }))
+                          }
+                        />
+                      ) : (
+                        <>
                       {/* Headrail Selector */}
                       {product.features.hasHeadrail && (
                         <div className="pt-0 first:pt-0 pb-6">
@@ -1157,6 +1249,8 @@ const ProductPage = ({
                           )}
                         </div>
                       </div>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>

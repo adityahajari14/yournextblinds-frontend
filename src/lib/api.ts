@@ -16,6 +16,11 @@ import {
   CheckoutResponse,
 } from '@/types';
 import { getCategoryCustomizations } from '@/data/categoryCustomizations';
+import {
+  DAY_NIGHT_BAND_H_PRODUCT_HANDLE,
+  DAY_NIGHT_BAND_H_TAG,
+  HIDDEN_TEST_PRODUCT_TAG,
+} from '@/data/dayNightBandH';
 
 const SERVER_API_CACHE_REVALIDATE_SECONDS =
   Number(process.env.SERVER_API_CACHE_REVALIDATE_SECONDS || 3_600);
@@ -157,6 +162,10 @@ interface FetchProductsParams {
 export async function fetchProducts(params?: FetchProductsParams): Promise<ApiProductsResponse> {
   try {
     let allProducts = await fetchShopifyProductsMerged(params?.search);
+
+    allProducts = allProducts.filter((product) =>
+      !product.tags.some((tag) => tag.slug.toLowerCase() === HIDDEN_TEST_PRODUCT_TAG)
+    );
 
     // Apply tag filter if specified
     if (params?.tags?.length) {
@@ -475,10 +484,20 @@ export function formatPriceWithCurrency(price: number, currency: string = 'USD')
 const ECLIPSECORE_HONEYCOMB_SLUG = 'non-driii-honeycomb-blackout-blinds';
 
 export function transformProduct(apiProduct: ApiProduct): Product {
-  const categoryName = apiProduct.categories[0]?.name || 'Blinds';
+  const apiTagSlugs = apiProduct.tags.map(t => t.slug.toLowerCase());
+  const isBandHProduct =
+    apiProduct.slug === DAY_NIGHT_BAND_H_PRODUCT_HANDLE ||
+    apiTagSlugs.includes(DAY_NIGHT_BAND_H_TAG);
+  const categoryName = isBandHProduct
+    ? 'Day and Night Blinds'
+    : apiProduct.categories[0]?.name || 'Blinds';
 
   // Get all category slugs for the product (products can have multiple categories)
   let categorySlugs = apiProduct.categories.map(c => c.slug);
+
+  if (isBandHProduct && !categorySlugs.includes('day-and-night-blinds')) {
+    categorySlugs = ['day-and-night-blinds', ...categorySlugs];
+  }
 
   // EclipseCore / honeycomb blackout product: ensure we use eclipsecore-shades features so
   // "Measure your window" and "Customize your blind" show Size, Blind Color, Frame Color, Opening Direction
@@ -499,9 +518,8 @@ export function transformProduct(apiProduct: ApiProduct): Product {
 
   // Enable pet-friendly chain option for waterproof vertical blinds
   // 'waterproof-blackout-vertical-blinds' is a nav slug; backend products use category 'vertical-blinds' + 'waterproof' tag
-  const tagSlugs = apiProduct.tags.map(t => t.slug.toLowerCase());
   const hasPvcFabric = categorySlugs.some(s => s.toLowerCase() === 'vertical-blinds') &&
-    tagSlugs.includes('waterproof');
+    apiTagSlugs.includes('waterproof');
   features.hasPvcFabric = hasPvcFabric;
 
   return {

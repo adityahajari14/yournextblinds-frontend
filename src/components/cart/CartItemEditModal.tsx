@@ -5,7 +5,7 @@ import { CartItem, CustomizationPricing, DEFAULT_CONFIGURATION, PriceBandMatrix,
 import { fetchCustomizationPricing, fetchPriceMatrix, formatPriceWithCurrency, validateCartPrice } from '@/lib/api';
 import { calculateTotalPrice, configToCustomizations, getTotalInches } from '@/lib/pricing';
 import { getMissingRequiredCustomizations } from '@/lib/product-customization-validation';
-import { RoomTypeSelector, SimpleDropdown, SizeSelector } from '@/components/product/customization';
+import { DayNightBandHSelector, RoomTypeSelector, SimpleDropdown, SizeSelector } from '@/components/product/customization';
 import {
   BLIND_COLOR_OPTIONS,
   BOTTOM_BAR_OPTIONS,
@@ -30,6 +30,12 @@ import {
   ZEBRA_INSTALLATION_OPTIONS,
 } from '@/data/customizations';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
+import {
+  DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS,
+  DAY_NIGHT_BAND_H_SIZE_LIMITS,
+  isDayNightBandHProduct,
+  supportsBandHWrappedCassette,
+} from '@/data/dayNightBandH';
 
 interface CartItemEditModalProps {
   item: CartItem;
@@ -45,8 +51,10 @@ const getBottomBarPricing = () =>
     prices: [{ widthMm: null, price: option.price || 0 }],
   }));
 
-const getFirstMotorizationOption = () =>
-  MOTORIZATION_OPTIONS.find((option) => option.id !== 'none')?.id ?? null;
+const getFirstMotorizationOption = (isBandHProduct: boolean) =>
+  isBandHProduct
+    ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS[0]?.id ?? null
+    : MOTORIZATION_OPTIONS.find((option) => option.id !== 'none')?.id ?? null;
 
 const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) => {
   const [config, setConfig] = useState<ProductConfiguration>({
@@ -67,8 +75,11 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const product = item.product;
-  const defaultMotorizationOption = getFirstMotorizationOption();
-  const activeMotorizationOptions = MOTORIZATION_OPTIONS.filter((option) => option.id !== 'none');
+  const isBandHProduct = isDayNightBandHProduct(product);
+  const defaultMotorizationOption = getFirstMotorizationOption(isBandHProduct);
+  const activeMotorizationOptions = isBandHProduct
+    ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS
+    : MOTORIZATION_OPTIONS.filter((option) => option.id !== 'none');
   const category = product.category.toLowerCase();
   const isRollerOrDayNight = category.includes('roller') || category.includes('day') || category.includes('night');
   const isDayNight = category.includes('day') || category.includes('night') || category.includes('zebra');
@@ -119,6 +130,25 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
   }, []);
 
   const visibleOptions = useMemo(() => {
+    if (isBandHProduct) {
+      return {
+        showSize: product.features.hasSize,
+        showHeadrail: true,
+        showHeadrailColour: false,
+        showInstallationMethod: true,
+        showControlOption: !isMotorizationActive,
+        showStacking: false,
+        showControlSide: config.controlOption === 'continuous-chain' && !isMotorizationActive,
+        showBottomChain: false,
+        showBracketType: false,
+        showBlindColor: false,
+        showFrameColor: false,
+        showOpeningDirection: false,
+        showBottomBar: false,
+        showRollStyle: false,
+      };
+    }
+
     if (isRollerOrDayNight) {
       return {
         showSize: product.features.hasSize,
@@ -155,14 +185,18 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
       showBottomBar: product.features.hasBottomBar,
       showRollStyle: product.features.hasRollStyle,
     };
-  }, [config.headrail, isRollerOrDayNight, product.features]);
+  }, [config.controlOption, config.headrail, isBandHProduct, isMotorizationActive, isRollerOrDayNight, product.features]);
 
   const normalizedConfig = useMemo<ProductConfiguration>(() => ({
     ...config,
-    controlSide: isMotorizationActive && product.features.hasChainColor ? null : config.controlSide,
-    chainColor: isMotorizationActive ? null : config.chainColor,
-    wrappedCassette: selectedOptionalCards.cassette ? config.wrappedCassette : null,
-    cassetteMatchingBar: selectedOptionalCards.cassette ? config.cassetteMatchingBar : null,
+    controlSide: isBandHProduct
+      ? (config.controlOption === 'continuous-chain' && !isMotorizationActive ? config.controlSide : null)
+      : isMotorizationActive && product.features.hasChainColor ? null : config.controlSide,
+    chainColor: isBandHProduct || isMotorizationActive ? null : config.chainColor,
+    wrappedCassette: isBandHProduct
+      ? (supportsBandHWrappedCassette(config.headrail) ? config.wrappedCassette : null)
+      : selectedOptionalCards.cassette ? config.wrappedCassette : null,
+    cassetteMatchingBar: isBandHProduct ? null : selectedOptionalCards.cassette ? config.cassetteMatchingBar : null,
     motorization: isMotorizationActive
       ? (config.motorization && config.motorization !== 'none' ? config.motorization : defaultMotorizationOption)
       : null,
@@ -170,23 +204,41 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
   }), [
     config,
     defaultMotorizationOption,
+    isBandHProduct,
     isMotorizationActive,
     product.features.hasChainColor,
     selectedOptionalCards.bottomBar,
     selectedOptionalCards.cassette,
   ]);
 
-  const requiredVisibility = useMemo(() => ({
-    ...visibleOptions,
-    showControlSide: product.features.hasChainColor ? !isMotorizationActive : visibleOptions.showControlSide,
-    showChainColor: product.features.hasChainColor && !isMotorizationActive,
-    showWrappedCassette: selectedOptionalCards.cassette && product.features.hasWrappedCassette,
-    showCassetteMatchingBar:
-      selectedOptionalCards.cassette &&
-      (product.features.hasCassetteMatchingBar || product.features.hasRollerCassette),
-    showMotorization: isMotorizationActive,
-    showBottomBar: selectedOptionalCards.bottomBar && visibleOptions.showBottomBar,
-  }), [
+  const requiredVisibility = useMemo(() => {
+    if (isBandHProduct) {
+      return {
+        ...visibleOptions,
+        showControlSide: config.controlOption === 'continuous-chain' && !isMotorizationActive,
+        showChainColor: false,
+        showWrappedCassette: supportsBandHWrappedCassette(config.headrail),
+        showCassetteMatchingBar: false,
+        showMotorization: isMotorizationActive,
+        showBottomBar: false,
+      };
+    }
+
+    return {
+      ...visibleOptions,
+      showControlSide: product.features.hasChainColor ? !isMotorizationActive : visibleOptions.showControlSide,
+      showChainColor: product.features.hasChainColor && !isMotorizationActive,
+      showWrappedCassette: selectedOptionalCards.cassette && product.features.hasWrappedCassette,
+      showCassetteMatchingBar:
+        selectedOptionalCards.cassette &&
+        (product.features.hasCassetteMatchingBar || product.features.hasRollerCassette),
+      showMotorization: isMotorizationActive,
+      showBottomBar: selectedOptionalCards.bottomBar && visibleOptions.showBottomBar,
+    };
+  }, [
+    config.controlOption,
+    config.headrail,
+    isBandHProduct,
     isMotorizationActive,
     product.features.hasCassetteMatchingBar,
     product.features.hasChainColor,
@@ -197,10 +249,31 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     visibleOptions,
   ]);
 
-  const missingCustomizations = useMemo(
-    () => getMissingRequiredCustomizations(normalizedConfig, requiredVisibility),
-    [normalizedConfig, requiredVisibility]
-  );
+  const missingCustomizations = useMemo(() => {
+    const missing = getMissingRequiredCustomizations(normalizedConfig, requiredVisibility);
+
+    if (!isBandHProduct || normalizedConfig.width <= 0 || normalizedConfig.height <= 0) {
+      return missing;
+    }
+
+    const widthInches = getTotalInches(
+      normalizedConfig.width,
+      normalizedConfig.widthFraction,
+      normalizedConfig.widthUnit
+    );
+    const heightInches = getTotalInches(
+      normalizedConfig.height,
+      normalizedConfig.heightFraction,
+      normalizedConfig.heightUnit
+    );
+    const isOutOfRange =
+      widthInches < DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth ||
+      widthInches > DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth ||
+      heightInches < DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight ||
+      heightInches > DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight;
+
+    return isOutOfRange ? [...missing, 'valid Band H size'] : missing;
+  }, [isBandHProduct, normalizedConfig, requiredVisibility]);
 
   const selectedCustomizations = useMemo(() => configToCustomizations({
     headrail: visibleOptions.showHeadrail ? normalizedConfig.headrail : null,
@@ -211,9 +284,11 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     controlSide: visibleOptions.showControlSide ? normalizedConfig.controlSide : null,
     bottomChain: visibleOptions.showBottomChain ? normalizedConfig.bottomChain : null,
     bracketType: visibleOptions.showBracketType ? normalizedConfig.bracketType : null,
-    chainColor: normalizedConfig.chainColor,
-    wrappedCassette: normalizedConfig.wrappedCassette,
-    cassetteMatchingBar: normalizedConfig.cassetteMatchingBar,
+    chainColor: isBandHProduct ? null : normalizedConfig.chainColor,
+    wrappedCassette: isBandHProduct
+      ? (supportsBandHWrappedCassette(normalizedConfig.headrail) ? normalizedConfig.wrappedCassette : null)
+      : normalizedConfig.wrappedCassette,
+    cassetteMatchingBar: isBandHProduct ? null : normalizedConfig.cassetteMatchingBar,
     isRollerCassette: product.features.hasRollerCassette,
     motorization: normalizedConfig.motorization,
     blindColor: visibleOptions.showBlindColor ? normalizedConfig.blindColor : null,
@@ -221,7 +296,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     openingDirection: visibleOptions.showOpeningDirection ? normalizedConfig.openingDirection : null,
     bottomBar: visibleOptions.showBottomBar ? normalizedConfig.bottomBar : null,
     rollStyle: visibleOptions.showRollStyle ? normalizedConfig.rollStyle : null,
-  }), [normalizedConfig, product.features.hasRollerCassette, visibleOptions]);
+  }), [isBandHProduct, normalizedConfig, product.features.hasRollerCassette, visibleOptions]);
 
   const priceCalculation = useMemo(() => {
     const widthInches = getTotalInches(
@@ -362,6 +437,10 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                 onHeightChange={(value) => updateConfig({ height: value })}
                 onHeightFractionChange={(value) => updateConfig({ heightFraction: value })}
                 onUnitChange={(unit) => updateConfig({ widthUnit: unit, heightUnit: unit })}
+                minWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : undefined}
+                maxWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : undefined}
+                minHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : undefined}
+                maxHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : undefined}
               />
             )}
 
@@ -373,6 +452,30 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
               onBlindNameChange={(blindName) => updateConfig({ blindName: blindName || null })}
             />
 
+            {isBandHProduct ? (
+              <>
+                {visibleOptions.showInstallationMethod && (
+                  <div className="max-w-md">
+                    {renderDropdown('installationMethod', 'Installation', installationOptions)}
+                  </div>
+                )}
+                <DayNightBandHSelector
+                  config={config}
+                  updateConfig={updateConfig}
+                  isMotorizationSelected={selectedOptionalCards.motorization}
+                  onMotorizationSelectedChange={(selected) =>
+                    setSelectedOptionalCards((prev) => ({
+                      ...prev,
+                      motorization: selected,
+                      continuousChain: false,
+                      cassette: false,
+                      bottomBar: false,
+                    }))
+                  }
+                />
+              </>
+            ) : (
+              <>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               {visibleOptions.showHeadrail && renderDropdown('headrail', 'Headrail', HEADRAIL_OPTIONS)}
               {visibleOptions.showHeadrailColour && renderDropdown('headrailColour', 'Headrail Colour', HEADRAIL_COLOUR_OPTIONS)}
@@ -506,6 +609,8 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                   </div>
                 )}
               </div>
+            )}
+              </>
             )}
           </div>
         </div>

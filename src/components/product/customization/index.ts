@@ -17,3 +17,4 @@ export { default as MotorizationSelector } from './MotorizationSelector';
 export { default as SimpleDropdown } from './SimpleDropdown';
 export { default as BottomBarSelector } from './BottomBarSelector';
 export { default as RollStyleSelector } from './RollStyleSelector';
+export { default as DayNightBandHSelector } from './DayNightBandHSelector';

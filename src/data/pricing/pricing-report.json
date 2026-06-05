@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-05-25T05:20:52.322Z",
+  "generatedAt": "2026-06-05T04:59:11.290Z",
   "source": "yournextblinds-db-export",
-  "checksum": "02dcff04ab73a836b89fdc8c232f41aea1872b1f99d76eb5b95593437d68fff3",
+  "checksum": "14ec6021a0d6656959ba4ace0f3a47d86ae0790ae3aeb4a55c069e8bcc50ce13",
   "counts": {
-    "priceBands": 18,
+    "priceBands": 19,
     "widthBands": 47,
     "heightBands": 28,
-    "priceCells": 3225,
-    "customizationOptions": 60,
-    "customizationPricings": 144
+    "priceCells": 3984,
+    "customizationOptions": 70,
+    "customizationPricings": 154
   },
   "priceBandNames": [
     "Dayandnight - Band A",
@@ -28,7 +28,8 @@
     "Vertical Blind - Band B",
     "Vertical Blind - Band C",
     "Vertical Blind - Band D",
-    "Vertical Blind - Band E"
+    "Vertical Blind - Band E",
+    "Dayandnight - Band H"
   ],
   "validation": {
     "errors": [],

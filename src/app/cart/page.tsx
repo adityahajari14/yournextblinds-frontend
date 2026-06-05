@@ -33,6 +33,12 @@ import {
   BOTTOM_BAR_OPTIONS,
   ROLL_STYLE_OPTIONS,
 } from '@/data/customizations';
+import {
+  DAY_NIGHT_BAND_H_CONTROL_OPTIONS,
+  DAY_NIGHT_BAND_H_HEADRAIL_OPTIONS,
+  DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS,
+  DAY_NIGHT_BAND_H_WRAPPED_CASSETTE_OPTIONS,
+} from '@/data/dayNightBandH';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 
 export default function CartPage() {
@@ -142,18 +148,18 @@ export default function CartPage() {
     const details: Array<{ key: string; label: string; options?: PriceOption[] }> = [
       { key: 'roomType', label: 'Room Type', options: ROOM_TYPE_OPTIONS },
       { key: 'blindName', label: 'Blind Name' },
-      { key: 'headrail', label: 'Headrail', options: HEADRAIL_OPTIONS },
+      { key: 'headrail', label: 'Headrail', options: [...HEADRAIL_OPTIONS, ...DAY_NIGHT_BAND_H_HEADRAIL_OPTIONS] },
       { key: 'headrailColour', label: 'Headrail Colour', options: HEADRAIL_COLOUR_OPTIONS },
       { key: 'installationMethod', label: 'Installation', options: [...INSTALLATION_METHOD_OPTIONS, ...ROLLER_INSTALLATION_OPTIONS] },
-      { key: 'controlOption', label: 'Control', options: [...CONTROL_OPTIONS, ...ROLLER_CONTROL_OPTIONS] },
+      { key: 'controlOption', label: 'Control', options: [...CONTROL_OPTIONS, ...ROLLER_CONTROL_OPTIONS, ...DAY_NIGHT_BAND_H_CONTROL_OPTIONS] },
       { key: 'stacking', label: 'Stacking', options: Object.values(VERTICAL_STACKING_OPTIONS).flat() },
       { key: 'controlSide', label: 'Control Side', options: CONTROL_SIDE_OPTIONS },
       { key: 'bottomChain', label: 'Bottom Weight/Chain', options: BOTTOM_CHAIN_OPTIONS },
       { key: 'bracketType', label: 'Bracket Type', options: BRACKET_TYPE_OPTIONS },
       { key: 'chainColor', label: 'Chain Color', options: CHAIN_COLOR_OPTIONS },
-      { key: 'wrappedCassette', label: 'Wrapped Cassette', options: WRAPPED_CASSETTE_OPTIONS },
+      { key: 'wrappedCassette', label: 'Wrapped Cassette', options: [...WRAPPED_CASSETTE_OPTIONS, ...DAY_NIGHT_BAND_H_WRAPPED_CASSETTE_OPTIONS] },
       { key: 'cassetteMatchingBar', label: 'Cassette Bar', options: [...CASSETTE_MATCHING_BAR_OPTIONS, ...ROLLER_CASSETTE_OPTIONS] },
-      { key: 'motorization', label: 'Motorisation', options: MOTORIZATION_OPTIONS },
+      { key: 'motorization', label: 'Motorisation', options: [...MOTORIZATION_OPTIONS, ...DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS] },
       { key: 'blindColor', label: 'Blind Color', options: BLIND_COLOR_OPTIONS },
       { key: 'frameColor', label: 'Frame Color', options: FRAME_COLOR_OPTIONS },
       { key: 'openingDirection', label: 'Opening Direction', options: OPENING_DIRECTION_OPTIONS },
@@ -210,7 +216,8 @@ export default function CartPage() {
     // Control Option
     if (config.controlOption) {
       const option = CONTROL_OPTIONS.find(opt => opt.id === config.controlOption) ||
-        ROLLER_CONTROL_OPTIONS.find(opt => opt.id === config.controlOption);
+        ROLLER_CONTROL_OPTIONS.find(opt => opt.id === config.controlOption) ||
+        DAY_NIGHT_BAND_H_CONTROL_OPTIONS.find(opt => opt.id === config.controlOption);
       if (option?.price && option.price > 0) {
         costs.push({ label: option.name, price: option.price });
       }
@@ -258,7 +265,8 @@ export default function CartPage() {
 
     // Wrapped Cassette
     if (config.wrappedCassette) {
-      const option = WRAPPED_CASSETTE_OPTIONS.find(opt => opt.id === config.wrappedCassette);
+      const option = [...WRAPPED_CASSETTE_OPTIONS, ...DAY_NIGHT_BAND_H_WRAPPED_CASSETTE_OPTIONS]
+        .find(opt => opt.id === config.wrappedCassette);
       if (option?.price && option.price > 0) {
         costs.push({ label: option.name, price: option.price });
       }
@@ -273,7 +281,8 @@ export default function CartPage() {
     }
 
     if (config.motorization && config.motorization !== 'none') {
-      const option = MOTORIZATION_OPTIONS.find(opt => opt.id === config.motorization);
+      const option = [...MOTORIZATION_OPTIONS, ...DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS]
+        .find(opt => opt.id === config.motorization);
       costs.push({ label: 'Motorisation motor', price: 95 });
       if (option?.price && option.price > 0) {
         costs.push({ label: option.name, price: option.price });
