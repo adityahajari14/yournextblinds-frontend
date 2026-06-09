@@ -153,7 +153,7 @@ const DayNightBandHSelector = ({
               </span>
             )}
             <div className="relative h-[100px] w-full mb-3 rounded-md bg-gray-50 overflow-hidden flex items-center justify-center">
-              <Image src="/products/motorization/1ch.png" alt="Motorization" width={130} height={100} className="object-contain" />
+              <Image src="/products/control/motorised-option.webp" alt="Motorization" width={130} height={100} className="object-contain" />
             </div>
             <p className="text-base font-semibold text-[#3a3a3a] pr-8">Motorization</p>
             <p className="text-sm text-gray-500 mt-1">Motorized control with remote selection.</p>
