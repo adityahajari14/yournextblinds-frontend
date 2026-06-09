@@ -1,4 +1,8 @@
 import pricingDataFile from '@/data/pricing/pricing-data.json';
+import {
+  DAY_NIGHT_BAND_H_PRICE_BAND_NAME,
+  DAY_NIGHT_BAND_H_PRODUCT_HANDLE,
+} from '@/data/dayNightBandH';
 import { getPriceBandNameByHandle, getAllCachedProducts } from './product-cache';
 
 export interface PricingRequest {
@@ -110,6 +114,10 @@ interface PricingIndexes {
 
 const pricingData = pricingDataFile as PricingDataFile;
 let indexes: PricingIndexes | null = null;
+
+const localPriceBandByHandle: Record<string, string> = {
+  [DAY_NIGHT_BAND_H_PRODUCT_HANDLE]: DAY_NIGHT_BAND_H_PRICE_BAND_NAME,
+};
 
 function key(...parts: Array<string | null>) {
   return parts.map((part) => part ?? '__null__').join('::');
@@ -353,7 +361,7 @@ function findCeilingHeightBand(heightInches: number, priceBandId: string): JsonH
 }
 
 async function resolvePriceBand(handle: string): Promise<JsonPriceBand> {
-  const priceBandName = await getPriceBandNameByHandle(handle);
+  const priceBandName = localPriceBandByHandle[handle] ?? await getPriceBandNameByHandle(handle);
   if (!priceBandName) {
     throw new Error(`Product "${handle}" not found or has no price band assigned`);
   }
@@ -585,6 +593,9 @@ export async function getMinimumPricesByHandle(): Promise<Record<string, number>
   for (const product of Object.values(allProducts)) {
     if (product.priceBandName) bandNames.add(product.priceBandName);
   }
+  for (const priceBandName of Object.values(localPriceBandByHandle)) {
+    bandNames.add(priceBandName);
+  }
 
   const priceBands = Array.from(bandNames)
     .map((bandName) => data.priceBandsByName.get(bandName))
@@ -596,6 +607,13 @@ export async function getMinimumPricesByHandle(): Promise<Record<string, number>
     if (!product.priceBandName) continue;
 
     const bandId = bandNameToId.get(product.priceBandName);
+    const price = bandId ? minPrices.get(bandId) : undefined;
+    if (price !== undefined) {
+      result[handle] = price;
+    }
+  }
+  for (const [handle, priceBandName] of Object.entries(localPriceBandByHandle)) {
+    const bandId = bandNameToId.get(priceBandName);
     const price = bandId ? minPrices.get(bandId) : undefined;
     if (price !== undefined) {
       result[handle] = price;
