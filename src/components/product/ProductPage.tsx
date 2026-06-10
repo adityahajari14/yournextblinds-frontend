@@ -81,6 +81,44 @@ interface ProductPageProps {
   initialCustomizationPricing?: CustomizationPricingType[];
 }
 
+const BAND_H_INSTALLATION_GUIDES = {
+  ccl: {
+    label: 'Continuous Chain',
+    files: {
+      english: '/products/band-h/Zebra_CCL_111925.pdf',
+      spanish: '/products/band-h/SP_Zebra_CCL_111925.pdf',
+    },
+  },
+  cordless: {
+    label: 'Cordless',
+    files: {
+      english: '/products/band-h/Zebra_Cordless_111925.pdf',
+      spanish: '/products/band-h/Sp_Zebra_Cordless_111925.pdf',
+    },
+  },
+  motorized: {
+    label: 'Motorized',
+    files: {
+      english: '/products/band-h/Zebra_Motorized_111925.pdf',
+      spanish: '/products/band-h/SP_Zebra_Motorized_1112425.pdf',
+    },
+  },
+} as const;
+
+type BandHInstallationGuideMethod = keyof typeof BAND_H_INSTALLATION_GUIDES;
+type BandHInstallationGuideLanguage = 'english' | 'spanish';
+
+const BAND_H_INSTALLATION_GUIDE_LANGUAGES: Array<{
+  id: BandHInstallationGuideLanguage;
+  label: string;
+}> = [
+  { id: 'english', label: 'English' },
+  { id: 'spanish', label: 'Spanish' },
+];
+
+const BAND_H_PROMO_DISCOUNT_PERCENT = 50;
+const BAND_H_COUPON_CODE = 'Sale15';
+
 const ProductPage = ({
   product,
   relatedProducts,
@@ -118,6 +156,10 @@ const ProductPage = ({
   const [pricingLoaded, setPricingLoaded] = useState(hasInitialPricing);
   const [isValidating, setIsValidating] = useState(false);
   const fetchingRef = useRef(false);
+  const [isBandHInstallationGuideOpen, setIsBandHInstallationGuideOpen] = useState(false);
+  const [isBandHCouponOpen, setIsBandHCouponOpen] = useState(false);
+  const [selectedBandHGuideMethod, setSelectedBandHGuideMethod] =
+    useState<BandHInstallationGuideMethod | null>(null);
 
   // Collapsible sections state
   const [isMeasureOpen, setIsMeasureOpen] = useState(true);
@@ -467,6 +509,18 @@ const ProductPage = ({
 
   const isAddToCartDisabled = isValidating || missingRequiredCustomizations.length > 0;
 
+  const openBandHInstallationGuide = (language: BandHInstallationGuideLanguage) => {
+    if (!selectedBandHGuideMethod) return;
+
+    window.open(
+      BAND_H_INSTALLATION_GUIDES[selectedBandHGuideMethod].files[language],
+      '_blank',
+      'noopener,noreferrer'
+    );
+    setIsBandHInstallationGuideOpen(false);
+    setSelectedBandHGuideMethod(null);
+  };
+
   // Calculate price using new pricing system
   const priceCalculation = useMemo(() => {
     // Need valid dimensions to calculate price
@@ -497,6 +551,8 @@ const ProductPage = ({
 
   // Show minimum price indicator when no dimensions selected
   const showMinPriceIndicator = config.width === 0 || config.height === 0;
+  const displayedPrice = showMinPriceIndicator ? product.price : totalPrice;
+  const bandHPromoCompareAtPrice = displayedPrice / (1 - BAND_H_PROMO_DISCOUNT_PERCENT / 100);
 
   // Calculate dynamic size ranges from price band
   const sizeRanges = useMemo(() => {
@@ -586,6 +642,29 @@ const ProductPage = ({
 
   return (
     <div className="bg-white">
+      {isBandHProduct && (
+        <>
+          <button
+            type="button"
+            onClick={() => setIsBandHCouponOpen(true)}
+            className="fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 rounded-l-lg bg-[#00473c] px-3 py-4 text-left text-white shadow-lg transition-colors hover:bg-[#003830] lg:block"
+            aria-label="Open 15 percent off coupon"
+          >
+            <span className="block text-xs font-semibold uppercase tracking-wide text-white/75">Limited savings</span>
+            <span className="block text-base font-bold leading-tight">Extra 15% off</span>
+            <span className="mt-1 block text-xs text-white/85">Reveal coupon</span>
+          </button>
+
+          <div className="fixed bottom-4 left-4 z-40 hidden h-20 w-20 items-center justify-center rounded-lg border border-[#d6e7e3] bg-white text-center text-[#00473c] shadow-xl lg:flex">
+            <div className="absolute -right-2 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow-inner" />
+            <div className="absolute -left-2 top-1/2 h-5 w-5 -translate-y-1/2 rounded-full bg-white shadow-inner" />
+            <span className="text-xs font-black uppercase leading-tight">
+              Summer<br />Sale<br />50% Off
+            </span>
+          </div>
+        </>
+      )}
+
       {/* Breadcrumb */}
       <div className="px-4 md:px-6 lg:px-20 py-3 md:py-4">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8">
@@ -639,13 +718,22 @@ const ProductPage = ({
               {/* Price Section */}
               <div className="border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6">
                 <div className="flex flex-col items-center lg:items-start">
-                  <div className="flex items-baseline gap-2 mb-3 md:mb-4">
+                  <div className="flex flex-wrap items-baseline justify-center gap-2 mb-3 md:mb-4 lg:justify-start">
+                    {isBandHProduct && (
+                      <span className="text-sm font-medium text-gray-400 line-through">
+                        {formatPriceWithCurrency(formatPrice(bandHPromoCompareAtPrice), product.currency)}
+                      </span>
+                    )}
                     <span className="text-xl md:text-2xl font-bold text-[#3a3a3a]">
-                      {showMinPriceIndicator
-                        ? formatPriceWithCurrency(formatPrice(product.price), product.currency)
-                        : formatPriceWithCurrency(formatPrice(totalPrice), product.currency)
-                      }
+                      {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
                     </span>
+                    {isBandHProduct && (
+                      <>
+                        <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
+                          {BAND_H_PROMO_DISCOUNT_PERCENT}% Off Summer Sale
+                        </span>
+                      </>
+                    )}
                   </div>
                   {priceCalculation && !showMinPriceIndicator && (
                     <div className="text-xs text-gray-400 mb-3">
@@ -1271,14 +1359,27 @@ const ProductPage = ({
               {/* Installation & Measurement Guide Buttons */}
               {guideType && (
                 <div className="flex gap-3 mt-3">
-                  <a
-                    href={PRODUCT_GUIDES[guideType].installation}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex-1 py-2.5 border border-[#00473c] text-[#00473c] text-sm font-medium rounded-lg text-center hover:bg-[#f0fdf9] transition-colors"
-                  >
-                    Installation Guide
-                  </a>
+                  {isBandHProduct ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedBandHGuideMethod(null);
+                        setIsBandHInstallationGuideOpen(true);
+                      }}
+                      className="flex-1 py-2.5 border border-[#00473c] text-[#00473c] text-sm font-medium rounded-lg text-center hover:bg-[#f0fdf9] transition-colors"
+                    >
+                      Installation Guide
+                    </button>
+                  ) : (
+                    <a
+                      href={PRODUCT_GUIDES[guideType].installation}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 py-2.5 border border-[#00473c] text-[#00473c] text-sm font-medium rounded-lg text-center hover:bg-[#f0fdf9] transition-colors"
+                    >
+                      Installation Guide
+                    </a>
+                  )}
                   <a
                     href={PRODUCT_GUIDES[guideType].measurement}
                     target="_blank"
@@ -1287,6 +1388,178 @@ const ProductPage = ({
                   >
                     Measurement Guide
                   </a>
+                </div>
+              )}
+
+              {isBandHProduct && isBandHInstallationGuideOpen && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="band-h-installation-guide-title"
+                  onClick={() => {
+                    setIsBandHInstallationGuideOpen(false);
+                    setSelectedBandHGuideMethod(null);
+                  }}
+                >
+                  <div
+                    className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3
+                          id="band-h-installation-guide-title"
+                          className="text-lg font-semibold text-[#2f2f2f]"
+                        >
+                          Installation Guide
+                        </h3>
+                        <p className="mt-1 text-sm text-gray-600">
+                          Choose the installation option, then select a language.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsBandHInstallationGuideOpen(false);
+                          setSelectedBandHGuideMethod(null);
+                        }}
+                        className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                        aria-label="Close installation guide dialog"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="mt-5 space-y-5">
+                      <div>
+                        <p className="mb-2 text-sm font-medium text-[#3a3a3a]">Installation option</p>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                          {(Object.entries(BAND_H_INSTALLATION_GUIDES) as Array<[
+                            BandHInstallationGuideMethod,
+                            typeof BAND_H_INSTALLATION_GUIDES[BandHInstallationGuideMethod]
+                          ]>).map(([methodId, guide]) => {
+                            const isSelected = selectedBandHGuideMethod === methodId;
+
+                            return (
+                              <button
+                                key={methodId}
+                                type="button"
+                                onClick={() => setSelectedBandHGuideMethod(methodId)}
+                                className={`rounded-lg border-2 p-3 text-left transition-colors ${
+                                  isSelected
+                                    ? 'border-[#00473c] bg-[#f6fffd]'
+                                    : 'border-gray-200 bg-white hover:border-[#00473c]'
+                                }`}
+                              >
+                                <span className="block text-sm font-semibold text-[#2f2f2f]">
+                                  {guide.label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {selectedBandHGuideMethod && (
+                        <div className="border-t border-gray-100 pt-4">
+                          <p className="mb-2 text-sm font-medium text-[#3a3a3a]">Language</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            {BAND_H_INSTALLATION_GUIDE_LANGUAGES.map((language) => (
+                              <button
+                                key={language.id}
+                                type="button"
+                                onClick={() => openBandHInstallationGuide(language.id)}
+                                className="rounded-lg border border-[#00473c] px-4 py-3 text-sm font-medium text-[#00473c] transition-colors hover:bg-[#f0fdf9]"
+                              >
+                                {language.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isBandHProduct && isBandHCouponOpen && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="band-h-coupon-title"
+                  onClick={() => setIsBandHCouponOpen(false)}
+                >
+                  <div
+                    className="w-full max-w-md overflow-hidden rounded-lg bg-white shadow-xl"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <div className="border-b border-[#d6e7e3] bg-[#f6fffd] px-5 py-4">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-xs font-semibold uppercase tracking-wide text-[#00473c]">
+                            Limited-time coupon
+                          </p>
+                          <h3 id="band-h-coupon-title" className="mt-1 text-2xl font-bold text-[#2f2f2f]">
+                            Take an extra 15% off
+                          </h3>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setIsBandHCouponOpen(false)}
+                          className="flex h-8 w-8 items-center justify-center rounded-md border border-[#d6e7e3] text-gray-500 hover:bg-white hover:text-gray-700"
+                          aria-label="Close coupon dialog"
+                        >
+                          <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="p-5">
+                      <p className="text-sm leading-relaxed text-gray-600">
+                        Add a little more value to your custom shade order. Enter this code at checkout
+                        to apply an additional saving before your order is confirmed.
+                      </p>
+
+                      <div className="mt-5 rounded-lg border border-dashed border-[#00473c] bg-white p-4 text-center shadow-sm">
+                        <p className="text-xs font-semibold uppercase tracking-wide text-[#00473c]">
+                          Checkout code
+                        </p>
+                        <p className="mt-1 text-3xl font-black tracking-wide text-[#00473c]">
+                          {BAND_H_COUPON_CODE}
+                        </p>
+                        <p className="mt-2 text-xs text-gray-500">
+                          Apply this code in the discount field at checkout.
+                        </p>
+                      </div>
+
+                      <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (typeof navigator !== 'undefined') {
+                              navigator.clipboard?.writeText(BAND_H_COUPON_CODE);
+                            }
+                          }}
+                          className="rounded-lg border border-[#00473c] px-4 py-3 text-sm font-semibold text-[#00473c] transition-colors hover:bg-[#f0fdf9]"
+                        >
+                          Copy Coupon
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setIsBandHCouponOpen(false)}
+                          className="rounded-lg bg-[#00473c] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#003830]"
+                        >
+                          Continue
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               )}
 
