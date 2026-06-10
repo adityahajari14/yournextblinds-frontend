@@ -8,11 +8,12 @@ interface ProductGalleryProps {
   images: string[];
   videos?: string[];
   productName: string;
+  selectedIndex?: number;
 }
 
 const MAX_VISIBLE_THUMBNAILS = 5;
 
-const ProductGallery = ({ images, videos = [], productName }: ProductGalleryProps) => {
+const ProductGallery = ({ images, videos = [], productName, selectedIndex }: ProductGalleryProps) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showAllImages, setShowAllImages] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
@@ -20,6 +21,11 @@ const ProductGallery = ({ images, videos = [], productName }: ProductGalleryProp
   useEffect(() => {
     setIsMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (typeof selectedIndex !== 'number') return;
+    setSelectedImage(selectedIndex);
+  }, [selectedIndex]);
 
   // Combine images and videos
   // Videos come after images unless we want to prioritize them (leaving as appended for now)

@@ -91,6 +91,11 @@ export default function CartPage() {
           openingDirection: config.openingDirection || undefined,
           bottomBar: config.bottomBar || undefined,
           rollStyle: config.rollStyle || undefined,
+          selectedVariantId: config.selectedVariantId || undefined,
+          selectedVariantTitle: config.selectedVariantTitle || undefined,
+          selectedVariantImage: config.selectedVariantImage || undefined,
+          selectedVariantOptionName: config.selectedVariantOptionName || undefined,
+          selectedVariantOptionValue: config.selectedVariantOptionValue || undefined,
         };
 
         return {
@@ -136,6 +141,11 @@ export default function CartPage() {
       'height',
       'heightFraction',
       'heightUnit',
+      'selectedVariantId',
+      'selectedVariantTitle',
+      'selectedVariantImage',
+      'selectedVariantOptionName',
+      'selectedVariantOptionValue',
     ]);
 
     // Size (always show if available)
@@ -173,6 +183,10 @@ export default function CartPage() {
       if (!value || value === 'none') return;
       parts.push(`${label}: ${options ? getOptionName(value, options) : value}`);
     });
+
+    if (config.selectedVariantOptionValue) {
+      parts.push(`${config.selectedVariantOptionName || 'Color'}: ${config.selectedVariantOptionValue}`);
+    }
 
     // Legacy fields (for backwards compatibility)
     if (config.mount) {
@@ -376,7 +390,7 @@ export default function CartPage() {
                       <div className="flex gap-4 md:gap-6">
                         <div className="relative w-24 h-24 md:w-32 md:h-32 flex-shrink-0 bg-gray-100 rounded-lg overflow-hidden">
                           <Image
-                            src={item.product.images[0]}
+                            src={item.configuration.selectedVariantImage || item.product.images[0]}
                             alt={item.product.name}
                             fill
                             className="object-cover"

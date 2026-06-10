@@ -216,6 +216,7 @@ export async function fetchProductBySlug(slug: string): Promise<ApiProductRespon
     success: false,
     data: {
       id: '', slug: '', title: '', description: null, images: [], videos: [],
+      variants: [],
       price: 0, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
       categories: [], tags: [],
     },
@@ -535,6 +536,7 @@ export function transformProduct(apiProduct: ApiProduct): Product {
     estimatedDelivery: DEFAULT_ESTIMATED_DELIVERY,
     description: apiProduct.description || '',
     images: apiProduct.images.length > 0 ? apiProduct.images : [],
+    variants: apiProduct.variants || [],
     videos: apiProduct.videos || [],
     features: features,
     reviews: [],

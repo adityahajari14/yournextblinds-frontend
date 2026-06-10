@@ -31,6 +31,19 @@ export interface ProductReview {
   verified: boolean;
 }
 
+export interface ProductVariantOption {
+  name: string;
+  value: string;
+}
+
+export interface ProductVariant {
+  id: string;
+  title: string;
+  image?: string | null;
+  imageAlt?: string | null;
+  selectedOptions: ProductVariantOption[];
+}
+
 export interface ProductFeatures {
   hasSize: boolean;
   hasHeadrail: boolean;
@@ -67,6 +80,7 @@ export interface Product {
   estimatedDelivery: string;
   description: string;
   images: string[];
+  variants?: ProductVariant[];
   videos?: string[];
   features: ProductFeatures;
   reviews: ProductReview[];
@@ -103,6 +117,11 @@ export interface ProductConfiguration {
   openingDirection: string | null;
   bottomBar: string | null;
   rollStyle: string | null;
+  selectedVariantId: string | null;
+  selectedVariantTitle: string | null;
+  selectedVariantImage: string | null;
+  selectedVariantOptionName: string | null;
+  selectedVariantOptionValue: string | null;
 }
 
 export const DEFAULT_CONFIGURATION: ProductConfiguration = {
@@ -131,6 +150,11 @@ export const DEFAULT_CONFIGURATION: ProductConfiguration = {
   openingDirection: null,
   bottomBar: null,
   rollStyle: null,
+  selectedVariantId: null,
+  selectedVariantTitle: null,
+  selectedVariantImage: null,
+  selectedVariantOptionName: null,
+  selectedVariantOptionValue: null,
 };
 
 // ============================================
@@ -186,6 +210,7 @@ export interface ApiProduct {
   descriptionHtml?: string | null;
   images: string[];
   imageAlts?: string[];
+  variants?: ProductVariant[];
   videos?: string[];
   price: number; // Minimum price from 20x20 band
   createdAt: string;

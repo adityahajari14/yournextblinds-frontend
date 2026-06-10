@@ -30,6 +30,16 @@ interface StorefrontImage {
   altText: string | null;
 }
 
+interface StorefrontVariant {
+  id: string;
+  title: string;
+  selectedOptions: Array<{
+    name: string;
+    value: string;
+  }>;
+  image: StorefrontImage | null;
+}
+
 interface StorefrontCollection {
   id: string;
   handle: string;
@@ -50,6 +60,9 @@ interface StorefrontProduct {
   updatedAt: string;
   images: {
     edges: Array<{ node: StorefrontImage }>;
+  };
+  variants: {
+    edges: Array<{ node: StorefrontVariant }>;
   };
   collections: {
     edges: Array<{ node: StorefrontCollection }>;
@@ -121,6 +134,22 @@ const PRODUCT_FIELDS = `
       node {
         url
         altText
+      }
+    }
+  }
+  variants(first: 100) {
+    edges {
+      node {
+        id
+        title
+        selectedOptions {
+          name
+          value
+        }
+        image {
+          url
+          altText
+        }
       }
     }
   }
@@ -321,6 +350,16 @@ function mapStorefrontProduct(
     descriptionHtml: sfProduct.descriptionHtml || null,
     images: sfProduct.images.edges.map((edge) => edge.node.url),
     imageAlts: sfProduct.images.edges.map((edge) => edge.node.altText || ''),
+    variants: sfProduct.variants.edges.map((edge) => ({
+      id: edge.node.id,
+      title: edge.node.title,
+      image: edge.node.image?.url ?? null,
+      imageAlt: edge.node.image?.altText ?? null,
+      selectedOptions: edge.node.selectedOptions.map((option) => ({
+        name: option.name,
+        value: option.value,
+      })),
+    })),
     videos: [],
     price: minimumPrices[sfProduct.handle] || 0,
     createdAt: sfProduct.createdAt,

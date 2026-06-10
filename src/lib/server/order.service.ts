@@ -32,6 +32,11 @@ export interface CheckoutItemRequest {
     openingDirection?: string;
     bottomBar?: string;
     rollStyle?: string;
+    selectedVariantId?: string;
+    selectedVariantTitle?: string;
+    selectedVariantImage?: string;
+    selectedVariantOptionName?: string;
+    selectedVariantOptionValue?: string;
     [key: string]: string | undefined;
   };
 }
@@ -119,6 +124,12 @@ function buildLineItemProperties(
   if (item.configuration.blindName) {
     properties.push({ key: 'Blind Name', value: item.configuration.blindName });
   }
+  if (item.configuration.selectedVariantOptionValue) {
+    properties.push({
+      key: item.configuration.selectedVariantOptionName || 'Color',
+      value: item.configuration.selectedVariantOptionValue,
+    });
+  }
 
   const labelMap: Record<string, string> = {
     headrail: 'Headrail',
@@ -150,6 +161,16 @@ function buildLineItemProperties(
   properties.push({ key: '_calculatedPrice', value: calculatedPrice.toFixed(2) });
 
   return properties;
+}
+
+function normalizeVariantGid(variantId?: string): string | null {
+  if (!variantId) return null;
+  if (variantId.startsWith('gid://shopify/ProductVariant/')) return variantId;
+
+  const numericId = Number(variantId);
+  if (!Number.isFinite(numericId) || numericId <= 0) return null;
+
+  return `gid://shopify/ProductVariant/${numericId}`;
 }
 
 async function getPrimaryVariantIdByHandle(handle: string): Promise<number | null> {
@@ -258,12 +279,14 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
     const itemPrice = pricing.totalPrice;
     const lineItemTitle = `${productTitle} – ${item.widthInches}" × ${item.heightInches}"`;
 
-    const variantId = await getPrimaryVariantIdByHandle(item.handle);
+    const selectedVariantGid = normalizeVariantGid(item.configuration.selectedVariantId);
+    const variantId = selectedVariantGid ? null : await getPrimaryVariantIdByHandle(item.handle);
+    const lineItemVariantId = selectedVariantGid || (variantId ? `gid://shopify/ProductVariant/${variantId}` : null);
     const customAttributes = buildLineItemProperties(item, itemPrice);
 
-    if (variantId) {
+    if (lineItemVariantId) {
       lineItems.push({
-        variantId: `gid://shopify/ProductVariant/${variantId}`,
+        variantId: lineItemVariantId,
         priceOverride: {
           amount: itemPrice.toFixed(2),
           currencyCode: DRAFT_ORDER_CURRENCY,
