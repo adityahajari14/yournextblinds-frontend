@@ -694,6 +694,59 @@ const ProductPage = ({
     }
   };
 
+  const renderBandHColorSelector = (className: string) => {
+    if (!isBandHProduct || bandHColorVariants.length === 0) return null;
+
+    return (
+      <div className={className}>
+        <div className="mb-5">
+          <h3 className="min-w-0 text-lg font-semibold text-[#1f1f1f] sm:text-xl">
+            Color - {selectedBandHVariantOption?.value ?? 'Select Color'}
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-5 gap-3 sm:grid-cols-6">
+          {bandHColorVariants.map((variant) => {
+            const option = getVariantDisplayOption(variant);
+            const isSelected = config.selectedVariantId === variant.id;
+
+            return (
+              <button
+                key={variant.id}
+                type="button"
+                onClick={() => {
+                  setConfig((prev) => ({
+                    ...prev,
+                    selectedVariantId: variant.id,
+                    selectedVariantTitle: variant.title,
+                    selectedVariantImage: variant.image ?? null,
+                    selectedVariantOptionName: option.name,
+                    selectedVariantOptionValue: option.value,
+                  }));
+                }}
+                className={`relative aspect-square overflow-hidden rounded-md bg-gray-50 transition-all ${
+                  isSelected
+                    ? 'border-2 border-[#00473c] p-0.5 shadow-sm'
+                    : 'border border-transparent hover:border-[#d4c7c2]'
+                }`}
+                aria-label={`Select color ${option.value}`}
+                title={option.value}
+              >
+                <Image
+                  src={variant.image || product.images[0] || '/home/products/vertical-blinds-1.jpg'}
+                  alt={option.value}
+                  fill
+                  className="rounded-[4px] object-cover"
+                  unoptimized
+                />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className={isBandHProduct ? 'bg-white pb-20 lg:pb-0' : 'bg-white'}>
       {isBandHProduct && (
@@ -806,68 +859,7 @@ const ProductPage = ({
                 <StarRating rating={product.rating} />
               </div>
 
-              {isBandHProduct && bandHColorVariants.length > 0 && (
-                <div className="border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6 lg:hidden">
-                  <div className="mb-3 flex items-baseline justify-between gap-3">
-                    <h3 className="text-sm font-semibold text-[#3a3a3a]">Color</h3>
-                    {selectedBandHVariantOption && (
-                      <span className="rounded-md bg-[#f0fdf9] px-2.5 py-1 text-xs font-semibold text-[#00473c]">
-                        {selectedBandHVariantOption.value}
-                      </span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {bandHColorVariants.map((variant) => {
-                      const option = getVariantDisplayOption(variant);
-                      const isSelected = config.selectedVariantId === variant.id;
-
-                      return (
-                        <button
-                          key={variant.id}
-                          type="button"
-                          onClick={() => {
-                            setConfig((prev) => ({
-                              ...prev,
-                              selectedVariantId: variant.id,
-                              selectedVariantTitle: variant.title,
-                              selectedVariantImage: variant.image ?? null,
-                              selectedVariantOptionName: option.name,
-                              selectedVariantOptionValue: option.value,
-                            }));
-                          }}
-                          className={`relative rounded-lg border-2 bg-white p-2 text-left transition-all ${
-                            isSelected
-                              ? 'border-[#00473c] ring-2 ring-[#00473c]/15'
-                              : 'border-gray-200 hover:border-[#00473c]/50'
-                          }`}
-                        >
-                          {isSelected && (
-                            <span className="absolute right-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[#00473c] text-white">
-                              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </span>
-                          )}
-                          <div className="relative mb-2 aspect-square overflow-hidden rounded-md bg-gray-50">
-                            <Image
-                              src={variant.image || product.images[0] || '/home/products/vertical-blinds-1.jpg'}
-                              alt={option.value}
-                              fill
-                              className="object-cover"
-                              unoptimized
-                            />
-                          </div>
-                          <span className={`block text-center text-sm font-semibold ${
-                            isSelected ? 'text-[#00473c]' : 'text-[#2f2f2f]'
-                          }`}>
-                            {option.value}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+              {renderBandHColorSelector('mb-4 lg:hidden')}
 
               {/* Shipping Info Box */}
               <div className="flex items-center border border-gray-200 rounded-lg mb-4 md:mb-6 px-3 md:px-4 py-2 md:py-3">
@@ -912,68 +904,7 @@ const ProductPage = ({
                 </div>
               </div>
 
-              {isBandHProduct && bandHColorVariants.length > 0 && (
-                <div className="hidden lg:block border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6">
-                  <div className="mb-3 flex items-baseline justify-between gap-3">
-                    <h3 className="text-sm font-semibold text-[#3a3a3a]">Color</h3>
-                    {selectedBandHVariantOption && (
-                      <span className="rounded-md bg-[#f0fdf9] px-2.5 py-1 text-xs font-semibold text-[#00473c]">
-                        {selectedBandHVariantOption.value}
-                      </span>
-                    )}
-                  </div>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    {bandHColorVariants.map((variant) => {
-                      const option = getVariantDisplayOption(variant);
-                      const isSelected = config.selectedVariantId === variant.id;
-
-                      return (
-                        <button
-                          key={variant.id}
-                          type="button"
-                          onClick={() => {
-                            setConfig((prev) => ({
-                              ...prev,
-                              selectedVariantId: variant.id,
-                              selectedVariantTitle: variant.title,
-                              selectedVariantImage: variant.image ?? null,
-                              selectedVariantOptionName: option.name,
-                              selectedVariantOptionValue: option.value,
-                            }));
-                          }}
-                          className={`relative rounded-lg border-2 bg-white p-2 text-left transition-all ${
-                            isSelected
-                              ? 'border-[#00473c] ring-2 ring-[#00473c]/15'
-                              : 'border-gray-200 hover:border-[#00473c]/50'
-                          }`}
-                        >
-                          {isSelected && (
-                            <span className="absolute right-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[#00473c] text-white">
-                              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                              </svg>
-                            </span>
-                          )}
-                          <div className="relative mb-2 aspect-square overflow-hidden rounded-md bg-gray-50">
-                            <Image
-                              src={variant.image || product.images[0] || '/home/products/vertical-blinds-1.jpg'}
-                              alt={option.value}
-                              fill
-                              className="object-cover"
-                              unoptimized
-                            />
-                          </div>
-                          <span className={`block text-center text-sm font-semibold ${
-                            isSelected ? 'text-[#00473c]' : 'text-[#2f2f2f]'
-                          }`}>
-                            {option.value}
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
+              {renderBandHColorSelector('hidden lg:block mb-4 md:mb-6')}
 
               {/* Customization Sections */}
               <div className="space-y-4">
