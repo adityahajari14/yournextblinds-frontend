@@ -695,30 +695,33 @@ const ProductPage = ({
   };
 
   return (
-    <div className="bg-white">
+    <div className={isBandHProduct ? 'bg-white pb-20 lg:pb-0' : 'bg-white'}>
       {isBandHProduct && (
         <>
           <button
             type="button"
             onClick={() => setIsBandHCouponOpen(true)}
-            className="fixed right-0 top-1/2 z-40 hidden -translate-y-1/2 rounded-l-lg bg-[#00473c] px-3 py-4 text-left text-white shadow-lg transition-colors hover:bg-[#003830] lg:block"
+            className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-[#0f5f52] bg-[#00473c] px-2.5 py-3 text-white shadow-lg transition-colors hover:bg-[#003830] lg:px-3 lg:py-4"
             aria-label="Open 15 percent off coupon"
           >
-            <span className="block text-xs font-semibold uppercase tracking-wide text-white/75">Limited-time savings</span>
-            <span className="block text-base font-bold leading-tight">Extra 15% off</span>
-            <span className="mt-1 block text-xs text-white/85">Reveal before checkout</span>
+            <span
+              className="block text-xs font-semibold uppercase tracking-wide text-white/90 lg:text-sm"
+              style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+            >
+              Extra 15% off
+            </span>
           </button>
 
-          <div className="fixed bottom-5 left-5 z-40 hidden w-32 overflow-hidden rounded-lg border border-[#003830] bg-[#00473c] text-center text-white shadow-2xl ring-4 ring-white lg:block">
-            <div className="border-b border-white/15 bg-white/10 px-3 py-2">
-              <span className="block text-[11px] font-semibold uppercase tracking-wide text-white/80">
+          <div className="fixed bottom-4 left-4 z-40 w-24 overflow-hidden rounded-md border border-[#c8ded9] bg-white text-center text-[#00473c] shadow-lg lg:bottom-5 lg:left-5 lg:w-28">
+            <div className="border-b border-[#dcebe7] bg-[#f6fffd] px-2 py-1.5">
+              <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#4d6b65]">
                 Summer Sale
               </span>
             </div>
-            <div className="px-3 py-3">
-              <span className="block text-3xl font-black leading-none">50%</span>
-              <span className="mt-1 block text-sm font-bold uppercase tracking-wide">Off</span>
-              <span className="mt-2 block rounded-md bg-white px-2 py-1 text-[10px] font-bold uppercase tracking-wide text-[#00473c]">
+            <div className="px-2 py-2">
+              <span className="block text-xl font-black leading-none lg:text-2xl">50%</span>
+              <span className="mt-0.5 block text-[11px] font-bold uppercase tracking-wide">Off</span>
+              <span className="mt-1.5 block rounded bg-[#e8f5f2] px-1.5 py-1 text-[9px] font-bold uppercase tracking-wide">
                 Ends Today
               </span>
             </div>
@@ -741,6 +744,41 @@ const ProductPage = ({
       <section className="px-4 md:px-6 lg:px-20 pb-8 md:pb-12">
         <div className="max-w-[1400px] mx-auto px-4 md:px-6 lg:px-8">
           <div className="flex flex-col lg:flex-row gap-6 md:gap-8 lg:gap-12">
+            <div className="lg:hidden">
+              <h1 className="text-xl font-medium text-[#3a3a3a] mb-2">
+                {product.name}
+              </h1>
+
+              <div className="flex items-center gap-1 mb-4">
+                <StarRating rating={product.rating} />
+              </div>
+
+              <div className="border border-gray-200 rounded-lg p-4 mb-4">
+                <div className="flex flex-col items-start">
+                  <div className="flex flex-wrap items-baseline gap-2">
+                    {isBandHProduct && (
+                      <span className="text-sm font-medium text-gray-400 line-through">
+                        {formatPriceWithCurrency(formatPrice(bandHPromoCompareAtPrice), product.currency)}
+                      </span>
+                    )}
+                    <span className="text-2xl font-bold text-[#3a3a3a]">
+                      {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
+                    </span>
+                    {isBandHProduct && (
+                      <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
+                        {BAND_H_PROMO_DISCOUNT_PERCENT}% Off Summer Sale - Ends Today
+                      </span>
+                    )}
+                  </div>
+                  {priceCalculation && !showMinPriceIndicator && (
+                    <div className="mt-3 text-xs text-gray-400">
+                      Size: {priceCalculation.widthBand?.inches}" × {priceCalculation.heightBand?.inches}"
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+
             {/* Left - Gallery with Thumbnails on Left */}
             <div className="w-full lg:w-1/2 lg:sticky lg:top-8 lg:self-start">
               <ProductGallery
@@ -754,19 +792,82 @@ const ProductPage = ({
             {/* Right - Product Info */}
             <div className="w-full lg:w-1/2">
               {/* Product Title */}
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-medium text-[#3a3a3a] mb-2">
+              <h1 className="hidden lg:block text-xl md:text-2xl lg:text-3xl font-medium text-[#3a3a3a] mb-2">
                 {product.name}
               </h1>
 
               {/* Description */}
-              <p className="text-xs md:text-sm text-gray-600 mb-3 line-clamp-2">
+              <p className="hidden lg:block text-xs md:text-sm text-gray-600 mb-3 line-clamp-2">
                 {product.description}
               </p>
 
               {/* Rating */}
-              <div className="flex items-center gap-1 mb-4 md:mb-6">
+              <div className="hidden lg:flex items-center gap-1 mb-4 md:mb-6">
                 <StarRating rating={product.rating} />
               </div>
+
+              {isBandHProduct && bandHColorVariants.length > 0 && (
+                <div className="border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6 lg:hidden">
+                  <div className="mb-3 flex items-baseline justify-between gap-3">
+                    <h3 className="text-sm font-semibold text-[#3a3a3a]">Color</h3>
+                    {selectedBandHVariantOption && (
+                      <span className="rounded-md bg-[#f0fdf9] px-2.5 py-1 text-xs font-semibold text-[#00473c]">
+                        {selectedBandHVariantOption.value}
+                      </span>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                    {bandHColorVariants.map((variant) => {
+                      const option = getVariantDisplayOption(variant);
+                      const isSelected = config.selectedVariantId === variant.id;
+
+                      return (
+                        <button
+                          key={variant.id}
+                          type="button"
+                          onClick={() => {
+                            setConfig((prev) => ({
+                              ...prev,
+                              selectedVariantId: variant.id,
+                              selectedVariantTitle: variant.title,
+                              selectedVariantImage: variant.image ?? null,
+                              selectedVariantOptionName: option.name,
+                              selectedVariantOptionValue: option.value,
+                            }));
+                          }}
+                          className={`relative rounded-lg border-2 bg-white p-2 text-left transition-all ${
+                            isSelected
+                              ? 'border-[#00473c] ring-2 ring-[#00473c]/15'
+                              : 'border-gray-200 hover:border-[#00473c]/50'
+                          }`}
+                        >
+                          {isSelected && (
+                            <span className="absolute right-2 top-2 z-10 flex h-5 w-5 items-center justify-center rounded-full bg-[#00473c] text-white">
+                              <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                              </svg>
+                            </span>
+                          )}
+                          <div className="relative mb-2 aspect-square overflow-hidden rounded-md bg-gray-50">
+                            <Image
+                              src={variant.image || product.images[0] || '/home/products/vertical-blinds-1.jpg'}
+                              alt={option.value}
+                              fill
+                              className="object-cover"
+                              unoptimized
+                            />
+                          </div>
+                          <span className={`block text-center text-sm font-semibold ${
+                            isSelected ? 'text-[#00473c]' : 'text-[#2f2f2f]'
+                          }`}>
+                            {option.value}
+                          </span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Shipping Info Box */}
               <div className="flex items-center border border-gray-200 rounded-lg mb-4 md:mb-6 px-3 md:px-4 py-2 md:py-3">
@@ -784,7 +885,7 @@ const ProductPage = ({
               </div>
 
               {/* Price Section */}
-              <div className="border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6">
+              <div className="hidden lg:block border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6">
                 <div className="flex flex-col items-center lg:items-start">
                   <div className="flex flex-wrap items-baseline justify-center gap-2 mb-3 md:mb-4 lg:justify-start">
                     {isBandHProduct && (
@@ -812,7 +913,7 @@ const ProductPage = ({
               </div>
 
               {isBandHProduct && bandHColorVariants.length > 0 && (
-                <div className="border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6">
+                <div className="hidden lg:block border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6">
                   <div className="mb-3 flex items-baseline justify-between gap-3">
                     <h3 className="text-sm font-semibold text-[#3a3a3a]">Color</h3>
                     {selectedBandHVariantOption && (
