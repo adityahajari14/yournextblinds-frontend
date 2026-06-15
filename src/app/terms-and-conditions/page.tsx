@@ -227,11 +227,6 @@ export default function TermsAndConditionsPage() {
                 <p>Response Time: 1-3 working days.</p>
                 <p className="font-medium pt-3">YOUR NEXT BLINDS LLC</p>
                 <p>16819 Gentle Stone Dr, Houston, TX 77095, US</p>
-                <p>
-                  <a href="tel:+18326706705" className="text-[#00594a] hover:underline">
-                    +1 832-670-6705
-                  </a>
-                </p>
               </div>
             </div>
           </div>
