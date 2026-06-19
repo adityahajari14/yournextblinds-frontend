@@ -6,7 +6,7 @@ const features = [
     { name: '100% Blackout' },
     { name: 'Easy Fit' },
     { name: 'Price & Value' },
-    { name: 'Improved Sleep Quality' },
+    { name: 'Better Sleep Environment' },
     { name: 'Noise Reduction' },
     { name: 'Energy Efficiency' },
     { name: 'Easy Install' },
@@ -38,7 +38,7 @@ export const ProductComparisonTableSection = () => {
                         {/* Your Next Blinds Column (Dark Card) */}
                         <div className="w-[110px] sm:w-[130px] md:w-[200px] bg-[#1a1a1a] text-white rounded-2xl shadow-2xl z-20 relative -my-4 pb-4 flex flex-col items-center">
                             <div className="h-[88px] flex items-center justify-center w-full border-b border-white/10 px-2">
-                                <span className="text-white font-bold text-sm md:text-lg tracking-wide leading-tight">YourNextBlinds</span>
+                                <span className="text-white font-bold text-sm md:text-lg tracking-wide leading-tight">Your Next Blinds</span>
                             </div>
                             <div className="flex flex-col w-full">
                                 {features.map((_, idx) => (
@@ -79,7 +79,7 @@ export const ProductComparisonTableSection = () => {
                 {/* Right Column: Content */}
                 <div className="w-full lg:w-1/2 text-center lg:text-left space-y-6">
                     <h2 className="text-3xl md:text-4xl font-bold text-black leading-tight">
-                        #1 Highest Reviewed Blackout Blinds for Light Sleepers
+                        The Highest-Rated Blackout Blinds for Light Sleepers
                     </h2>
                     <p className="text-gray-600 leading-relaxed max-w-lg mx-auto lg:mx-0">
                         With over 5 years in research and development, the Blackout Honeycomb Blinds guarantees a solution giving your total control.

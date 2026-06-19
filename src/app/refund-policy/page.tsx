@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { Header, NavBar, Footer } from '@/components';
 
 export const metadata: Metadata = {
-  title: 'Returns & Refunds Policy - YourNextBlinds',
+  title: 'Returns & Refunds Policy - Your Next Blinds',
   description:
-    'Read the YourNextBlinds returns and refunds policy, including damaged goods, faulty items, cancellations, replacements, and warranty terms.',
+    'Read the Your Next Blinds returns and refunds policy, including damaged goods, faulty items, cancellations, replacements, and warranty terms.',
 };
 
 const sections = [

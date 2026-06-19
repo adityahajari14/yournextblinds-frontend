@@ -67,7 +67,7 @@ export const ProductComparisonSection = () => {
                             90% of adults say outdoor lightexposure persists their sleep
                         </h2>
                         <p className="text-gray-300 leading-relaxed text-sm md:text-base">
-                            When sunlight and street-lamp glare sneak into your bedroom, it not only wakes you up, it makes you stressed, puts you in a bad mood, and leaves you tired all day. Our Easy Fit blackout blinds block all outside light so you sleep soundly and wake up refreshed. Act now to reclaim your nights and your health.
+                            When sunlight and street-lamp glare sneak into your bedroom, it not only wakes you up, it makes you stressed, puts you in a bad mood, and leaves you tired all day. Our Easy Fit blackout blinds block all outside light so you sleep soundly and wake up refreshed. Act now to reclaim your nights and wake up feeling your best.
                         </p>
                         <button
                             onClick={scrollToTop}
@@ -220,7 +220,6 @@ export const ProductComparisonSection = () => {
                 <div className="space-y-12">
                     <div className="text-center space-y-2">
                         <h2 className="text-3xl md:text-3xl font-bold">A 3-in-1 Solution For All!</h2>
-                        <p className="text-gray-400 text-sm uppercase tracking-wider font-bold">Talk About Your Brands</p>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

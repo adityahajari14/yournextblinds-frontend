@@ -7,17 +7,17 @@ export const CustomerReviewsSection = () => {
         {
             headline: "The room forgot what light felt like.",
             author: "Sarah J.",
-            text: "This service was amazing and exceeded my expectations!",
+            text: "I never realised how much early morning light was waking me up. These blinds made a huge difference — the bedroom stays dark until we're actually ready to get up.",
         },
         {
             headline: "No sun, no moon—just endless dark.",
             author: "David M.",
-            text: "Fast, professional, and affordable. Highly recommend!",
+            text: "Ordered on Tuesday, installed by Friday. The Easy Fit system really does work without drilling — perfect as we're renting. Solid quality for the price.",
         },
         {
             headline: "Pure blackout, pure silence.",
             author: "Emma R.",
-            text: "The team was so helpful and friendly. I'll use them again!",
+            text: "We got these for our toddler's room and the difference is night and day (literally). Nap times have been so much easier since the room is actually dark.",
         },
     ];
 

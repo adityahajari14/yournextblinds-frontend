@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { Header, NavBar, Footer } from '@/components';
 
 export const metadata: Metadata = {
-  title: 'Shipping Policy - YourNextBlinds',
+  title: 'Shipping Policy - Your Next Blinds',
   description:
-    'Read the YourNextBlinds shipping policy, including manufacturing timeframes, delivery estimates, failed delivery, damaged packaging, and contact details.',
+    'Read the Your Next Blinds shipping policy, including manufacturing timeframes, delivery estimates, failed delivery, damaged packaging, and contact details.',
 };
 
 const sections = [
@@ -74,7 +74,7 @@ export default function ShippingPolicyPage() {
         <section className="px-4 md:px-6 lg:px-20 py-10 md:py-14">
           <div className="max-w-[860px] mx-auto">
             <p className="text-[#444] leading-relaxed text-base md:text-[17px]">
-              This Shipping Policy explains how YourNextBlinds processes and delivers made-to-measure
+              This Shipping Policy explains how Your Next Blinds processes and delivers made-to-measure
               blind orders. Because each blind is custom manufactured, dispatch takes place after production
               is complete.
             </p>

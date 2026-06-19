@@ -1,7 +1,7 @@
 import Image from 'next/image';
 
 const features = [
-  { id: 1, title: 'First in your Letterbox', description: 'Samples are posted directly through your letterbox — no waiting in required.' },
+  { id: 1, title: 'First in your Letterbox', description: 'Samples are posted directly through your letterbox — no signature required.' },
   { id: 2, title: 'Available on Selected Products', description: 'Free samples are offered on specific fabric ranges. Look for the sample option on eligible product pages.' },
   { id: 3, title: 'Find Your Perfect Match', description: 'See how our fabrics and colours look in your own home before placing your order.' },
 ];

@@ -3,9 +3,9 @@ import Link from 'next/link';
 import { Header, NavBar, Footer } from '@/components';
 
 export const metadata: Metadata = {
-  title: 'Terms and Conditions - YourNextBlinds',
+  title: 'Terms and Conditions - Your Next Blinds',
   description:
-    'Read the Terms and Conditions for YourNextBlinds orders, delivery, made-to-measure blinds, warranty, returns, and liability.',
+    'Read the Terms and Conditions for Your Next Blinds orders, delivery, made-to-measure blinds, warranty, returns, and liability.',
 };
 
 const sections = [

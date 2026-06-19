@@ -4,8 +4,8 @@ import type { Metadata } from 'next';
 import { TopBar, Header, NavBar, Footer } from '@/components';
 
 export const metadata: Metadata = {
-  title: 'About Us - YourNextBlind | Custom Blinds Made in Texas',
-  description: 'Learn about YourNextBlind - Over 15 years of expertise in custom window coverings. Designed for light, built for life. Manufactured in Texas.',
+  title: 'About Us - Your Next Blinds | Custom Blinds Made in Texas',
+  description: 'Learn about Your Next Blinds - Over 15 years of expertise in custom window coverings. Designed for light, built for life. Manufactured in Texas.',
 };
 
 const values = [
@@ -71,13 +71,13 @@ export default function AboutPage() {
               <div className="order-2 lg:order-1 space-y-5">
                 <div className="space-y-4 text-base md:text-[17px] text-[#4a4a4a] leading-relaxed">
                   <p>
-                    At YourNextBlind, we've spent over 15 years understanding that relationship — how to filter light softly, how to block it completely, and how to give homeowners full control over it.
+                    At Your Next Blinds, we've spent over 15 years understanding that relationship — how to filter light softly, how to block it completely, and how to give homeowners full control over it.
                   </p>
                   <p>
                     Our journey began in 2008, working hands-on with window coverings across multiple markets and countries. Over time, we mastered the materials, the mechanics, and the craftsmanship behind high-quality blinds and shades. That global experience now comes together in one place — a brand built for the modern American home.
                   </p>
                   <p>
-                    We created YourNextBlind to make premium, custom window coverings simple, accessible, and reliable — without showroom pressure, inflated prices, or guesswork.
+                    We created Your Next Blinds to make premium, custom window coverings simple, accessible, and reliable — without showroom pressure, inflated prices, or guesswork.
                   </p>
                 </div>
               </div>
@@ -226,11 +226,11 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Why YourNextBlind Section */}
+        {/* Why Your Next Blinds Section */}
         <section className="bg-white px-6 md:px-12 lg:px-20 py-16 md:py-20">
           <div className="max-w-[900px] mx-auto">
             <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-[#1a1a1a] tracking-tight text-center mb-8 md:mb-10">
-              Why YourNextBlind
+              Why Your Next Blinds
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {whyUs.map((item, index) => (
@@ -274,13 +274,13 @@ export default function AboutPage() {
                 
                 <div className="max-w-[600px] mx-auto space-y-3">
                   <div className="space-y-1.5 text-base md:text-lg text-white/95 leading-relaxed">
-                    <p className="italic">Your next blinds aren't just window coverings — they're how you wake up in the morning, how you rest at night, how you rest at night, and how your home feels every day in between.</p>
+                    <p className="italic">Your next blinds aren't just window coverings — they're how you wake up in the morning, how you rest at night, and how your home feels every day in between.</p>
                   </div>
                 </div>
 
                 <div className="pt-3 md:pt-4">
                   <p className="text-lg md:text-xl lg:text-2xl font-semibold text-white mb-6 md:mb-8">
-                    This is <span className="italic">YourNextBlind.</span>
+                    This is <span className="italic">Your Next Blinds.</span>
                   </p>
                   <Link href="/collections">
                     <button className="border-2 border-white text-white px-8 md:px-10 py-3 rounded-full text-sm md:text-base font-semibold tracking-wide hover:bg-white hover:text-[#00473c] transition-all duration-300 transform hover:scale-105 hover:shadow-xl">

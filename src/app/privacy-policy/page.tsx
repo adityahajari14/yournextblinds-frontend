@@ -2,8 +2,8 @@ import type { Metadata } from 'next';
 import { TopBar, Header, NavBar, Footer } from '@/components';
 
 export const metadata: Metadata = {
-  title: 'Privacy Policy - YourNextBlinds',
-  description: 'Read our Privacy Policy to understand how YourNextBlinds collects, uses, and discloses your personal information.',
+  title: 'Privacy Policy - Your Next Blinds',
+  description: 'Read our Privacy Policy to understand how Your Next Blinds collects, uses, and discloses your personal information.',
 };
 
 const sections = [
