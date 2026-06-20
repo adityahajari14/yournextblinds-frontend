@@ -667,7 +667,7 @@ const ProductPage = ({
 
   // Show minimum price indicator when no dimensions selected
   const showMinPriceIndicator = config.width === 0 || config.height === 0;
-  const displayedPrice = showMinPriceIndicator ? product.price : totalPrice;
+  const displayedPrice = isRollerBandF ? 0 : showMinPriceIndicator ? product.price : totalPrice;
   const bandHPromoCompareAtPrice = displayedPrice / (1 - BAND_H_PROMO_DISCOUNT_PERCENT / 100);
 
   // Calculate dynamic size ranges from price band
