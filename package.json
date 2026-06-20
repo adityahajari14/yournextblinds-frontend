@@ -11,6 +11,7 @@
     "export:products": "node scripts/export-shopify-products.mjs",
     "export:product-details": "node scripts/export-product-details-feed.mjs",
     "shopify:upsert-band-h-test": "node scripts/upsert-shopify-band-h-test-product.mjs",
+    "shopify:upsert-roller-band-f-test": "node scripts/upsert-shopify-roller-band-f-test-product.mjs",
     "sync:shopify-skus": "node scripts/sync-shopify-skus.mjs",
     "pricing:validate": "node scripts/validate-pricing-data.mjs",
     "pricing:validate:shopify": "node scripts/validate-pricing-data.mjs --shopify"

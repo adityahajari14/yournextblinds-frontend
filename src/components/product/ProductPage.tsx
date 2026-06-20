@@ -40,6 +40,8 @@ import {
   BottomBarSelector,
   RollStyleSelector,
   DayNightBandHSelector,
+  RollerBandFSelector,
+  RollerBandFRoomDarkeningSelector,
 } from './customization';
 import {
   HEADRAIL_OPTIONS,
@@ -70,6 +72,14 @@ import {
   isDayNightBandHProduct,
   supportsBandHWrappedCassette,
 } from '@/data/dayNightBandH';
+import {
+  ROLLER_BAND_F_MOTORIZATION_OPTIONS,
+  ROLLER_BAND_F_SIZE_LIMITS,
+  ROLLER_BAND_F_ROOM_DARKENING_OPTIONS,
+  isRollerBandFProduct,
+  supportsRollerBandFWrappedCassette,
+  rollerBandFShowsRollOption,
+} from '@/data/rollerBandF';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 import { CONTINUOUS_CHAIN_CARD, CONTINUOUS_CHAIN_CARD_ROLLER, CONTINUOUS_CHAIN_CARD_ZEBRA, CASSETTE_CARD, CASSETTE_CARD_ROLLER, CASSETTE_CARD_ZEBRA, MOTORIZATION_CARD, BOTTOM_BAR_CARD } from '@/data/optionalCustomizations';
 import Image from 'next/image';
@@ -139,6 +149,7 @@ const ProductPage = ({
   const { addToCart } = useCart();
   const searchParams = useSearchParams();
   const isBandHProduct = useMemo(() => isDayNightBandHProduct(product), [product]);
+  const isRollerBandF = useMemo(() => isRollerBandFProduct(product), [product]);
 
   useEffect(() => {
     trackShopifyProductView(product);
@@ -150,6 +161,9 @@ const ProductPage = ({
     widthFraction: '0',
     height: 0,
     heightFraction: '0',
+    roomDarkening: isRollerBandFProduct(product)
+      ? (ROLLER_BAND_F_ROOM_DARKENING_OPTIONS.find((o) => o.id === 'dimout')?.id ?? null)
+      : null,
   });
 
   // State for pricing data from backend
@@ -193,23 +207,31 @@ const ProductPage = ({
   const preselectMotorization = searchParams.get('motorized') === 'true';
   const defaultMotorizationOption = isBandHProduct
     ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS[0]?.id ?? null
+    : isRollerBandF
+    ? ROLLER_BAND_F_MOTORIZATION_OPTIONS[0]?.id ?? null
     : MOTORIZATION_OPTIONS.find((option) => option.id !== 'none')?.id ?? null;
   const activeMotorizationOptions = isBandHProduct
     ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS
+    : isRollerBandF
+    ? ROLLER_BAND_F_MOTORIZATION_OPTIONS
     : MOTORIZATION_OPTIONS.filter((option) => option.id !== 'none');
   const canUseMotorization = product.features.hasMotorization || preselectMotorization;
   const isMotorizationActive =
     canUseMotorization && selectedOptionalCards.motorization;
   const cartConfiguration = useMemo<ProductConfiguration>(() => ({
     ...config,
-    controlSide: isBandHProduct
-      ? (config.controlOption === 'continuous-chain' && !isMotorizationActive ? config.controlSide : null)
+    controlSide: (isBandHProduct || isRollerBandF)
+      ? ((config.controlOption === 'continuous-chain' || config.controlOption === 'roller-f-continuous-chain') && !isMotorizationActive ? config.controlSide : null)
       : isMotorizationActive && product.features.hasChainColor ? null : config.controlSide,
-    chainColor: isBandHProduct || isMotorizationActive ? null : config.chainColor,
+    chainColor: isBandHProduct || isRollerBandF || isMotorizationActive ? null : config.chainColor,
     wrappedCassette: isBandHProduct && !supportsBandHWrappedCassette(config.headrail)
       ? null
+      : isRollerBandF && !supportsRollerBandFWrappedCassette(config.headrail)
+      ? null
       : config.wrappedCassette,
-    cassetteMatchingBar: isBandHProduct ? null : config.cassetteMatchingBar,
+    cassetteMatchingBar: isBandHProduct || isRollerBandF ? null : config.cassetteMatchingBar,
+    rollOption: isRollerBandF && rollerBandFShowsRollOption(config.headrail) ? config.rollOption : null,
+    roomDarkening: isRollerBandF ? config.roomDarkening : null,
     motorization: isMotorizationActive
       ? (config.motorization && config.motorization !== 'none' ? config.motorization : defaultMotorizationOption)
       : null,
@@ -217,6 +239,7 @@ const ProductPage = ({
     config,
     defaultMotorizationOption,
     isBandHProduct,
+    isRollerBandF,
     isMotorizationActive,
     product.features.hasChainColor,
   ]);
@@ -318,8 +341,8 @@ const ProductPage = ({
   }, [product.category]);
 
   const bandHColorVariants = useMemo(
-    () => isBandHProduct ? (product.variants ?? []).filter((variant) => variant.image) : [],
-    [isBandHProduct, product.variants]
+    () => (isBandHProduct || isRollerBandF) ? (product.variants ?? []).filter((variant) => variant.image) : [],
+    [isBandHProduct, isRollerBandF, product.variants]
   );
   const selectedBandHVariant = useMemo(
     () => bandHColorVariants.find((variant) => variant.id === config.selectedVariantId) ?? bandHColorVariants[0] ?? null,
@@ -343,7 +366,7 @@ const ProductPage = ({
     : undefined;
 
   useEffect(() => {
-    if (!isBandHProduct || bandHColorVariants.length === 0) return;
+    if ((!isBandHProduct && !isRollerBandF) || bandHColorVariants.length === 0) return;
     if (config.selectedVariantId && bandHColorVariants.some((variant) => variant.id === config.selectedVariantId)) {
       return;
     }
@@ -358,7 +381,7 @@ const ProductPage = ({
       selectedVariantOptionName: firstOption.name,
       selectedVariantOptionValue: firstOption.value,
     }));
-  }, [bandHColorVariants, config.selectedVariantId, isBandHProduct]);
+  }, [bandHColorVariants, config.selectedVariantId, isBandHProduct, isRollerBandF]);
 
   const installationOptions = isDayNight
     ? ZEBRA_INSTALLATION_OPTIONS
@@ -397,6 +420,26 @@ const ProductPage = ({
         showControlOption: !isMotorizationActive,
         showStacking: false,
         showControlSide: config.controlOption === 'continuous-chain' && !isMotorizationActive,
+        showBottomChain: false,
+        showBracketType: false,
+        showMotorization: isMotorizationActive,
+        showBlindColor: false,
+        showFrameColor: false,
+        showOpeningDirection: false,
+        showBottomBar: false,
+        showRollStyle: false,
+      };
+    }
+
+    if (isRollerBandF) {
+      return {
+        showSize: true,
+        showHeadrail: true,
+        showHeadrailColour: false,
+        showInstallationMethod: true,
+        showControlOption: !isMotorizationActive,
+        showStacking: false,
+        showControlSide: config.controlOption === 'roller-f-continuous-chain' && !isMotorizationActive,
         showBottomChain: false,
         showBracketType: false,
         showMotorization: isMotorizationActive,
@@ -462,7 +505,7 @@ const ProductPage = ({
       showBottomBar: product.features.hasBottomBar,
       showRollStyle: product.features.hasRollStyle,
     };
-  }, [config.controlOption, config.headrail, isBandHProduct, isMotorizationActive, isRollerOrDayNight, product.features]);
+  }, [config.controlOption, config.headrail, isBandHProduct, isRollerBandF, isMotorizationActive, isRollerOrDayNight, product.features]);
 
   // Build list of selected customizations for pricing
   const selectedCustomizations = useMemo(() => {
@@ -475,11 +518,13 @@ const ProductPage = ({
       controlSide: visibleOptions.showControlSide ? cartConfiguration.controlSide : null,
       bottomChain: visibleOptions.showBottomChain ? config.bottomChain : null,
       bracketType: visibleOptions.showBracketType ? config.bracketType : null,
-      chainColor: isBandHProduct ? null : cartConfiguration.chainColor,
+      chainColor: (isBandHProduct || isRollerBandF) ? null : cartConfiguration.chainColor,
       wrappedCassette: isBandHProduct
         ? (supportsBandHWrappedCassette(config.headrail) ? cartConfiguration.wrappedCassette : null)
+        : isRollerBandF
+        ? (supportsRollerBandFWrappedCassette(config.headrail) ? cartConfiguration.wrappedCassette : null)
         : config.wrappedCassette,
-      cassetteMatchingBar: isBandHProduct ? null : config.cassetteMatchingBar,
+      cassetteMatchingBar: (isBandHProduct || isRollerBandF) ? null : config.cassetteMatchingBar,
       isRollerCassette: product.features.hasRollerCassette,
       motorization: cartConfiguration.motorization,
       blindColor: visibleOptions.showBlindColor ? config.blindColor : null,
@@ -487,8 +532,10 @@ const ProductPage = ({
       openingDirection: visibleOptions.showOpeningDirection ? config.openingDirection : null,
       bottomBar: visibleOptions.showBottomBar ? config.bottomBar : null,
       rollStyle: visibleOptions.showRollStyle ? config.rollStyle : null,
+      roomDarkening: cartConfiguration.roomDarkening,
+      rollOption: cartConfiguration.rollOption,
     });
-  }, [cartConfiguration, config, isBandHProduct, product.features.hasRollerCassette, visibleOptions]);
+  }, [cartConfiguration, config, isBandHProduct, isRollerBandF, product.features.hasRollerCassette, visibleOptions]);
 
   const requiredCustomizationVisibility = useMemo(() => {
     if (isBandHProduct) {
@@ -498,6 +545,18 @@ const ProductPage = ({
         showChainColor: false,
         showCassetteMatchingBar: false,
         showMotorization: isMotorizationActive,
+      };
+    }
+
+    if (isRollerBandF) {
+      return {
+        ...visibleOptions,
+        showWrappedCassette: supportsRollerBandFWrappedCassette(config.headrail),
+        showChainColor: false,
+        showCassetteMatchingBar: false,
+        showMotorization: isMotorizationActive,
+        showRoomDarkening: true,
+        showRollOption: rollerBandFShowsRollOption(config.headrail),
       };
     }
 
@@ -521,6 +580,7 @@ const ProductPage = ({
   }, [
     config.headrail,
     isBandHProduct,
+    isRollerBandF,
     isMotorizationActive,
     product.features.hasCassetteMatchingBar,
     product.features.hasChainColor,
@@ -536,7 +596,8 @@ const ProductPage = ({
       requiredCustomizationVisibility
     );
 
-    if (!isBandHProduct || cartConfiguration.width <= 0 || cartConfiguration.height <= 0) {
+    const isBandProduct = isBandHProduct || isRollerBandF;
+    if (!isBandProduct || cartConfiguration.width <= 0 || cartConfiguration.height <= 0) {
       return missingCustomizations;
     }
 
@@ -550,16 +611,17 @@ const ProductPage = ({
       cartConfiguration.heightFraction,
       cartConfiguration.heightUnit
     );
+    const limits = isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS : ROLLER_BAND_F_SIZE_LIMITS;
     const isOutOfRange =
-      widthInches < DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth ||
-      widthInches > DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth ||
-      heightInches < DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight ||
-      heightInches > DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight;
+      widthInches < limits.minWidth ||
+      widthInches > limits.maxWidth ||
+      heightInches < limits.minHeight ||
+      heightInches > limits.maxHeight;
 
     return isOutOfRange
-      ? [...missingCustomizations, 'valid Band H size']
+      ? [...missingCustomizations, isBandHProduct ? 'valid Band H size' : 'valid Roller Band F size']
       : missingCustomizations;
-  }, [cartConfiguration, isBandHProduct, requiredCustomizationVisibility]);
+  }, [cartConfiguration, isBandHProduct, isRollerBandF, requiredCustomizationVisibility]);
 
   const isAddToCartDisabled = isValidating || missingRequiredCustomizations.length > 0;
 
@@ -695,7 +757,7 @@ const ProductPage = ({
   };
 
   const renderBandHColorSelector = (className: string) => {
-    if (!isBandHProduct || bandHColorVariants.length === 0) return null;
+    if ((!isBandHProduct && !isRollerBandF) || bandHColorVariants.length === 0) return null;
 
     return (
       <div className={className}>
@@ -748,7 +810,7 @@ const ProductPage = ({
   };
 
   return (
-    <div className={isBandHProduct ? 'bg-white pb-20 lg:pb-0' : 'bg-white'}>
+    <div className={(isBandHProduct || isRollerBandF) ? 'bg-white pb-20 lg:pb-0' : 'bg-white'}>
       {isBandHProduct && (
         <>
           <button
@@ -838,7 +900,7 @@ const ProductPage = ({
                 images={productGalleryImages}
                 videos={product.videos}
                 productName={product.name}
-                selectedIndex={isBandHProduct ? selectedBandHVariantImageIndex : undefined}
+                selectedIndex={(isBandHProduct || isRollerBandF) ? selectedBandHVariantImageIndex : undefined}
               />
             </div>
 
@@ -908,6 +970,14 @@ const ProductPage = ({
 
               {/* Customization Sections */}
               <div className="space-y-4">
+                {/* Room Darkening — Roller Band F only, above measure card */}
+                {isRollerBandF && (
+                  <RollerBandFRoomDarkeningSelector
+                    config={config}
+                    updateConfig={(updates) => setConfig((prev) => ({ ...prev, ...updates }))}
+                  />
+                )}
+
                 {/* Measure your windows - Collapsible Section */}
                 <div className="border border-gray-200 rounded-lg overflow-hidden">
                   <button
@@ -944,10 +1014,10 @@ const ProductPage = ({
                           onHeightChange={(value) => setConfig({ ...config, height: value })}
                           onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
                           onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
-                          minWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : sizeRanges?.minWidth}
-                          maxWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : sizeRanges?.maxWidth}
-                          minHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : sizeRanges?.minHeight}
-                          maxHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : sizeRanges?.maxHeight}
+                          minWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : sizeRanges?.minWidth}
+                          maxWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : sizeRanges?.maxWidth}
+                          minHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : sizeRanges?.minHeight}
+                          maxHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : sizeRanges?.maxHeight}
                         />
                       )}
 
@@ -1008,6 +1078,21 @@ const ProductPage = ({
                     <div className="p-4 md:p-6 space-y-6 divide-y divide-gray-100">
                       {isBandHProduct ? (
                         <DayNightBandHSelector
+                          config={config}
+                          updateConfig={(updates) => setConfig((prev) => ({ ...prev, ...updates }))}
+                          isMotorizationSelected={selectedOptionalCards.motorization}
+                          onMotorizationSelectedChange={(selected) =>
+                            setSelectedOptionalCards((prev) => ({
+                              ...prev,
+                              motorization: selected,
+                              continuousChain: false,
+                              cassette: false,
+                              bottomBar: false,
+                            }))
+                          }
+                        />
+                      ) : isRollerBandF ? (
+                        <RollerBandFSelector
                           config={config}
                           updateConfig={(updates) => setConfig((prev) => ({ ...prev, ...updates }))}
                           isMotorizationSelected={selectedOptionalCards.motorization}

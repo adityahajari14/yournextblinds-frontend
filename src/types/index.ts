@@ -117,6 +117,8 @@ export interface ProductConfiguration {
   openingDirection: string | null;
   bottomBar: string | null;
   rollStyle: string | null;
+  roomDarkening: string | null;
+  rollOption: string | null;
   selectedVariantId: string | null;
   selectedVariantTitle: string | null;
   selectedVariantImage: string | null;
@@ -150,6 +152,8 @@ export const DEFAULT_CONFIGURATION: ProductConfiguration = {
   openingDirection: null,
   bottomBar: null,
   rollStyle: null,
+  roomDarkening: null,
+  rollOption: null,
   selectedVariantId: null,
   selectedVariantTitle: null,
   selectedVariantImage: null,

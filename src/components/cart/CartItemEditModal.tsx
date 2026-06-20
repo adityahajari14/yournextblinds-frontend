@@ -5,7 +5,7 @@ import { CartItem, CustomizationPricing, DEFAULT_CONFIGURATION, PriceBandMatrix,
 import { fetchCustomizationPricing, fetchPriceMatrix, formatPriceWithCurrency, validateCartPrice } from '@/lib/api';
 import { calculateTotalPrice, configToCustomizations, getTotalInches } from '@/lib/pricing';
 import { getMissingRequiredCustomizations } from '@/lib/product-customization-validation';
-import { DayNightBandHSelector, RoomTypeSelector, SimpleDropdown, SizeSelector } from '@/components/product/customization';
+import { DayNightBandHSelector, RollerBandFSelector, RoomTypeSelector, SimpleDropdown, SizeSelector } from '@/components/product/customization';
 import {
   BLIND_COLOR_OPTIONS,
   BOTTOM_BAR_OPTIONS,
@@ -36,6 +36,13 @@ import {
   isDayNightBandHProduct,
   supportsBandHWrappedCassette,
 } from '@/data/dayNightBandH';
+import {
+  ROLLER_BAND_F_MOTORIZATION_OPTIONS,
+  ROLLER_BAND_F_SIZE_LIMITS,
+  isRollerBandFProduct,
+  supportsRollerBandFWrappedCassette,
+  rollerBandFShowsRollOption,
+} from '@/data/rollerBandF';
 
 interface CartItemEditModalProps {
   item: CartItem;
@@ -51,9 +58,11 @@ const getBottomBarPricing = () =>
     prices: [{ widthMm: null, price: option.price || 0 }],
   }));
 
-const getFirstMotorizationOption = (isBandHProduct: boolean) =>
+const getFirstMotorizationOption = (isBandHProduct: boolean, isRollerBandF: boolean) =>
   isBandHProduct
     ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS[0]?.id ?? null
+    : isRollerBandF
+    ? ROLLER_BAND_F_MOTORIZATION_OPTIONS[0]?.id ?? null
     : MOTORIZATION_OPTIONS.find((option) => option.id !== 'none')?.id ?? null;
 
 const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) => {
@@ -76,9 +85,12 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
 
   const product = item.product;
   const isBandHProduct = isDayNightBandHProduct(product);
-  const defaultMotorizationOption = getFirstMotorizationOption(isBandHProduct);
+  const isRollerBandF = isRollerBandFProduct(product);
+  const defaultMotorizationOption = getFirstMotorizationOption(isBandHProduct, isRollerBandF);
   const activeMotorizationOptions = isBandHProduct
     ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS
+    : isRollerBandF
+    ? ROLLER_BAND_F_MOTORIZATION_OPTIONS
     : MOTORIZATION_OPTIONS.filter((option) => option.id !== 'none');
   const category = product.category.toLowerCase();
   const isRollerOrDayNight = category.includes('roller') || category.includes('day') || category.includes('night');
@@ -130,7 +142,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
   }, []);
 
   const visibleOptions = useMemo(() => {
-    if (isBandHProduct) {
+    if (isBandHProduct || isRollerBandF) {
       return {
         showSize: product.features.hasSize,
         showHeadrail: true,
@@ -138,7 +150,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
         showInstallationMethod: true,
         showControlOption: !isMotorizationActive,
         showStacking: false,
-        showControlSide: config.controlOption === 'continuous-chain' && !isMotorizationActive,
+        showControlSide: (config.controlOption === 'continuous-chain' || config.controlOption === 'roller-f-continuous-chain') && !isMotorizationActive,
         showBottomChain: false,
         showBracketType: false,
         showBlindColor: false,
@@ -185,18 +197,22 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
       showBottomBar: product.features.hasBottomBar,
       showRollStyle: product.features.hasRollStyle,
     };
-  }, [config.controlOption, config.headrail, isBandHProduct, isMotorizationActive, isRollerOrDayNight, product.features]);
+  }, [config.controlOption, config.headrail, isBandHProduct, isRollerBandF, isMotorizationActive, isRollerOrDayNight, product.features]);
 
   const normalizedConfig = useMemo<ProductConfiguration>(() => ({
     ...config,
-    controlSide: isBandHProduct
-      ? (config.controlOption === 'continuous-chain' && !isMotorizationActive ? config.controlSide : null)
+    controlSide: (isBandHProduct || isRollerBandF)
+      ? ((config.controlOption === 'continuous-chain' || config.controlOption === 'roller-f-continuous-chain') && !isMotorizationActive ? config.controlSide : null)
       : isMotorizationActive && product.features.hasChainColor ? null : config.controlSide,
-    chainColor: isBandHProduct || isMotorizationActive ? null : config.chainColor,
+    chainColor: isBandHProduct || isRollerBandF || isMotorizationActive ? null : config.chainColor,
     wrappedCassette: isBandHProduct
       ? (supportsBandHWrappedCassette(config.headrail) ? config.wrappedCassette : null)
+      : isRollerBandF
+      ? (supportsRollerBandFWrappedCassette(config.headrail) ? config.wrappedCassette : null)
       : selectedOptionalCards.cassette ? config.wrappedCassette : null,
-    cassetteMatchingBar: isBandHProduct ? null : selectedOptionalCards.cassette ? config.cassetteMatchingBar : null,
+    cassetteMatchingBar: (isBandHProduct || isRollerBandF) ? null : selectedOptionalCards.cassette ? config.cassetteMatchingBar : null,
+    rollOption: isRollerBandF && rollerBandFShowsRollOption(config.headrail) ? config.rollOption : null,
+    roomDarkening: isRollerBandF ? config.roomDarkening : null,
     motorization: isMotorizationActive
       ? (config.motorization && config.motorization !== 'none' ? config.motorization : defaultMotorizationOption)
       : null,
@@ -205,6 +221,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     config,
     defaultMotorizationOption,
     isBandHProduct,
+    isRollerBandF,
     isMotorizationActive,
     product.features.hasChainColor,
     selectedOptionalCards.bottomBar,
@@ -224,6 +241,20 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
       };
     }
 
+    if (isRollerBandF) {
+      return {
+        ...visibleOptions,
+        showControlSide: config.controlOption === 'roller-f-continuous-chain' && !isMotorizationActive,
+        showChainColor: false,
+        showWrappedCassette: supportsRollerBandFWrappedCassette(config.headrail),
+        showCassetteMatchingBar: false,
+        showMotorization: isMotorizationActive,
+        showBottomBar: false,
+        showRoomDarkening: true,
+        showRollOption: rollerBandFShowsRollOption(config.headrail),
+      };
+    }
+
     return {
       ...visibleOptions,
       showControlSide: product.features.hasChainColor ? !isMotorizationActive : visibleOptions.showControlSide,
@@ -239,6 +270,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     config.controlOption,
     config.headrail,
     isBandHProduct,
+    isRollerBandF,
     isMotorizationActive,
     product.features.hasCassetteMatchingBar,
     product.features.hasChainColor,
@@ -252,7 +284,8 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
   const missingCustomizations = useMemo(() => {
     const missing = getMissingRequiredCustomizations(normalizedConfig, requiredVisibility);
 
-    if (!isBandHProduct || normalizedConfig.width <= 0 || normalizedConfig.height <= 0) {
+    const isBandProduct = isBandHProduct || isRollerBandF;
+    if (!isBandProduct || normalizedConfig.width <= 0 || normalizedConfig.height <= 0) {
       return missing;
     }
 
@@ -266,14 +299,15 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
       normalizedConfig.heightFraction,
       normalizedConfig.heightUnit
     );
+    const limits = isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS : ROLLER_BAND_F_SIZE_LIMITS;
     const isOutOfRange =
-      widthInches < DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth ||
-      widthInches > DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth ||
-      heightInches < DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight ||
-      heightInches > DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight;
+      widthInches < limits.minWidth ||
+      widthInches > limits.maxWidth ||
+      heightInches < limits.minHeight ||
+      heightInches > limits.maxHeight;
 
-    return isOutOfRange ? [...missing, 'valid Band H size'] : missing;
-  }, [isBandHProduct, normalizedConfig, requiredVisibility]);
+    return isOutOfRange ? [...missing, isBandHProduct ? 'valid Band H size' : 'valid Roller Band F size'] : missing;
+  }, [isBandHProduct, isRollerBandF, normalizedConfig, requiredVisibility]);
 
   const selectedCustomizations = useMemo(() => configToCustomizations({
     headrail: visibleOptions.showHeadrail ? normalizedConfig.headrail : null,
@@ -284,11 +318,13 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     controlSide: visibleOptions.showControlSide ? normalizedConfig.controlSide : null,
     bottomChain: visibleOptions.showBottomChain ? normalizedConfig.bottomChain : null,
     bracketType: visibleOptions.showBracketType ? normalizedConfig.bracketType : null,
-    chainColor: isBandHProduct ? null : normalizedConfig.chainColor,
+    chainColor: (isBandHProduct || isRollerBandF) ? null : normalizedConfig.chainColor,
     wrappedCassette: isBandHProduct
       ? (supportsBandHWrappedCassette(normalizedConfig.headrail) ? normalizedConfig.wrappedCassette : null)
+      : isRollerBandF
+      ? (supportsRollerBandFWrappedCassette(normalizedConfig.headrail) ? normalizedConfig.wrappedCassette : null)
       : normalizedConfig.wrappedCassette,
-    cassetteMatchingBar: isBandHProduct ? null : normalizedConfig.cassetteMatchingBar,
+    cassetteMatchingBar: (isBandHProduct || isRollerBandF) ? null : normalizedConfig.cassetteMatchingBar,
     isRollerCassette: product.features.hasRollerCassette,
     motorization: normalizedConfig.motorization,
     blindColor: visibleOptions.showBlindColor ? normalizedConfig.blindColor : null,
@@ -296,7 +332,9 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     openingDirection: visibleOptions.showOpeningDirection ? normalizedConfig.openingDirection : null,
     bottomBar: visibleOptions.showBottomBar ? normalizedConfig.bottomBar : null,
     rollStyle: visibleOptions.showRollStyle ? normalizedConfig.rollStyle : null,
-  }), [isBandHProduct, normalizedConfig, product.features.hasRollerCassette, visibleOptions]);
+    roomDarkening: normalizedConfig.roomDarkening,
+    rollOption: normalizedConfig.rollOption,
+  }), [isBandHProduct, isRollerBandF, normalizedConfig, product.features.hasRollerCassette, visibleOptions]);
 
   const priceCalculation = useMemo(() => {
     const widthInches = getTotalInches(
@@ -437,10 +475,10 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                 onHeightChange={(value) => updateConfig({ height: value })}
                 onHeightFractionChange={(value) => updateConfig({ heightFraction: value })}
                 onUnitChange={(unit) => updateConfig({ widthUnit: unit, heightUnit: unit })}
-                minWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : undefined}
-                maxWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : undefined}
-                minHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : undefined}
-                maxHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : undefined}
+                minWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : undefined}
+                maxWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : undefined}
+                minHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : undefined}
+                maxHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : undefined}
               />
             )}
 
@@ -460,6 +498,28 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                   </div>
                 )}
                 <DayNightBandHSelector
+                  config={config}
+                  updateConfig={updateConfig}
+                  isMotorizationSelected={selectedOptionalCards.motorization}
+                  onMotorizationSelectedChange={(selected) =>
+                    setSelectedOptionalCards((prev) => ({
+                      ...prev,
+                      motorization: selected,
+                      continuousChain: false,
+                      cassette: false,
+                      bottomBar: false,
+                    }))
+                  }
+                />
+              </>
+            ) : isRollerBandF ? (
+              <>
+                {visibleOptions.showInstallationMethod && (
+                  <div className="max-w-md">
+                    {renderDropdown('installationMethod', 'Installation', installationOptions)}
+                  </div>
+                )}
+                <RollerBandFSelector
                   config={config}
                   updateConfig={updateConfig}
                   isMotorizationSelected={selectedOptionalCards.motorization}

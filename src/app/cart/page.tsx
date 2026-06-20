@@ -39,6 +39,14 @@ import {
   DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS,
   DAY_NIGHT_BAND_H_WRAPPED_CASSETTE_OPTIONS,
 } from '@/data/dayNightBandH';
+import {
+  ROLLER_BAND_F_HEADRAIL_OPTIONS,
+  ROLLER_BAND_F_CONTROL_OPTIONS,
+  ROLLER_BAND_F_MOTORIZATION_OPTIONS,
+  ROLLER_BAND_F_WRAPPED_CASSETTE_OPTIONS,
+  ROLLER_BAND_F_ROOM_DARKENING_OPTIONS,
+  ROLLER_BAND_F_ROLL_OPTIONS,
+} from '@/data/rollerBandF';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 
 export default function CartPage() {
@@ -158,23 +166,25 @@ export default function CartPage() {
     const details: Array<{ key: string; label: string; options?: PriceOption[] }> = [
       { key: 'roomType', label: 'Room Type', options: ROOM_TYPE_OPTIONS },
       { key: 'blindName', label: 'Blind Name' },
-      { key: 'headrail', label: 'Headrail', options: [...HEADRAIL_OPTIONS, ...DAY_NIGHT_BAND_H_HEADRAIL_OPTIONS] },
+      { key: 'headrail', label: 'Headrail', options: [...HEADRAIL_OPTIONS, ...DAY_NIGHT_BAND_H_HEADRAIL_OPTIONS, ...ROLLER_BAND_F_HEADRAIL_OPTIONS] },
       { key: 'headrailColour', label: 'Headrail Colour', options: HEADRAIL_COLOUR_OPTIONS },
       { key: 'installationMethod', label: 'Installation', options: [...INSTALLATION_METHOD_OPTIONS, ...ROLLER_INSTALLATION_OPTIONS] },
-      { key: 'controlOption', label: 'Control', options: [...CONTROL_OPTIONS, ...ROLLER_CONTROL_OPTIONS, ...DAY_NIGHT_BAND_H_CONTROL_OPTIONS] },
+      { key: 'controlOption', label: 'Control', options: [...CONTROL_OPTIONS, ...ROLLER_CONTROL_OPTIONS, ...DAY_NIGHT_BAND_H_CONTROL_OPTIONS, ...ROLLER_BAND_F_CONTROL_OPTIONS] },
       { key: 'stacking', label: 'Stacking', options: Object.values(VERTICAL_STACKING_OPTIONS).flat() },
       { key: 'controlSide', label: 'Control Side', options: CONTROL_SIDE_OPTIONS },
       { key: 'bottomChain', label: 'Bottom Weight/Chain', options: BOTTOM_CHAIN_OPTIONS },
       { key: 'bracketType', label: 'Bracket Type', options: BRACKET_TYPE_OPTIONS },
       { key: 'chainColor', label: 'Chain Color', options: CHAIN_COLOR_OPTIONS },
-      { key: 'wrappedCassette', label: 'Wrapped Cassette', options: [...WRAPPED_CASSETTE_OPTIONS, ...DAY_NIGHT_BAND_H_WRAPPED_CASSETTE_OPTIONS] },
+      { key: 'wrappedCassette', label: 'Wrapped Cassette', options: [...WRAPPED_CASSETTE_OPTIONS, ...DAY_NIGHT_BAND_H_WRAPPED_CASSETTE_OPTIONS, ...ROLLER_BAND_F_WRAPPED_CASSETTE_OPTIONS] },
       { key: 'cassetteMatchingBar', label: 'Cassette Bar', options: [...CASSETTE_MATCHING_BAR_OPTIONS, ...ROLLER_CASSETTE_OPTIONS] },
-      { key: 'motorization', label: 'Motorisation', options: [...MOTORIZATION_OPTIONS, ...DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS] },
+      { key: 'motorization', label: 'Motorisation', options: [...MOTORIZATION_OPTIONS, ...DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS, ...ROLLER_BAND_F_MOTORIZATION_OPTIONS] },
       { key: 'blindColor', label: 'Blind Color', options: BLIND_COLOR_OPTIONS },
       { key: 'frameColor', label: 'Frame Color', options: FRAME_COLOR_OPTIONS },
       { key: 'openingDirection', label: 'Opening Direction', options: OPENING_DIRECTION_OPTIONS },
       { key: 'bottomBar', label: 'Bottom Bar', options: BOTTOM_BAR_OPTIONS },
       { key: 'rollStyle', label: 'Roll Style', options: ROLL_STYLE_OPTIONS },
+      { key: 'roomDarkening', label: 'Room Darkening', options: ROLLER_BAND_F_ROOM_DARKENING_OPTIONS },
+      { key: 'rollOption', label: 'Roll Option', options: ROLLER_BAND_F_ROLL_OPTIONS },
     ];
 
     details.forEach(({ key, label, options }) => {

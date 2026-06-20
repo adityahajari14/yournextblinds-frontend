@@ -220,6 +220,8 @@ export function configToCustomizations(config: {
   openingDirection?: string | null;
   bottomBar?: string | null;
   rollStyle?: string | null;
+  roomDarkening?: string | null;
+  rollOption?: string | null;
 }): { category: string; optionId: string }[] {
   const customizations: { category: string; optionId: string }[] = [];
 
@@ -274,6 +276,12 @@ export function configToCustomizations(config: {
   }
   if (config.rollStyle) {
     customizations.push({ category: 'roll-style', optionId: config.rollStyle });
+  }
+  if (config.roomDarkening) {
+    customizations.push({ category: 'room-darkening', optionId: config.roomDarkening });
+  }
+  if (config.rollOption) {
+    customizations.push({ category: 'roll-option', optionId: config.rollOption });
   }
 
   return customizations;

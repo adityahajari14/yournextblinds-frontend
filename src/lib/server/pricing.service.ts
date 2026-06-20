@@ -3,6 +3,10 @@ import {
   DAY_NIGHT_BAND_H_PRICE_BAND_NAME,
   DAY_NIGHT_BAND_H_PRODUCT_HANDLE,
 } from '@/data/dayNightBandH';
+import {
+  ROLLER_BAND_F_PRICE_BAND_NAME,
+  ROLLER_BAND_F_PRODUCT_HANDLE,
+} from '@/data/rollerBandF';
 import { getPriceBandNameByHandle, getAllCachedProducts } from './product-cache';
 
 export interface PricingRequest {
@@ -117,6 +121,7 @@ let indexes: PricingIndexes | null = null;
 
 const localPriceBandByHandle: Record<string, string> = {
   [DAY_NIGHT_BAND_H_PRODUCT_HANDLE]: DAY_NIGHT_BAND_H_PRICE_BAND_NAME,
+  [ROLLER_BAND_F_PRODUCT_HANDLE]: ROLLER_BAND_F_PRICE_BAND_NAME,
 };
 
 function key(...parts: Array<string | null>) {

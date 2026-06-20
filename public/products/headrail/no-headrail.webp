@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="160" viewBox="0 0 200 160">
+  <rect width="200" height="160" fill="#f5f5f5" rx="6"/>
+  <!-- Fabric strips -->
+  <rect x="40" y="30" width="120" height="10" fill="#d0ccc8" rx="2"/>
+  <rect x="40" y="46" width="120" height="10" fill="#e0dcd8" rx="2"/>
+  <rect x="40" y="62" width="120" height="10" fill="#d0ccc8" rx="2"/>
+  <rect x="40" y="78" width="120" height="10" fill="#e0dcd8" rx="2"/>
+  <rect x="40" y="94" width="120" height="10" fill="#d0ccc8" rx="2"/>
+  <rect x="40" y="110" width="120" height="10" fill="#e0dcd8" rx="2"/>
+  <!-- Left edge line -->
+  <line x1="40" y1="28" x2="40" y2="122" stroke="#aaa" stroke-width="1.5"/>
+  <!-- Right edge line -->
+  <line x1="160" y1="28" x2="160" y2="122" stroke="#aaa" stroke-width="1.5"/>
+  <!-- No headrail cross indicator -->
+  <circle cx="100" cy="14" r="9" fill="none" stroke="#aaa" stroke-width="1.5"/>
+  <line x1="94" y1="14" x2="106" y2="14" stroke="#aaa" stroke-width="1.5"/>
+</svg>

@@ -97,6 +97,11 @@
       "id": "price-band-dayandnight-h",
       "name": "Dayandnight - Band H",
       "description": "Fixed test pricing band for Dayandnight products - Band H"
+    },
+    {
+      "id": "price-band-roller-f",
+      "name": "Roller - Band F",
+      "description": "Fixed test pricing band for Roller products - Band F"
     }
   ],
   "widthBands": [
@@ -23130,6 +23135,13 @@
       "price": 804
     },
     {
+      "id": "cell-roller-f-cmke6nffs0000zo7kgj744yml-cmlddwsnm000imo7k5yntza2v",
+      "priceBandId": "price-band-roller-f",
+      "widthBandId": "cmke6nffs0000zo7kgj744yml",
+      "heightBandId": "cmlddwsnm000imo7k5yntza2v",
+      "price": 139.79
+    },
+    {
       "id": "cell-dayandnight-h-cmke6nffs0000zo7kgj744yml-cmlddwsnm000imo7k5yntza2v",
       "priceBandId": "price-band-dayandnight-h",
       "widthBandId": "cmke6nffs0000zo7kgj744yml",
@@ -28995,6 +29007,118 @@
       "name": "Multi Channel Remote",
       "description": null,
       "sortOrder": 16
+    },
+    {
+      "id": "customization-roller-f-headrail-square-flat",
+      "category": "headrail",
+      "optionId": "roller-f-square-flat",
+      "name": "Square Flat",
+      "description": null,
+      "sortOrder": 1
+    },
+    {
+      "id": "customization-roller-f-headrail-curved",
+      "category": "headrail",
+      "optionId": "roller-f-curved",
+      "name": "Curved",
+      "description": null,
+      "sortOrder": 2
+    },
+    {
+      "id": "customization-roller-f-headrail-no-drill-headrail",
+      "category": "headrail",
+      "optionId": "roller-f-no-drill-headrail",
+      "name": "No Drill Headrail",
+      "description": null,
+      "sortOrder": 3
+    },
+    {
+      "id": "customization-roller-f-headrail-no-headrail",
+      "category": "headrail",
+      "optionId": "roller-f-no-headrail",
+      "name": "No Headrail",
+      "description": null,
+      "sortOrder": 4
+    },
+    {
+      "id": "customization-roller-f-wrapped-cassette-no",
+      "category": "wrapped-cassette",
+      "optionId": "roller-f-cassette-no",
+      "name": "No Fabric Wrapped Cassette",
+      "description": null,
+      "sortOrder": 5
+    },
+    {
+      "id": "customization-roller-f-wrapped-cassette-yes",
+      "category": "wrapped-cassette",
+      "optionId": "roller-f-cassette-yes",
+      "name": "Fabric Wrapped Cassette",
+      "description": null,
+      "sortOrder": 6
+    },
+    {
+      "id": "customization-roller-f-control-option-continuous-chain",
+      "category": "control-option",
+      "optionId": "roller-f-continuous-chain",
+      "name": "Continuous Chain",
+      "description": null,
+      "sortOrder": 7
+    },
+    {
+      "id": "customization-roller-f-control-option-cordless",
+      "category": "control-option",
+      "optionId": "roller-f-cordless",
+      "name": "Cordless",
+      "description": null,
+      "sortOrder": 8
+    },
+    {
+      "id": "customization-roller-f-motorization-single-channel",
+      "category": "motorization",
+      "optionId": "roller-f-single-channel",
+      "name": "Single Channel Remote",
+      "description": null,
+      "sortOrder": 9
+    },
+    {
+      "id": "customization-roller-f-motorization-multi-channel",
+      "category": "motorization",
+      "optionId": "roller-f-multi-channel",
+      "name": "Multi Channel Remote",
+      "description": null,
+      "sortOrder": 10
+    },
+    {
+      "id": "customization-roller-f-room-darkening-dimout",
+      "category": "room-darkening",
+      "optionId": "dimout",
+      "name": "Dimout",
+      "description": null,
+      "sortOrder": 11
+    },
+    {
+      "id": "customization-roller-f-room-darkening-blackout",
+      "category": "room-darkening",
+      "optionId": "blackout",
+      "name": "Blackout",
+      "description": null,
+      "sortOrder": 12
+    },
+    {
+      "id": "customization-roller-f-roll-option-standard-roll",
+      "category": "roll-option",
+      "optionId": "standard-roll",
+      "name": "Standard Roll",
+      "description": null,
+      "sortOrder": 13
+    },
+    {
+      "id": "customization-roller-f-roll-option-reverse-roll",
+      "category": "roll-option",
+      "optionId": "reverse-roll",
+      "name": "Reverse Roll",
+      "description": null,
+      "sortOrder": 14
     }
   ],
   "customizationPricings": [
@@ -30068,7 +30192,105 @@
       "widthBandId": null,
       "price": 39,
       "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-headrail-square-flat",
+      "customizationOptionId": "customization-roller-f-headrail-square-flat",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-headrail-curved",
+      "customizationOptionId": "customization-roller-f-headrail-curved",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-headrail-no-drill-headrail",
+      "customizationOptionId": "customization-roller-f-headrail-no-drill-headrail",
+      "widthBandId": null,
+      "price": 44.49,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-headrail-no-headrail",
+      "customizationOptionId": "customization-roller-f-headrail-no-headrail",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-wrapped-cassette-no",
+      "customizationOptionId": "customization-roller-f-wrapped-cassette-no",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-wrapped-cassette-yes",
+      "customizationOptionId": "customization-roller-f-wrapped-cassette-yes",
+      "widthBandId": null,
+      "price": 25,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-control-option-continuous-chain",
+      "customizationOptionId": "customization-roller-f-control-option-continuous-chain",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-control-option-cordless",
+      "customizationOptionId": "customization-roller-f-control-option-cordless",
+      "widthBandId": null,
+      "price": 35.75,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-motorization-single-channel",
+      "customizationOptionId": "customization-roller-f-motorization-single-channel",
+      "widthBandId": null,
+      "price": 24,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-motorization-multi-channel",
+      "customizationOptionId": "customization-roller-f-motorization-multi-channel",
+      "widthBandId": null,
+      "price": 39,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-room-darkening-dimout",
+      "customizationOptionId": "customization-roller-f-room-darkening-dimout",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-room-darkening-blackout",
+      "customizationOptionId": "customization-roller-f-room-darkening-blackout",
+      "widthBandId": null,
+      "price": 49.99,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-roll-option-standard-roll",
+      "customizationOptionId": "customization-roller-f-roll-option-standard-roll",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "customization-pricing-roller-f-roll-option-reverse-roll",
+      "customizationOptionId": "customization-roller-f-roll-option-reverse-roll",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
     }
   ],
-  "checksum": "4e75e38c141761e8e245485ef8f6c8a79f9df9114b394c3e9b67884761a4f5a3"
+  "checksum": "02bc821abf05f8285c81fc67a04c5cf4ee230698a0f49760250c4b1845cbc03f"
 }

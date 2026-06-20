@@ -18,3 +18,5 @@ export { default as SimpleDropdown } from './SimpleDropdown';
 export { default as BottomBarSelector } from './BottomBarSelector';
 export { default as RollStyleSelector } from './RollStyleSelector';
 export { default as DayNightBandHSelector } from './DayNightBandHSelector';
+export { default as RollerBandFSelector } from './RollerBandFSelector';
+export { default as RollerBandFRoomDarkeningSelector } from './RollerBandFRoomDarkeningSelector';
