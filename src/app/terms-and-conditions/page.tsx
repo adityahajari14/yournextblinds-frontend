@@ -141,6 +141,10 @@ const sections = [
     title: '29. Changes to Terms of Service',
     content: `29.1 You can review the most current version of the Terms of Service at any time on this page.\n\n29.2 We reserve the right, in our sole discretion, to update, change, or replace any part of these Terms of Service by posting updates and changes to our website. It is your responsibility to check our website periodically for changes. We will notify you of any material changes to these Terms in accordance with applicable law, and such changes will be effective on the date specified in the notice. Your continued use of or access to the Services following the posting of any changes to these Terms of Service constitutes acceptance of those changes.`,
   },
+  {
+    title: '30. Manufacturing & Distribution',
+    content: `30.1 Our products are manufactured and distributed globally through our production facilities located in Texas (USA), Leeds (United Kingdom), and Guangzhou (China). These facilities support our international supply chain and enable the efficient fulfillment of customer orders across North America, Europe, Asia, and other global markets.\n\n30.2 Company reserves the right to manufacture, source, and distribute products from any of its facilities or approved partners as required to meet operational and customer requirements.`,
+  },
 ];
 
 export default function TermsAndConditionsPage() {

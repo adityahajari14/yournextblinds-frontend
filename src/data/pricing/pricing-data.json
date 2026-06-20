@@ -28981,14 +28981,6 @@
       "sortOrder": 13
     },
     {
-      "id": "customization-band-h-control-option-no-drill-control",
-      "category": "control-option",
-      "optionId": "no-drill-control",
-      "name": "No Drill Control",
-      "description": null,
-      "sortOrder": 14
-    },
-    {
       "id": "customization-band-h-motorization-single-channel",
       "category": "motorization",
       "optionId": "single-channel",
@@ -30032,7 +30024,7 @@
       "id": "customization-pricing-band-h-headrail-no-drill-headrail",
       "customizationOptionId": "customization-band-h-headrail-no-drill-headrail",
       "widthBandId": null,
-      "price": 0,
+      "price": 44.49,
       "isPerUnit": false
     },
     {
@@ -30061,13 +30053,6 @@
       "customizationOptionId": "customization-band-h-control-option-cordless",
       "widthBandId": null,
       "price": 35.75,
-      "isPerUnit": false
-    },
-    {
-      "id": "customization-pricing-band-h-control-option-no-drill-control",
-      "customizationOptionId": "customization-band-h-control-option-no-drill-control",
-      "widthBandId": null,
-      "price": 44.49,
       "isPerUnit": false
     },
     {

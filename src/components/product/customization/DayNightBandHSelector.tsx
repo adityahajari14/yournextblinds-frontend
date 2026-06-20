@@ -86,6 +86,11 @@ const DayNightBandHSelector = ({
                 )}
                 <p className="text-base font-semibold text-[#3a3a3a] pr-8">{option.name}</p>
                 <p className="text-sm text-gray-500 mt-1">{option.description}</p>
+                {option.price > 0 && (
+                  <span className="mt-3 inline-flex w-fit rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
+                    +${option.price.toFixed(2)}
+                  </span>
+                )}
               </button>
 
               {config.headrail === option.id && canUseWrappedCassette && (

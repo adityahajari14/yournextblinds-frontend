@@ -31,7 +31,7 @@ export const DAY_NIGHT_BAND_H_HEADRAIL_OPTIONS = [
     id: 'no-drill-headrail',
     name: 'No Drill Headrail',
     description: 'Depth required: 2.78 inches',
-    price: 0,
+    price: 44.49,
     image: '/products/headrail/no-drill-headrail.webp',
   },
 ];
@@ -55,13 +55,6 @@ export const DAY_NIGHT_BAND_H_CONTROL_OPTIONS = [
     description: 'Child safe cordless operation.',
     price: 35.75,
     image: '/products/control/cordless-zebra-shade.webp',
-  },
-  {
-    id: 'no-drill-control',
-    name: 'No Drill',
-    description: 'Child safe no-drill control option.',
-    price: 44.49,
-    image: '/products/headrail/no-drill-headrail.webp',
   },
 ];
 
