@@ -1,5 +1,4 @@
 export { default as ProductGallery } from './ProductGallery';
-export { default as ProductHeader } from './ProductHeader';
 export { default as ProductDescription } from './ProductDescription';
 export { default as ProductPricing } from './ProductPricing';
 export { default as ProductReviews } from './ProductReviews';

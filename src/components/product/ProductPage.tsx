@@ -933,7 +933,15 @@ const ProductPage = ({
                 <div className="ml-2 md:ml-3">
                   <div className="text-[10px] md:text-xs text-gray-500">Estimated Delivery Date</div>
                   <div className="text-xs md:text-sm font-semibold text-[#00473c]">
-                    {isBandHProduct ? '5 - 7 Working Days' : '12 Working Days'}
+                    {(() => {
+                      const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                      const addDays = (d: Date, n: number) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+                      const today = new Date();
+                      if (isBandHProduct) {
+                        return `${fmt(addDays(today, 5))} - ${fmt(addDays(today, 7))}`;
+                      }
+                      return fmt(addDays(today, 12));
+                    })()}
                   </div>
                 </div>
               </div>
