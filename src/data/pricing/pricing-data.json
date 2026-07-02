@@ -36501,10 +36501,18 @@
     {
       "id": "e517193c-1823-4f7b-845f-857b4b24328a",
       "category": "blind-color",
-      "optionId": "anthracite",
-      "name": "Anthracite",
+      "optionId": "graphite",
+      "name": "Graphite",
       "description": null,
       "sortOrder": 2
+    },
+    {
+      "id": "c4d8f2a6-3b5e-4a7c-9d1f-6e8a0b2c4d6e",
+      "category": "blind-color",
+      "optionId": "blue",
+      "name": "Blue",
+      "description": null,
+      "sortOrder": 3
     },
     {
       "id": "cmke6nzdc006izo7ketksaxgx",
@@ -36853,18 +36861,34 @@
     {
       "id": "7f854313-efd8-4ee1-a54a-20d6b4e2a8df",
       "category": "opening-direction",
-      "optionId": "left-right",
-      "name": "Left & Right",
+      "optionId": "left-to-right",
+      "name": "Left To Right",
       "description": null,
       "sortOrder": 0
     },
     {
       "id": "6e7f6a5c-91b8-4c6b-a57d-d391c64611d4",
       "category": "opening-direction",
-      "optionId": "up-down",
-      "name": "Up & Down",
+      "optionId": "top-down",
+      "name": "Top Down",
+      "description": null,
+      "sortOrder": 2
+    },
+    {
+      "id": "9c2d4e6f-8a1b-4c3d-9e5f-1a2b3c4d5e6f",
+      "category": "opening-direction",
+      "optionId": "right-to-left",
+      "name": "Right To Left",
       "description": null,
       "sortOrder": 1
+    },
+    {
+      "id": "b3e5f7a9-1c2d-4e6f-8a9b-3c4d5e6f7a8b",
+      "category": "opening-direction",
+      "optionId": "split",
+      "name": "Split",
+      "description": null,
+      "sortOrder": 3
     },
     {
       "id": "cmmgajzdy0000rc7khxnxyw9b",
@@ -37181,6 +37205,20 @@
       "customizationOptionId": "7f854313-efd8-4ee1-a54a-20d6b4e2a8df",
       "widthBandId": null,
       "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "5d8e9f0a-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
+      "customizationOptionId": "9c2d4e6f-8a1b-4c3d-9e5f-1a2b3c4d5e6f",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "7f0a1b2c-3d4e-5f6a-7b8c-9d0e1f2a3b4c",
+      "customizationOptionId": "b3e5f7a9-1c2d-4e6f-8a9b-3c4d5e6f7a8b",
+      "widthBandId": null,
+      "price": 35,
       "isPerUnit": false
     },
     {
@@ -38157,6 +38195,13 @@
       "isPerUnit": false
     },
     {
+      "id": "a1b2c3d4-5e6f-4a7b-8c9d-0e1f2a3b4c5d",
+      "customizationOptionId": "c4d8f2a6-3b5e-4a7c-9d1f-6e8a0b2c4d6e",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
       "id": "customization-pricing-band-h-headrail-square-flat",
       "customizationOptionId": "customization-band-h-headrail-square-flat",
       "widthBandId": null,
@@ -38318,7 +38363,7 @@
       "isPerUnit": false
     }
   ],
-  "checksum": "ef6e221de710166fdfd545e9da0b3a87bb4d34a404844e68e2a176f419b7e7af",
+  "checksum": "74ec8a2ce5e7d3ff11d04a595da6fe812e2ee873d98cdd39b5abe241811a41ce",
   "variantCodeBands": [
     {
       "code": "Z10010002",

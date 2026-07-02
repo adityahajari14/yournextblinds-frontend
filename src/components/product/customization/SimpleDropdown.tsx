@@ -21,6 +21,7 @@ interface SimpleDropdownProps {
   portal?: boolean;
   menuMinWidth?: number;
   portalPlacement?: 'auto' | 'bottom';
+  onInfoClick?: () => void;
 }
 
 const SimpleDropdown = ({
@@ -32,6 +33,7 @@ const SimpleDropdown = ({
   portal = false,
   menuMinWidth,
   portalPlacement = 'auto',
+  onInfoClick,
 }: SimpleDropdownProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ top: 0, left: 0, width: 0, maxHeight: 320 });
@@ -110,7 +112,19 @@ const SimpleDropdown = ({
 
   return (
     <div className="flex flex-col gap-3">
-      <label className="text-sm font-medium text-[#3a3a3a]">{label}</label>
+      <div className="flex items-center gap-1.5">
+        <label className="text-sm font-medium text-[#3a3a3a]">{label}</label>
+        {onInfoClick && (
+          <button
+            type="button"
+            onClick={onInfoClick}
+            aria-label={`${label} info`}
+            className="flex items-center justify-center w-4 h-4 rounded-full border border-gray-400 text-gray-500 hover:border-[#00473c] hover:text-[#00473c] transition-colors shrink-0"
+          >
+            <span className="text-[10px] leading-none font-semibold">?</span>
+          </button>
+        )}
+      </div>
       <div className="relative" ref={dropdownRef}>
         <button
           ref={buttonRef}

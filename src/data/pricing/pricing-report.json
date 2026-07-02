@@ -1,14 +1,14 @@
 {
   "generatedAt": "2026-07-02T07:35:06.193Z",
   "source": "manual+phase1-multi-table (Roller Band F G1-4, Dayandnight Band H G1-2)",
-  "checksum": "ef6e221de710166fdfd545e9da0b3a87bb4d34a404844e68e2a176f419b7e7af",
+  "checksum": "74ec8a2ce5e7d3ff11d04a595da6fe812e2ee873d98cdd39b5abe241811a41ce",
   "counts": {
     "priceBands": 26,
     "widthBands": 58,
     "heightBands": 43,
     "priceCells": 5105,
-    "customizationOptions": 83,
-    "customizationPricings": 167
+    "customizationOptions": 86,
+    "customizationPricings": 170
   },
   "priceBandNames": [
     "Dayandnight - Band A",

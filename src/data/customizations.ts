@@ -385,10 +385,16 @@ export const BLIND_COLOR_OPTIONS = [
     hex: '#fffdd0',
   },
   {
-    id: 'anthracite',
-    name: 'Anthracite',
+    id: 'graphite',
+    name: 'Graphite',
     price: 0,
-    hex: '#36454f',
+    hex: '#53565b',
+  },
+  {
+    id: 'blue',
+    name: 'Blue',
+    price: 0,
+    hex: '#4A90D9',
   },
 ];
 
@@ -411,16 +417,28 @@ export const FRAME_COLOR_OPTIONS = [
 // Opening Direction Options
 export const OPENING_DIRECTION_OPTIONS = [
   {
-    id: 'left-right',
-    name: 'Left & Right',
+    id: 'left-to-right',
+    name: 'Left To Right',
     price: 0,
     image: '/products/openingDirection/left-right-realistic.png',
   },
   {
-    id: 'up-down',
-    name: 'Up & Down',
+    id: 'right-to-left',
+    name: 'Right To Left',
+    price: 0,
+    image: '/products/openingDirection/left-right-realistic.png',
+  },
+  {
+    id: 'top-down',
+    name: 'Top Down',
     price: 0,
     image: '/products/openingDirection/up-down-realistic.png',
+  },
+  {
+    id: 'split',
+    name: 'Split',
+    price: 35,
+    image: '/products/openingDirection/left-right-realistic.png',
   },
 ];
 

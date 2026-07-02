@@ -5,7 +5,7 @@ import { CartItem, CustomizationPricing, DEFAULT_CONFIGURATION, PriceBandMatrix,
 import { fetchCustomizationPricing, fetchPriceMatrix, formatPriceWithCurrency, validateCartPrice } from '@/lib/api';
 import { calculateTotalPrice, configToCustomizations, getTotalInches } from '@/lib/pricing';
 import { getMissingRequiredCustomizations } from '@/lib/product-customization-validation';
-import { DayNightBandHSelector, RollerBandFSelector, RoomTypeSelector, SimpleDropdown, SizeSelector } from '@/components/product/customization';
+import { DayNightBandHSelector, OpeningDirectionGuideModal, RollerBandFSelector, RoomTypeSelector, SimpleDropdown, SizeSelector } from '@/components/product/customization';
 import {
   BLIND_COLOR_OPTIONS,
   BOTTOM_BAR_OPTIONS,
@@ -81,6 +81,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
   const [pricingLoaded, setPricingLoaded] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isOpeningDirectionGuideOpen, setIsOpeningDirectionGuideOpen] = useState(false);
   const dialogRef = useRef<HTMLDivElement>(null);
 
   const product = item.product;
@@ -468,7 +469,8 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     key: keyof ProductConfiguration,
     label: string,
     options: PriceOption[],
-    placeholder = `Select ${label.toLowerCase()}`
+    placeholder = `Select ${label.toLowerCase()}`,
+    onInfoClick?: () => void
   ) => (
     <SimpleDropdown
       label={label}
@@ -477,6 +479,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
       onChange={(value) => updateConfig({ [key]: value } as Partial<ProductConfiguration>)}
       placeholder={placeholder}
       portal={false}
+      onInfoClick={onInfoClick}
     />
   );
 
@@ -592,7 +595,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
               {visibleOptions.showBracketType && renderDropdown('bracketType', 'Bracket Type', BRACKET_TYPE_OPTIONS)}
               {visibleOptions.showBlindColor && renderDropdown('blindColor', 'Blind Color', BLIND_COLOR_OPTIONS)}
               {visibleOptions.showFrameColor && renderDropdown('frameColor', 'Frame Color', FRAME_COLOR_OPTIONS)}
-              {visibleOptions.showOpeningDirection && renderDropdown('openingDirection', 'Opening Direction', OPENING_DIRECTION_OPTIONS)}
+              {visibleOptions.showOpeningDirection && renderDropdown('openingDirection', 'Opening Direction', OPENING_DIRECTION_OPTIONS, undefined, () => setIsOpeningDirectionGuideOpen(true))}
               {visibleOptions.showRollStyle && renderDropdown('rollStyle', 'Roll Style', ROLL_STYLE_OPTIONS)}
             </div>
 
@@ -751,6 +754,10 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
           </div>
         </div>
       </div>
+
+      {isOpeningDirectionGuideOpen && (
+        <OpeningDirectionGuideModal onClose={() => setIsOpeningDirectionGuideOpen(false)} />
+      )}
     </div>
   );
 };

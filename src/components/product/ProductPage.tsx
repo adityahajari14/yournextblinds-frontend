@@ -37,6 +37,7 @@ import {
   CassetteMatchingBarSelector,
   MotorizationSelector,
   SimpleDropdown,
+  OpeningDirectionGuideModal,
   BottomBarSelector,
   RollStyleSelector,
   DayNightBandHSelector,
@@ -182,6 +183,7 @@ const ProductPage = ({
   const [isValidating, setIsValidating] = useState(false);
   const fetchingRef = useRef(false);
   const [isBandHInstallationGuideOpen, setIsBandHInstallationGuideOpen] = useState(false);
+  const [isOpeningDirectionGuideOpen, setIsOpeningDirectionGuideOpen] = useState(false);
   const [isBandHCouponOpen, setIsBandHCouponOpen] = useState(false);
   const [selectedBandHGuideMethod, setSelectedBandHGuideMethod] =
     useState<BandHInstallationGuideMethod | null>(null);
@@ -1298,8 +1300,13 @@ const ProductPage = ({
                             selectedValue={config.openingDirection}
                             onChange={(optionId) => setConfig({ ...config, openingDirection: optionId })}
                             placeholder="Select opening direction"
+                            onInfoClick={() => setIsOpeningDirectionGuideOpen(true)}
                           />
                         </div>
+                      )}
+
+                      {isOpeningDirectionGuideOpen && (
+                        <OpeningDirectionGuideModal onClose={() => setIsOpeningDirectionGuideOpen(false)} />
                       )}
 
                       {/* Optional Customization Cards Row */}
