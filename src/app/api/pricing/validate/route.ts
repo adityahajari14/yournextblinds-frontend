@@ -3,7 +3,17 @@ import * as pricingService from '@/lib/server/pricing.service';
 
 export async function POST(request: Request) {
   try {
-    const { handle, widthInches, heightInches, customizations, submittedPrice } = await request.json();
+    const {
+      handle,
+      widthInches,
+      heightInches,
+      customizations,
+      submittedPrice,
+      variantPriceBandName,
+      variantCode,
+      variantId,
+      variantLabel,
+    } = await request.json();
 
     if (!handle || typeof widthInches !== 'number' || typeof heightInches !== 'number' || typeof submittedPrice !== 'number') {
       return NextResponse.json(
@@ -13,7 +23,16 @@ export async function POST(request: Request) {
     }
 
     const validation = await pricingService.validateCartPrice(
-      { handle, widthInches, heightInches, customizations },
+      {
+        handle,
+        widthInches,
+        heightInches,
+        customizations,
+        variantPriceBandName,
+        variantCode,
+        variantId,
+        variantLabel,
+      },
       submittedPrice
     );
 

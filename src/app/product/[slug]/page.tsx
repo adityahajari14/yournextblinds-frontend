@@ -69,7 +69,16 @@ export default async function ProductPageRoute({ params }: ProductPageProps) {
   let initialCustomizationPricing: CustomizationPricing[] = [];
 
   try {
-    const priceBand = await resolveHandleToPriceBand(product.slug);
+    // For multi-table products the band depends on the color variant; resolve the
+    // default (first) variant so the server-rendered matrix matches the initial UI.
+    const defaultVariant = product.variants?.[0];
+    const defaultColorOption =
+      defaultVariant?.selectedOptions.find((option) => /colou?r/i.test(option.name)) ??
+      defaultVariant?.selectedOptions[0];
+    const priceBand = await resolveHandleToPriceBand(product.slug, {
+      variantId: defaultVariant?.id ?? null,
+      variantLabel: defaultColorOption?.value ?? null,
+    });
 
     if (priceBand) {
       const matrix = await getPriceBandMatrix(priceBand.id);

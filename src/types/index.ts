@@ -325,6 +325,8 @@ export interface PriceBandMatrix {
   widthBands: WidthBand[];
   heightBands: HeightBand[];
   prices: { widthMm: number; heightMm: number; price: number }[];
+  /** Per-color maximum finished width (inches) for multi-table products; null when uncapped. */
+  maxWidthInches?: number | null;
 }
 
 export interface CustomizationPricing {
@@ -342,6 +344,12 @@ export interface PricingRequest {
     category: string;
     optionId: string;
   }[];
+  // Multi-table products (Roller Band F / Dayandnight Band H): the band depends
+  // on the selected color variant. Any of these lets the server resolve it.
+  variantPriceBandName?: string | null;
+  variantCode?: string | null;
+  variantId?: string | null;
+  variantLabel?: string | null;
 }
 
 export interface PricingResponse {
@@ -355,6 +363,7 @@ export interface PricingResponse {
   totalPrice: number;
   widthBand: { mm: number; inches: number };
   heightBand: { mm: number; inches: number };
+  oversizeSurcharge?: number;
 }
 
 export interface PriceValidationResponse {

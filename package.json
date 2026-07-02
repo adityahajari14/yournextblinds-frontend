@@ -13,6 +13,7 @@
     "shopify:upsert-band-h-test": "node scripts/upsert-shopify-band-h-test-product.mjs",
     "shopify:upsert-roller-band-f-test": "node scripts/upsert-shopify-roller-band-f-test-product.mjs",
     "sync:shopify-skus": "node scripts/sync-shopify-skus.mjs",
+    "shopify:backfill-variant-bands": "node scripts/backfill-variant-price-bands.mjs",
     "pricing:validate": "node scripts/validate-pricing-data.mjs",
     "pricing:validate:shopify": "node scripts/validate-pricing-data.mjs --shopify"
   },

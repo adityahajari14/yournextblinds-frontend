@@ -3,7 +3,16 @@ import * as pricingService from '@/lib/server/pricing.service';
 
 export async function POST(request: Request) {
   try {
-    const { handle, widthInches, heightInches, customizations } = await request.json();
+    const {
+      handle,
+      widthInches,
+      heightInches,
+      customizations,
+      variantPriceBandName,
+      variantCode,
+      variantId,
+      variantLabel,
+    } = await request.json();
 
     if (!handle) {
       return NextResponse.json(
@@ -29,6 +38,10 @@ export async function POST(request: Request) {
       widthInches,
       heightInches,
       customizations,
+      variantPriceBandName,
+      variantCode,
+      variantId,
+      variantLabel,
     });
 
     return NextResponse.json({ success: true, data: pricing });

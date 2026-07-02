@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-05T04:59:11.290Z",
-  "source": "yournextblinds-db-export",
-  "checksum": "02bc821abf05f8285c81fc67a04c5cf4ee230698a0f49760250c4b1845cbc03f",
+  "generatedAt": "2026-07-02T07:35:06.193Z",
+  "source": "manual+phase1-multi-table (Roller Band F G1-4, Dayandnight Band H G1-2)",
+  "checksum": "ef6e221de710166fdfd545e9da0b3a87bb4d34a404844e68e2a176f419b7e7af",
   "counts": {
-    "priceBands": 20,
-    "widthBands": 47,
-    "heightBands": 28,
-    "priceCells": 3985,
+    "priceBands": 26,
+    "widthBands": 58,
+    "heightBands": 43,
+    "priceCells": 5105,
     "customizationOptions": 83,
     "customizationPricings": 167
   },
@@ -30,7 +30,13 @@
     "Vertical Blind - Band D",
     "Vertical Blind - Band E",
     "Dayandnight - Band H",
-    "Roller - Band F"
+    "Roller - Band F",
+    "Roller - Band F - Group 1",
+    "Roller - Band F - Group 2",
+    "Roller - Band F - Group 3",
+    "Roller - Band F - Group 4",
+    "Dayandnight - Band H - Group 1",
+    "Dayandnight - Band H - Group 2"
   ],
   "validation": {
     "errors": [],

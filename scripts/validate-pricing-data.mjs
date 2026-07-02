@@ -1,3 +1,5 @@
+import path from 'node:path';
+import process from 'node:process';
 import {
   getEnv,
   pricingReportPath,
@@ -6,6 +8,15 @@ import {
   validatePricingData,
   writeJson,
 } from './pricing-data-utils.mjs';
+import {
+  ROLLER_BAND_F_TAG,
+  DAY_NIGHT_BAND_H_TAG,
+  familyFromTitle,
+  loadColorCodeCsv,
+  loadVariantCodeBands,
+  resolveVariant,
+  defaultPricingDataPath,
+} from './variant-band-mapping.mjs';
 
 const args = new Set(process.argv.slice(2));
 const validateShopify = args.has('--shopify');
@@ -89,6 +100,69 @@ if (validateShopify) {
         `Shopify products reference missing price bands: ${missingPriceBands
           .map((item) => `${item.handle} -> ${item.priceBandName}`)
           .join(', ')}`
+      );
+    }
+
+    // Multi-table products: every live color variant must resolve to a code+band.
+    const EXCLUDED_HANDLES = new Set(['roller-shades-template']);
+    const csvPath = path.join(process.cwd(), 'scripts', 'data', 'product-color-code-mapping.csv');
+    const csv = loadColorCodeCsv(csvPath);
+    const codeBands = loadVariantCodeBands(defaultPricingDataPath);
+    const variantQuery = `
+      query($q: String!, $cursor: String) {
+        products(first: 25, query: $q, after: $cursor) {
+          pageInfo { hasNextPage endCursor }
+          edges { node {
+            handle title
+            variants(first: 100) { edges { node {
+              title sku selectedOptions { name value }
+            } } }
+          } }
+        }
+      }
+    `;
+    const unresolvedVariants = [];
+    for (const tag of [ROLLER_BAND_F_TAG, DAY_NIGHT_BAND_H_TAG]) {
+      let vCursor = null;
+      let vHasNext = true;
+      while (vHasNext) {
+        const response = await fetch(`https://${storeDomain}/admin/api/${apiVersion}/graphql.json`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': token },
+          body: JSON.stringify({ query: variantQuery, variables: { q: `tag:'${tag}'`, cursor: vCursor } }),
+        });
+        if (!response.ok) {
+          validation.errors.push(`Shopify variant validation failed with HTTP ${response.status}`);
+          break;
+        }
+        const json = await response.json();
+        if (json.errors?.length) {
+          validation.errors.push(`Shopify variant validation failed: ${json.errors[0]?.message}`);
+          break;
+        }
+        const productsPage = json.data?.products;
+        for (const edge of productsPage?.edges ?? []) {
+          const product = edge.node;
+          if (EXCLUDED_HANDLES.has(product.handle)) continue;
+          const family = familyFromTitle(product.title);
+          for (const variantEdge of product.variants.edges) {
+            const variant = variantEdge.node;
+            const colorLabel =
+              (variant.selectedOptions.find((o) => /colou?r/i.test(o.name)) ?? variant.selectedOptions[0])
+                ?.value ?? variant.title;
+            const resolved = resolveVariant({ family, colorLabel, sku: variant.sku }, csv, codeBands);
+            if (!resolved.code || !resolved.priceBandName) {
+              unresolvedVariants.push(`${product.handle} -> "${colorLabel}"`);
+            }
+          }
+        }
+        vHasNext = Boolean(productsPage?.pageInfo?.hasNextPage);
+        vCursor = productsPage?.pageInfo?.endCursor ?? null;
+      }
+    }
+    if (unresolvedVariants.length > 0) {
+      validation.errors.push(
+        `Multi-table variants that do not resolve to a price band: ${unresolvedVariants.join(', ')}`
       );
     }
   }

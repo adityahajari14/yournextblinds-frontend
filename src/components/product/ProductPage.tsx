@@ -264,9 +264,25 @@ const ProductPage = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fetch pricing data on mount
+  // For multi-table products (Roller Band F / Dayandnight Band H) the price band
+  // depends on the selected color variant, so the matrix must refetch on change.
+  const isMultiTableProduct = isBandHProduct || isRollerBandF;
+  const selectedVariantSignal = isMultiTableProduct
+    ? {
+        variantId: config.selectedVariantId,
+        variantLabel: config.selectedVariantOptionValue,
+      }
+    : undefined;
+  const selectedVariantSignalKey = isMultiTableProduct
+    ? `${config.selectedVariantId ?? ''}|${config.selectedVariantOptionValue ?? ''}`
+    : '';
+
+  // Fetch pricing data on mount, and refetch the matrix when the selected color
+  // variant changes for multi-table products.
   useEffect(() => {
-    if (hasInitialPricing) {
+    // Skip the initial fetch only for single-band products with server-provided
+    // pricing. Multi-table products always (re)fetch to match the chosen variant.
+    if (hasInitialPricing && !isMultiTableProduct) {
       return;
     }
 
@@ -281,7 +297,7 @@ const ProductPage = ({
     const loadPricingData = async () => {
       try {
         const [matrix, customizations] = await Promise.all([
-          fetchPriceMatrix(product.slug),
+          fetchPriceMatrix(product.slug, selectedVariantSignal),
           fetchCustomizationPricing(),
         ]);
 
@@ -319,7 +335,8 @@ const ProductPage = ({
       isMounted = false;
       fetchingRef.current = false;
     };
-  }, [hasInitialPricing, product.slug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasInitialPricing, product.slug, isMultiTableProduct, selectedVariantSignalKey]);
 
   // Determine which options to use based on product category
   const isRollerOrDayNight = useMemo(() => {
@@ -656,18 +673,44 @@ const ProductPage = ({
     );
   }, [config.width, config.widthFraction, config.height, config.heightFraction, priceMatrix, selectedCustomizations, customizationPricing]);
 
+  // Oversize surcharge: Roller Band F adds a flat fee when finished width > 93".
+  // Must mirror the server (see calculateProductPrice) so validation matches.
+  const oversizeSurcharge = useMemo(() => {
+    if (!isRollerBandF) return 0;
+    const widthInches = getTotalInches(config.width, config.widthFraction, config.widthUnit);
+    return widthInches > 93 ? 100 : 0;
+  }, [isRollerBandF, config.width, config.widthFraction, config.widthUnit]);
+
   // Get display price - use new pricing system if available, otherwise fallback
   const totalPrice = useMemo(() => {
     if (priceCalculation) {
-      return priceCalculation.totalPrice;
+      return priceCalculation.totalPrice + oversizeSurcharge;
     }
     // Fallback to base price from product if pricing not loaded
     return product.price;
-  }, [priceCalculation, product.price]);
+  }, [priceCalculation, oversizeSurcharge, product.price]);
+
+  // Minimum price from the currently-loaded matrix (the selected variant's band
+  // for multi-table products), used as the "from" price before a size is entered.
+  const matrixMinPrice = useMemo(() => {
+    if (!priceMatrix || priceMatrix.prices.length === 0) return null;
+    return priceMatrix.prices.reduce(
+      (min, cell) => (cell.price < min ? cell.price : min),
+      priceMatrix.prices[0].price
+    );
+  }, [priceMatrix]);
 
   // Show minimum price indicator when no dimensions selected
   const showMinPriceIndicator = config.width === 0 || config.height === 0;
-  const displayedPrice = isRollerBandF ? 0 : showMinPriceIndicator ? product.price : totalPrice;
+  // Roller Band F shows the band minimum ("from" price) until a size is entered,
+  // then the computed price (its variant-resolved matrix drives the total).
+  const displayedPrice = isRollerBandF
+    ? showMinPriceIndicator
+      ? matrixMinPrice ?? product.price
+      : totalPrice
+    : showMinPriceIndicator
+    ? product.price
+    : totalPrice;
   const bandHPromoCompareAtPrice = displayedPrice / (1 - BAND_H_PROMO_DISCOUNT_PERCENT / 100);
 
   // Calculate dynamic size ranges from price band
@@ -684,7 +727,12 @@ const ProductPage = ({
     const heightBands = priceMatrix.heightBands;
 
     const minWidth = Math.min(...widthBands.map(b => b.inches));
-    const maxWidth = Math.max(...widthBands.map(b => b.inches));
+    // Per-color max width (multi-table products) can be tighter than the widest column.
+    const bandMaxWidth = Math.max(...widthBands.map(b => b.inches));
+    const maxWidth =
+      typeof priceMatrix.maxWidthInches === 'number'
+        ? Math.min(bandMaxWidth, priceMatrix.maxWidthInches)
+        : bandMaxWidth;
     const minHeight = Math.min(...heightBands.map(b => b.inches));
     const maxHeight = Math.max(...heightBands.map(b => b.inches));
 
@@ -719,6 +767,12 @@ const ProductPage = ({
           widthInches,
           heightInches,
           customizations: selectedCustomizations,
+          ...(isMultiTableProduct
+            ? {
+                variantId: config.selectedVariantId,
+                variantLabel: config.selectedVariantOptionValue,
+              }
+            : {}),
         },
         totalPrice
       );

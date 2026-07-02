@@ -51,6 +51,7 @@ import {
   BOTTOM_BAR_OPTIONS,
 } from '@/data/customizations';
 import { isDayNightBandHProduct } from '@/data/dayNightBandH';
+import { isRollerBandFProduct } from '@/data/rollerBandF';
 
 interface CustomizationModalProps {
   product: Product;
@@ -67,6 +68,16 @@ const CustomizationModal = ({
 }: CustomizationModalProps) => {
   const { addToCart } = useCart();
 
+  // Multi-table products (Roller Band F / Dayandnight Band H): band depends on the
+  // selected color variant, so the matrix must refetch when it changes.
+  const isMultiTableProduct = isDayNightBandHProduct(product) || isRollerBandFProduct(product);
+  const variantSignal = isMultiTableProduct
+    ? { variantId: config.selectedVariantId, variantLabel: config.selectedVariantOptionValue }
+    : undefined;
+  const variantSignalKey = isMultiTableProduct
+    ? `${config.selectedVariantId ?? ''}|${config.selectedVariantOptionValue ?? ''}`
+    : '';
+
   // State for pricing data from backend
   const [priceMatrix, setPriceMatrix] = useState<PriceBandMatrix | null>(null);
   const [customizationPricing, setCustomizationPricing] = useState<CustomizationPricingType[]>([]);
@@ -74,7 +85,7 @@ const CustomizationModal = ({
   const [isValidating, setIsValidating] = useState(false);
   const fetchingRef = useRef(false);
 
-  // Fetch pricing data on mount
+  // Fetch pricing data on mount, refetch matrix when the color variant changes.
   useEffect(() => {
     // Prevent multiple simultaneous fetches
     if (fetchingRef.current) {
@@ -87,7 +98,7 @@ const CustomizationModal = ({
     const loadPricingData = async () => {
       try {
         const [matrix, customizations] = await Promise.all([
-          fetchPriceMatrix(product.slug),
+          fetchPriceMatrix(product.slug, variantSignal),
           fetchCustomizationPricing(),
         ]);
 
@@ -125,7 +136,8 @@ const CustomizationModal = ({
       isMounted = false;
       fetchingRef.current = false;
     };
-  }, [product.slug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.slug, variantSignalKey]);
 
   // Determine which options to use based on product category
   const isRollerOrDayNight = useMemo(() => {
@@ -274,14 +286,21 @@ const CustomizationModal = ({
     );
   }, [config.width, config.widthFraction, config.height, config.heightFraction, priceMatrix, selectedCustomizations, customizationPricing]);
 
+  // Oversize surcharge: Roller Band F adds a flat fee when finished width > 93".
+  const oversizeSurcharge = useMemo(() => {
+    if (!isRollerBandFProduct(product)) return 0;
+    const widthInches = getTotalInches(config.width, config.widthFraction, config.widthUnit);
+    return widthInches > 93 ? 100 : 0;
+  }, [product, config.width, config.widthFraction, config.widthUnit]);
+
   // Get display price - use new pricing system if available, otherwise fallback
   const totalPrice = useMemo(() => {
     if (priceCalculation) {
-      return priceCalculation.totalPrice;
+      return priceCalculation.totalPrice + oversizeSurcharge;
     }
     // Fallback to base price from product if pricing not loaded
     return product.price;
-  }, [priceCalculation, product.price]);
+  }, [priceCalculation, oversizeSurcharge, product.price]);
 
   // Calculate dynamic size ranges from price band
   const sizeRanges = useMemo(() => {
@@ -293,7 +312,11 @@ const CustomizationModal = ({
     const heightBands = priceMatrix.heightBands;
 
     const minWidth = Math.min(...widthBands.map(b => b.inches));
-    const maxWidth = Math.max(...widthBands.map(b => b.inches));
+    const bandMaxWidth = Math.max(...widthBands.map(b => b.inches));
+    const maxWidth =
+      typeof priceMatrix.maxWidthInches === 'number'
+        ? Math.min(bandMaxWidth, priceMatrix.maxWidthInches)
+        : bandMaxWidth;
     const minHeight = Math.min(...heightBands.map(b => b.inches));
     const maxHeight = Math.max(...heightBands.map(b => b.inches));
 
@@ -326,6 +349,12 @@ const CustomizationModal = ({
           widthInches,
           heightInches,
           customizations: selectedCustomizations,
+          ...(isMultiTableProduct
+            ? {
+                variantId: config.selectedVariantId,
+                variantLabel: config.selectedVariantOptionValue,
+              }
+            : {}),
         },
         totalPrice
       );

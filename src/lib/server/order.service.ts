@@ -265,6 +265,11 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
       widthInches: item.widthInches,
       heightInches: item.heightInches,
       customizations,
+      // Multi-table products: resolve the band from the selected color variant.
+      // variantId is authoritative (server reads its band metafield); the label
+      // is a fallback for the fabric code.
+      variantId: item.configuration.selectedVariantId ?? null,
+      variantLabel: item.configuration.selectedVariantOptionValue ?? null,
     });
 
     const priceDifference = Math.abs(pricing.totalPrice - item.submittedPrice);

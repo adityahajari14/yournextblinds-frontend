@@ -306,9 +306,17 @@ export async function fetchSizeBands(): Promise<SizeBands> {
 /**
  * Get price band matrix for a product (by handle/slug)
  */
-export async function fetchPriceMatrix(handle: string): Promise<PriceBandMatrix> {
+export async function fetchPriceMatrix(
+  handle: string,
+  variant?: { variantCode?: string | null; variantId?: string | null; variantLabel?: string | null }
+): Promise<PriceBandMatrix> {
   try {
-    const response = await apiFetch<PricingApiResponse<PriceBandMatrix>>(`/api/pricing/matrix/${handle}`);
+    const query = new URLSearchParams();
+    if (variant?.variantCode) query.set('variantCode', variant.variantCode);
+    if (variant?.variantId) query.set('variantId', variant.variantId);
+    if (variant?.variantLabel) query.set('variantLabel', variant.variantLabel);
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    const response = await apiFetch<PricingApiResponse<PriceBandMatrix>>(`/api/pricing/matrix/${handle}${suffix}`);
     return response.data;
   } catch (error: any) {
     // Return empty structure during build if backend is unavailable

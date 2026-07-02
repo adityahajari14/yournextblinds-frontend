@@ -4,7 +4,7 @@ import * as pricingService from '@/lib/server/pricing.service';
 export const revalidate = false;
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ handle: string }> }
 ) {
   try {
@@ -17,7 +17,13 @@ export async function GET(
       );
     }
 
-    const priceBand = await pricingService.resolveHandleToPriceBand(handle);
+    const { searchParams } = new URL(request.url);
+    const variantSignal = {
+      variantCode: searchParams.get('variantCode'),
+      variantId: searchParams.get('variantId'),
+      variantLabel: searchParams.get('variantLabel'),
+    };
+    const priceBand = await pricingService.resolveHandleToPriceBand(handle, variantSignal);
 
     if (!priceBand) {
       return NextResponse.json(
@@ -35,7 +41,9 @@ export async function GET(
       );
     }
 
-    return NextResponse.json({ success: true, data: matrix });
+    const maxWidthInches = await pricingService.resolveVariantMaxWidthInches(handle, variantSignal);
+
+    return NextResponse.json({ success: true, data: { ...matrix, maxWidthInches } });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Unknown error';
     console.error('Price matrix error:', message);

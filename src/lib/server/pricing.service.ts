@@ -7,7 +7,7 @@ import {
   ROLLER_BAND_F_PRICE_BAND_NAME,
   ROLLER_BAND_F_PRODUCT_HANDLE,
 } from '@/data/rollerBandF';
-import { getPriceBandNameByHandle, getAllCachedProducts } from './product-cache';
+import { getPriceBandNameByHandle, getAllCachedProducts, getCachedVariant } from './product-cache';
 
 export interface PricingRequest {
   handle: string;
@@ -17,6 +17,39 @@ export interface PricingRequest {
     category: string;
     optionId: string;
   }[];
+  /**
+   * For multi-table products (Roller Band F, Dayandnight Band H) the price band
+   * depends on the selected color variant, not the product. Callers may pass any
+   * of the following to resolve the variant's band; they are tried in order:
+   *  1. variantPriceBandName - an explicit band name (e.g. "Roller - Band F - Group 2")
+   *  2. variantCode          - the fabric code (e.g. "R12001"), mapped via variantCodeBands
+   *  3. variantId            - the Shopify variant GID, resolved server-side from its metafield
+   *  4. variantLabel         - the color option label, code parsed out as a last resort
+   * When none resolve, the product-level band is used (legacy single-band behavior).
+   */
+  variantPriceBandName?: string | null;
+  variantCode?: string | null;
+  variantId?: string | null;
+  variantLabel?: string | null;
+}
+
+export interface JsonVariantCodeBand {
+  code: string;
+  priceBandName: string;
+  maxWidthInches: number | null;
+  note?: string;
+}
+
+/** Oversize surcharge applied when finished width exceeds the threshold (Roller tables). */
+const OVERSIZE_WIDTH_THRESHOLD_INCHES = 93;
+const OVERSIZE_SURCHARGE = 100;
+
+/** Extracts a fabric code (e.g. R12001, Z100349D, Z75017) from arbitrary text. */
+const FABRIC_CODE_REGEX = /[RZ]\d{4,}D?/;
+export function extractFabricCode(text: string | null | undefined): string | null {
+  if (!text) return null;
+  const match = String(text).toUpperCase().match(FABRIC_CODE_REGEX);
+  return match ? match[0] : null;
 }
 
 export interface PricingResponse {
@@ -30,6 +63,8 @@ export interface PricingResponse {
   totalPrice: number;
   widthBand: { mm: number; inches: number };
   heightBand: { mm: number; inches: number };
+  /** Oversize width surcharge applied (Roller tables), 0 when not applicable. */
+  oversizeSurcharge: number;
 }
 
 export interface PriceBandMatrix {
@@ -103,6 +138,7 @@ interface PricingDataFile {
   priceCells: JsonPriceCell[];
   customizationOptions: JsonCustomizationOption[];
   customizationPricings: JsonCustomizationPricing[];
+  variantCodeBands?: JsonVariantCodeBand[];
 }
 
 interface PricingIndexes {
@@ -114,6 +150,7 @@ interface PricingIndexes {
   priceCellByCompositeKey: Map<string, JsonPriceCell>;
   customizationOptionsByKey: Map<string, JsonCustomizationOption>;
   customizationPricingsByOptionId: Map<string, JsonCustomizationPricing[]>;
+  variantCodeBandsByCode: Map<string, JsonVariantCodeBand>;
 }
 
 const pricingData = pricingDataFile as PricingDataFile;
@@ -240,6 +277,24 @@ function validatePricingData(data: PricingDataFile) {
     customizationPricingKeys.add(compositeKey);
   }
 
+  const seenVariantCodes = new Set<string>();
+  for (const entry of data.variantCodeBands ?? []) {
+    if (!entry.code) errors.push('variantCodeBand entry missing code');
+    const upper = (entry.code ?? '').toUpperCase();
+    if (seenVariantCodes.has(upper)) errors.push(`Duplicate variantCodeBand code: ${entry.code}`);
+    seenVariantCodes.add(upper);
+    if (!priceBandNames.has(entry.priceBandName)) {
+      errors.push(`variantCodeBand "${entry.code}" references missing price band "${entry.priceBandName}"`);
+    }
+    if (
+      entry.maxWidthInches !== null &&
+      entry.maxWidthInches !== undefined &&
+      (!Number.isFinite(entry.maxWidthInches) || entry.maxWidthInches <= 0)
+    ) {
+      errors.push(`variantCodeBand "${entry.code}" has invalid maxWidthInches`);
+    }
+  }
+
   for (const priceBand of data.priceBands ?? []) {
     const cells = data.priceCells.filter((cell) => cell.priceBandId === priceBand.id);
     if (cells.length === 0) {
@@ -295,6 +350,11 @@ function getIndexes(): PricingIndexes {
     customizationPricingsByOptionId.get(pricing.customizationOptionId)!.push(pricing);
   }
 
+  const variantCodeBandsByCode = new Map<string, JsonVariantCodeBand>();
+  for (const entry of pricingData.variantCodeBands ?? []) {
+    variantCodeBandsByCode.set(entry.code.toUpperCase(), entry);
+  }
+
   indexes = {
     priceBandsById,
     priceBandsByName,
@@ -304,6 +364,7 @@ function getIndexes(): PricingIndexes {
     priceCellByCompositeKey,
     customizationOptionsByKey,
     customizationPricingsByOptionId,
+    variantCodeBandsByCode,
   };
 
   return indexes;
@@ -365,18 +426,78 @@ function findCeilingHeightBand(heightInches: number, priceBandId: string): JsonH
   return ceilingBand ?? null;
 }
 
-async function resolvePriceBand(handle: string): Promise<JsonPriceBand> {
-  const priceBandName = localPriceBandByHandle[handle] ?? await getPriceBandNameByHandle(handle);
+function bandByName(priceBandName: string | null | undefined): JsonPriceBand | null {
+  if (!priceBandName) return null;
+  return getIndexes().priceBandsByName.get(priceBandName) ?? null;
+}
+
+function bandByVariantCode(code: string | null | undefined): {
+  band: JsonPriceBand;
+  entry: JsonVariantCodeBand;
+} | null {
+  const normalized = code?.toUpperCase();
+  if (!normalized) return null;
+  const entry = getIndexes().variantCodeBandsByCode.get(normalized);
+  if (!entry) return null;
+  const band = bandByName(entry.priceBandName);
+  return band ? { band, entry } : null;
+}
+
+interface ResolvedBand {
+  band: JsonPriceBand;
+  /** Set only when the band was resolved from a variant code mapping. */
+  variantCodeEntry: JsonVariantCodeBand | null;
+}
+
+/**
+ * Resolves the price band for a pricing request. For multi-table products the
+ * band depends on the selected color variant; those signals are tried first,
+ * falling back to the product-level band (legacy single-band behavior).
+ */
+async function resolvePriceBand(request: PricingRequest): Promise<ResolvedBand> {
+  const { handle } = request;
+
+  // 1. Explicit variant band name from the caller.
+  const explicitBand = bandByName(request.variantPriceBandName);
+  if (explicitBand) return { band: explicitBand, variantCodeEntry: null };
+
+  // 2. Explicit variant code from the caller.
+  const byCode = bandByVariantCode(request.variantCode);
+  if (byCode) return { band: byCode.band, variantCodeEntry: byCode.entry };
+
+  // 3. Server-authoritative: resolve the selected variant from the cache and
+  //    use its own band metafield or the code parsed from its label/SKU.
+  if (request.variantId) {
+    const variant = await getCachedVariant(handle, request.variantId);
+    if (variant) {
+      const variantBand = bandByName(variant.priceBandName);
+      if (variantBand) return { band: variantBand, variantCodeEntry: null };
+
+      const codeFromVariant =
+        extractFabricCode(variant.colorLabel) ?? extractFabricCode(variant.sku);
+      const byVariantCode = bandByVariantCode(codeFromVariant);
+      if (byVariantCode) {
+        return { band: byVariantCode.band, variantCodeEntry: byVariantCode.entry };
+      }
+    }
+  }
+
+  // 4. Code parsed from a label passed by the caller.
+  const byLabelCode = bandByVariantCode(extractFabricCode(request.variantLabel));
+  if (byLabelCode) return { band: byLabelCode.band, variantCodeEntry: byLabelCode.entry };
+
+  // 5. Fall back to the product-level band.
+  const priceBandName = localPriceBandByHandle[handle] ?? (await getPriceBandNameByHandle(handle));
   if (!priceBandName) {
     throw new Error(`Product "${handle}" not found or has no price band assigned`);
   }
 
-  const priceBand = getIndexes().priceBandsByName.get(priceBandName);
+  const priceBand = bandByName(priceBandName);
   if (!priceBand) {
     throw new Error(`Price band "${priceBandName}" not found in pricing data`);
   }
 
-  return priceBand;
+  return { band: priceBand, variantCodeEntry: null };
 }
 
 function findCustomizationOption(
@@ -498,7 +619,17 @@ function getMinimumPricesBatch(priceBandIds: string[]): Map<string, number> {
 }
 
 export async function calculateProductPrice(request: PricingRequest): Promise<PricingResponse> {
-  const priceBand = await resolvePriceBand(request.handle);
+  const { band: priceBand, variantCodeEntry } = await resolvePriceBand(request);
+
+  // Enforce the per-color maximum finished width when the band came from a
+  // variant code (Roller fabrics cap width by color; Zebra caps at band max).
+  const maxWidthInches = variantCodeEntry?.maxWidthInches ?? null;
+  if (maxWidthInches !== null && request.widthInches > maxWidthInches) {
+    throw new Error(
+      `Width ${request.widthInches}" exceeds the maximum ${maxWidthInches}" for this color`
+    );
+  }
+
   const widthBand = findCeilingWidthBand(request.widthInches, priceBand.id);
   const heightBand = findCeilingHeightBand(request.heightInches, priceBand.id);
 
@@ -538,7 +669,15 @@ export async function calculateProductPrice(request: PricingRequest): Promise<Pr
   const customizationTotal = customizationPrices.reduce((sum, customization) => sum + customization.price, 0);
   const hasMotorization = request.customizations?.some((customization) => customization.category === 'motorization');
   const motorizationBasePrice = hasMotorization ? 95 : 0;
-  const totalPrice = dimensionPrice + customizationTotal + motorizationBasePrice;
+
+  // Oversize surcharge: Roller tables add a flat fee when finished width exceeds
+  // the threshold. Only applies to Roller Band F bands (variant-code resolved).
+  const isRollerBand = priceBand.name.startsWith('Roller - Band F');
+  const oversizeSurcharge =
+    isRollerBand && request.widthInches > OVERSIZE_WIDTH_THRESHOLD_INCHES ? OVERSIZE_SURCHARGE : 0;
+
+  const totalPrice =
+    dimensionPrice + customizationTotal + motorizationBasePrice + oversizeSurcharge;
 
   return {
     dimensionPrice,
@@ -546,11 +685,38 @@ export async function calculateProductPrice(request: PricingRequest): Promise<Pr
     totalPrice,
     widthBand: { mm: widthBand.widthMm, inches: widthBand.widthInches },
     heightBand: { mm: heightBand.heightMm, inches: heightBand.heightInches },
+    oversizeSurcharge,
   };
 }
 
 export async function getPriceBandMatrix(priceBandId: string): Promise<PriceBandMatrix | null> {
   return getPriceBandMatrixFromJson(priceBandId);
+}
+
+/**
+ * Resolves the per-color maximum finished width (inches) for a variant, when the
+ * band is variant-code driven. Returns null when there is no per-color cap.
+ */
+export async function resolveVariantMaxWidthInches(
+  handle: string,
+  variant?: {
+    variantPriceBandName?: string | null;
+    variantCode?: string | null;
+    variantId?: string | null;
+    variantLabel?: string | null;
+  }
+): Promise<number | null> {
+  try {
+    const { variantCodeEntry } = await resolvePriceBand({
+      handle,
+      widthInches: 0,
+      heightInches: 0,
+      ...variant,
+    });
+    return variantCodeEntry?.maxWidthInches ?? null;
+  } catch {
+    return null;
+  }
 }
 
 export async function getCustomizationPricing(): Promise<CustomizationPricingData[]> {
@@ -565,10 +731,23 @@ export async function getHeightBands() {
   return [...pricingData.heightBands].sort(sortHeightBands);
 }
 
-export async function resolveHandleToPriceBand(handle: string) {
+export async function resolveHandleToPriceBand(
+  handle: string,
+  variant?: {
+    variantPriceBandName?: string | null;
+    variantCode?: string | null;
+    variantId?: string | null;
+    variantLabel?: string | null;
+  }
+) {
   try {
-    const priceBand = await resolvePriceBand(handle);
-    return { id: priceBand.id, name: priceBand.name };
+    const { band } = await resolvePriceBand({
+      handle,
+      widthInches: 0,
+      heightInches: 0,
+      ...variant,
+    });
+    return { id: band.id, name: band.name };
   } catch {
     return null;
   }

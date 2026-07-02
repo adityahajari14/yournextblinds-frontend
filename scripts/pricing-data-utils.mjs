@@ -182,6 +182,55 @@ export function validatePricingData(data, options = {}) {
     pricingKeys.add(key);
   }
 
+  const seenVariantCodes = new Set();
+  for (const entry of data.variantCodeBands ?? []) {
+    if (!entry.code) errors.push('variantCodeBand entry missing code');
+    const upper = (entry.code ?? '').toUpperCase();
+    if (seenVariantCodes.has(upper)) errors.push(`Duplicate variantCodeBand code: ${entry.code}`);
+    seenVariantCodes.add(upper);
+    if (!priceBandNames.has(entry.priceBandName)) {
+      errors.push(`variantCodeBand "${entry.code}" references missing price band "${entry.priceBandName}"`);
+    }
+    if (
+      entry.maxWidthInches !== null &&
+      entry.maxWidthInches !== undefined &&
+      (!Number.isFinite(entry.maxWidthInches) || entry.maxWidthInches <= 0)
+    ) {
+      errors.push(`variantCodeBand "${entry.code}" has invalid maxWidthInches`);
+    }
+  }
+
+  // Warn on price cells that drop sharply vs. their left/top neighbor (likely
+  // corrupted source values, e.g. the known bad cells awaiting correction).
+  const bandCells = new Map();
+  for (const cell of data.priceCells ?? []) {
+    if (!bandCells.has(cell.priceBandId)) bandCells.set(cell.priceBandId, []);
+    bandCells.get(cell.priceBandId).push(cell);
+  }
+  const widthInchesById = new Map((data.widthBands ?? []).map((b) => [b.id, b.widthInches]));
+  const heightInchesById = new Map((data.heightBands ?? []).map((b) => [b.id, b.heightInches]));
+  for (const [bandId, cells] of bandCells) {
+    const bandName = (data.priceBands ?? []).find((b) => b.id === bandId)?.name ?? bandId;
+    const priceAt = new Map(
+      cells.map((c) => [`${widthInchesById.get(c.widthBandId)}x${heightInchesById.get(c.heightBandId)}`, c.price])
+    );
+    const widths = [...new Set(cells.map((c) => widthInchesById.get(c.widthBandId)))].sort((a, b) => a - b);
+    for (const cell of cells) {
+      const w = widthInchesById.get(cell.widthBandId);
+      const h = heightInchesById.get(cell.heightBandId);
+      // Compare with the immediate lower width at the same height when present.
+      const idx = widths.indexOf(w);
+      if (idx > 0) {
+        const leftPrice = priceAt.get(`${widths[idx - 1]}x${h}`);
+        if (Number.isFinite(leftPrice) && cell.price < leftPrice * 0.6) {
+          warnings.push(
+            `Suspicious price cell in "${bandName}" at ${w}"x${h}": ${cell.price} is far below left neighbor ${leftPrice} (possible corrupted value)`
+          );
+        }
+      }
+    }
+  }
+
   for (const band of data.priceBands ?? []) {
     const cells = (data.priceCells ?? []).filter((cell) => cell.priceBandId === band.id);
     if (cells.length === 0) {

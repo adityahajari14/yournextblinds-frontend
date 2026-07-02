@@ -107,13 +107,22 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     Boolean(item.configuration.motorization && item.configuration.motorization !== 'none');
   const isMotorizationActive = canUseMotorization && selectedOptionalCards.motorization;
 
+  // Multi-table products: the band depends on the selected color variant.
+  const isMultiTableProduct = isBandHProduct || isRollerBandF;
+  const variantSignal = isMultiTableProduct
+    ? { variantId: config.selectedVariantId, variantLabel: config.selectedVariantOptionValue }
+    : undefined;
+  const variantSignalKey = isMultiTableProduct
+    ? `${config.selectedVariantId ?? ''}|${config.selectedVariantOptionValue ?? ''}`
+    : '';
+
   useEffect(() => {
     let isMounted = true;
 
     const loadPricing = async () => {
       try {
         const [matrix, customizations] = await Promise.all([
-          fetchPriceMatrix(product.slug),
+          fetchPriceMatrix(product.slug, variantSignal),
           fetchCustomizationPricing(),
         ]);
 
@@ -135,7 +144,8 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     return () => {
       isMounted = false;
     };
-  }, [product.slug]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product.slug, variantSignalKey]);
 
   useEffect(() => {
     dialogRef.current?.focus();
@@ -361,7 +371,20 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     );
   }, [customizationPricing, normalizedConfig, priceMatrix, selectedCustomizations]);
 
-  const editedPrice = priceCalculation?.totalPrice ?? product.price;
+  // Oversize surcharge: Roller Band F adds a flat fee when finished width > 93".
+  const oversizeSurcharge = useMemo(() => {
+    if (!isRollerBandF) return 0;
+    const widthInches = getTotalInches(
+      normalizedConfig.width,
+      normalizedConfig.widthFraction,
+      normalizedConfig.widthUnit
+    );
+    return widthInches > 93 ? 100 : 0;
+  }, [isRollerBandF, normalizedConfig.width, normalizedConfig.widthFraction, normalizedConfig.widthUnit]);
+
+  const editedPrice = priceCalculation
+    ? priceCalculation.totalPrice + oversizeSurcharge
+    : product.price;
   const canSave = missingCustomizations.length === 0 && pricingLoaded && !isSaving;
 
   const updateConfig = (patch: Partial<ProductConfiguration>) => {
@@ -396,6 +419,12 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
           widthInches,
           heightInches,
           customizations: selectedCustomizations,
+          ...(isMultiTableProduct
+            ? {
+                variantId: config.selectedVariantId,
+                variantLabel: config.selectedVariantOptionValue,
+              }
+            : {}),
         },
         editedPrice
       );
