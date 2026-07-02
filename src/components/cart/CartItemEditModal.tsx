@@ -382,6 +382,23 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     return widthInches > 93 ? 100 : 0;
   }, [isRollerBandF, normalizedConfig.width, normalizedConfig.widthFraction, normalizedConfig.widthUnit]);
 
+  // Size ranges from the selected variant's matrix (per-color max width applied).
+  const sizeRanges = useMemo(() => {
+    if (!priceMatrix || priceMatrix.widthBands.length === 0 || priceMatrix.heightBands.length === 0) {
+      return null;
+    }
+    const bandMaxWidth = Math.max(...priceMatrix.widthBands.map((b) => b.inches));
+    return {
+      minWidth: Math.min(...priceMatrix.widthBands.map((b) => b.inches)),
+      maxWidth:
+        typeof priceMatrix.maxWidthInches === 'number'
+          ? Math.min(bandMaxWidth, priceMatrix.maxWidthInches)
+          : bandMaxWidth,
+      minHeight: Math.min(...priceMatrix.heightBands.map((b) => b.inches)),
+      maxHeight: Math.max(...priceMatrix.heightBands.map((b) => b.inches)),
+    };
+  }, [priceMatrix]);
+
   const editedPrice = priceCalculation
     ? priceCalculation.totalPrice + oversizeSurcharge
     : product.price;
@@ -504,10 +521,10 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                 onHeightChange={(value) => updateConfig({ height: value })}
                 onHeightFractionChange={(value) => updateConfig({ heightFraction: value })}
                 onUnitChange={(unit) => updateConfig({ widthUnit: unit, heightUnit: unit })}
-                minWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : undefined}
-                maxWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : undefined}
-                minHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : undefined}
-                maxHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : undefined}
+                minWidth={sizeRanges?.minWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : undefined)}
+                maxWidth={sizeRanges?.maxWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : undefined)}
+                minHeight={sizeRanges?.minHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : undefined)}
+                maxHeight={sizeRanges?.maxHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : undefined)}
               />
             )}
 

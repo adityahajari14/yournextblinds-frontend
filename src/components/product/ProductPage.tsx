@@ -702,14 +702,12 @@ const ProductPage = ({
 
   // Show minimum price indicator when no dimensions selected
   const showMinPriceIndicator = config.width === 0 || config.height === 0;
-  // Roller Band F shows the band minimum ("from" price) until a size is entered,
-  // then the computed price (its variant-resolved matrix drives the total).
-  const displayedPrice = isRollerBandF
-    ? showMinPriceIndicator
+  // Multi-table products (Roller Band F / Dayandnight Band H) show the selected
+  // variant's band minimum until a size is entered, then the computed price.
+  const displayedPrice = showMinPriceIndicator
+    ? isMultiTableProduct
       ? matrixMinPrice ?? product.price
-      : totalPrice
-    : showMinPriceIndicator
-    ? product.price
+      : product.price
     : totalPrice;
   const bandHPromoCompareAtPrice = displayedPrice / (1 - BAND_H_PROMO_DISCOUNT_PERCENT / 100);
 
@@ -1076,10 +1074,10 @@ const ProductPage = ({
                           onHeightChange={(value) => setConfig({ ...config, height: value })}
                           onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
                           onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
-                          minWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : sizeRanges?.minWidth}
-                          maxWidth={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : sizeRanges?.maxWidth}
-                          minHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : sizeRanges?.minHeight}
-                          maxHeight={isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : sizeRanges?.maxHeight}
+                          minWidth={sizeRanges?.minWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : undefined)}
+                          maxWidth={sizeRanges?.maxWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : undefined)}
+                          minHeight={sizeRanges?.minHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : undefined)}
+                          maxHeight={sizeRanges?.maxHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : undefined)}
                         />
                       )}
 
