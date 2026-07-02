@@ -13,7 +13,8 @@ const categoryImages: Record<string, string> = {
   'Metal Venetian Blinds': '/home/products/vertical-blinds-5.jpg',
   'Venetian Blinds': '/home/products/vertical-blinds-5.jpg',
   'Roman Blinds': '/home/products/vertical-blinds-3.jpg',
-  'Day and Night Blinds': '/home/products/vertical-blinds-4.jpg',
+  'Day and Night Blinds': '/home/products/vertical-blinds.jpg',
+  'Dual zebra Shades': '/home/categories/dual-zebra-shades.webp',
 };
 
 export default function CategoryHero({ title, description, productCount }: CategoryHeroProps) {

@@ -9,7 +9,7 @@ const IMAGE_MAP: Record<string, string> = {
   '/collections/light-filtering-roller-shades':      '/home/categories/light%20filtering%20roller%20shades.png',
   '/collections/blackout-roller-shades':             '/home/categories/Blackout%20roller%20Shades.png',
   '/collections/waterproof-blackout-roller-shades':  '/home/categories/Waterproof%20Blackout%20roller%20Shades.png',
-  '/collections/dual-zebra-shades':                  '/home/categories/Dual%20zebra%20Shades.png',
+  '/collections/dual-zebra-shades':                  '/home/categories/dual-zebra-shades.webp',
   '/collections/light-filtering-vertical-blinds':    '/home/categories/light%20filtering%20vertical%20blinds.png',
   '/collections/blackout-vertical-blinds':           '/home/categories/blackout%20vertical%20blinds.png',
   '/collections/waterproof-blackout-vertical-blinds':'/home/categories/water%20proof%20vertical%20blinds.png',
