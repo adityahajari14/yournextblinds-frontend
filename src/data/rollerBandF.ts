@@ -38,7 +38,7 @@ export const ROLLER_BAND_F_HEADRAIL_OPTIONS = [
     name: 'No Headrail',
     description: 'No headrail — fabric only',
     price: 0,
-    image: '/products/headrail/no-headrail.webp',
+    image: '/products/headrail/noheadrail.webp',
   },
 ];
 
