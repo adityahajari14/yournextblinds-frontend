@@ -6,8 +6,8 @@ const EXCLUDED_LABELS = new Set(['All blinds and shades', 'Roller Shades', 'Vert
 
 // Map each collection href to its category image
 const IMAGE_MAP: Record<string, string> = {
-  '/collections/light-filtering-roller-shades':      '/home/categories/light%20filtering%20roller%20shades.png',
-  '/collections/blackout-roller-shades':             '/home/categories/Blackout%20roller%20Shades.png',
+  '/collections/light-filtering-roller-shades':      '/home/categories/light-filtering-roller-shades.webp',
+  '/collections/blackout-roller-shades':             '/home/categories/blackout-roller-shades.webp',
   '/collections/waterproof-blackout-roller-shades':  '/home/categories/Waterproof%20Blackout%20roller%20Shades.png',
   '/collections/dual-zebra-shades':                  '/home/categories/dual-zebra-shades.webp',
   '/collections/light-filtering-vertical-blinds':    '/home/categories/light%20filtering%20vertical%20blinds.png',
@@ -17,7 +17,7 @@ const IMAGE_MAP: Record<string, string> = {
   '/collections/motorised-dual-zebra-shades':        '/home/categories/motorised%20zebra%20dual%20shades.png',
   '/collections/motorised-eclipsecore':              '/home/categories/motorised%20eclipsecore.png',
   '/product/non-driii-honeycomb-blackout-blinds?motorized=true': '/home/categories/motorised%20eclipsecore.png',
-  '/collections/blackout-roller-shades-category':    '/home/categories/Blackout%20roller%20Shades.png',
+  '/collections/blackout-roller-shades-category':    '/home/categories/blackout-roller-shades.webp',
   '/collections/blackout-dual-zebra-shades':         '/home/categories/Dual%20zebra%20Shades.png',
   '/collections/blackout-vertical-blinds-category':  '/home/categories/blackout%20vertical%20blinds.png',
   '/collections/eclipsecore-shades':                 '/home/categories/eclipse%20core%20shades.png',

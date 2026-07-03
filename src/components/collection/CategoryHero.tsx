@@ -15,6 +15,8 @@ const categoryImages: Record<string, string> = {
   'Roman Blinds': '/home/products/vertical-blinds-3.jpg',
   'Day and Night Blinds': '/home/products/vertical-blinds.jpg',
   'Dual zebra Shades': '/home/categories/dual-zebra-shades.webp',
+  'Light filtering roller Shades': '/home/categories/light-filtering-roller-shades.webp',
+  'Blackout roller Shades': '/home/categories/blackout-roller-shades.webp',
 };
 
 export default function CategoryHero({ title, description, productCount }: CategoryHeroProps) {

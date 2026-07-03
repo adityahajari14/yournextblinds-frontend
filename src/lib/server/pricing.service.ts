@@ -161,6 +161,21 @@ const localPriceBandByHandle: Record<string, string> = {
   [ROLLER_BAND_F_PRODUCT_HANDLE]: ROLLER_BAND_F_PRICE_BAND_NAME,
 };
 
+/**
+ * The legacy flat bands (`Roller - Band F`, `Dayandnight - Band H`) are stub
+ * placeholders kept only as a checkout safety net for un-backfilled variants
+ * (see multi-table pricing design notes) — they are not real size ranges
+ * (e.g. the Roller stub has a single 20x19 cell). Before a color variant is
+ * selected, resolution has no variant signal to pick a real Group band, so
+ * it would otherwise land on these stubs and collapse the UI's min/max
+ * placeholder to a single value. Redirect to a representative real group
+ * band (Group 1) so the pre-selection size range is meaningful.
+ */
+const representativeGroupBandByLegacyName: Record<string, string> = {
+  [ROLLER_BAND_F_PRICE_BAND_NAME]: 'Roller - Band F - Group 1',
+  [DAY_NIGHT_BAND_H_PRICE_BAND_NAME]: 'Dayandnight - Band H - Group 1',
+};
+
 function key(...parts: Array<string | null>) {
   return parts.map((part) => part ?? '__null__').join('::');
 }
@@ -487,10 +502,11 @@ async function resolvePriceBand(request: PricingRequest): Promise<ResolvedBand> 
   if (byLabelCode) return { band: byLabelCode.band, variantCodeEntry: byLabelCode.entry };
 
   // 5. Fall back to the product-level band.
-  const priceBandName = localPriceBandByHandle[handle] ?? (await getPriceBandNameByHandle(handle));
+  let priceBandName = localPriceBandByHandle[handle] ?? (await getPriceBandNameByHandle(handle));
   if (!priceBandName) {
     throw new Error(`Product "${handle}" not found or has no price band assigned`);
   }
+  priceBandName = representativeGroupBandByLegacyName[priceBandName] ?? priceBandName;
 
   const priceBand = bandByName(priceBandName);
   if (!priceBand) {
