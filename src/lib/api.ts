@@ -21,6 +21,7 @@ import {
   DAY_NIGHT_BAND_H_TAG,
   HIDDEN_TEST_PRODUCT_TAG,
 } from '@/data/dayNightBandH';
+import { ROLLER_BAND_F_TAG } from '@/data/rollerBandF';
 
 const SERVER_API_CACHE_REVALIDATE_SECONDS =
   Number(process.env.SERVER_API_CACHE_REVALIDATE_SECONDS || 3_600);
@@ -254,11 +255,21 @@ export async function fetchProductsByCategory(
       const hasPrimaryCategory = product.categories.some((cat) => cat.slug === categorySlug);
       if (!hasPrimaryCategory) return false;
 
-      // Must have all required tags (if specified)
+      // Must have all required tags (if specified).
+      // Band F products always pass on roller-blinds pages; Band H always pass on day-and-night pages
+      // — they appear in every roller/zebra collection regardless of light-filtering/blackout tags.
       if (requiredTags && requiredTags.length > 0) {
         const productTagSlugs = product.tags.map((tag) => tag.slug);
-        const hasAllTags = requiredTags.every((tag) => productTagSlugs.includes(tag));
-        if (!hasAllTags) return false;
+        const isBandF = productTagSlugs.includes(ROLLER_BAND_F_TAG);
+        const isBandH = productTagSlugs.includes(DAY_NIGHT_BAND_H_TAG) ||
+          product.slug === DAY_NIGHT_BAND_H_PRODUCT_HANDLE;
+        const bypassTags =
+          (isBandF && categorySlug === 'roller-blinds') ||
+          (isBandH && categorySlug === 'day-and-night-blinds');
+        if (!bypassTags) {
+          const hasAllTags = requiredTags.every((tag) => productTagSlugs.includes(tag));
+          if (!hasAllTags) return false;
+        }
       }
 
       // Must have all required secondary categories (if specified)

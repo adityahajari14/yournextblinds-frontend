@@ -3,6 +3,7 @@
 import { useState, useMemo } from 'react';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/product';
+import type { CollectionContext } from '@/components/product/ProductCard';
 
 interface FilterOptions {
   colors: string[];
@@ -14,15 +15,17 @@ interface ProductGridWithFiltersProps {
   filterOptions: FilterOptions;
   categoryName: string;
   preselectedMotorization?: boolean;
+  collectionContext?: CollectionContext;
 }
 
 type SortOption = 'best-selling' | 'price-low' | 'price-high' | 'name-az' | 'name-za';
 
-export default function ProductGridWithFilters({ 
-  products, 
+export default function ProductGridWithFilters({
+  products,
   filterOptions,
   categoryName,
   preselectedMotorization = false,
+  collectionContext,
 }: ProductGridWithFiltersProps) {
   // Filter state
   const [selectedColors, setSelectedColors] = useState<string[]>([]);
@@ -322,6 +325,7 @@ export default function ProductGridWithFilters({
                     image: product.images[0],
                   }}
                   preselectedMotorization={preselectedMotorization}
+                  collectionContext={collectionContext}
                 />
               ))}
             </div>

@@ -45,6 +45,31 @@ const guides = [
         file: '/guides/roller_blinds_installation_guide_yournextblinds.pdf',
         type: 'Installation',
       },
+      {
+        title: 'Roller Shade (Cordless Square) – Installation Guide',
+        file: '/guides/Roller Shade_Cordless_Square_Installation Guide_121225.pdf',
+        type: 'Installation',
+      },
+      {
+        title: 'Roller Shade (Cordless Square) – Installation Guide (Spanish)',
+        file: '/guides/SP_Roller Shade_Cordless_Square_Installation Guide_120325.pdf',
+        type: 'Installation',
+      },
+      {
+        title: 'Roller Shade (Motorized Square) – Installation Guide',
+        file: '/guides/Roller Shade_Square_Motorized_Installation Guide_121225.pdf',
+        type: 'Installation',
+      },
+      {
+        title: 'Roller Shade (Motorized Square) – Installation Guide (Spanish)',
+        file: '/guides/SP_Roller Shade_Square_Motorized_Installation Guide_120325.pdf',
+        type: 'Installation',
+      },
+      {
+        title: 'Roller Shade (Motorized) – Installation Guide',
+        file: '/guides/Roller Shade_Motorized_Installation Guide_120325.pdf',
+        type: 'Installation',
+      },
     ],
   },
   {

@@ -6,6 +6,7 @@ import CategoryHero from '@/components/collection/CategoryHero';
 import ProductGridWithFilters from '@/components/collection/ProductGridWithFilters';
 import ComingSoon from '@/components/collection/ComingSoon';
 import { ALL_COLLECTION_SLUGS, COLLECTION_DISPLAY_NAMES, COLLECTION_DESCRIPTIONS, NAVIGATION_SLUG_MAPPING, NAVIGATION_TAG_FILTERS, NAVIGATION_CATEGORY_FILTERS } from '@/data/navigation';
+import type { CollectionContext } from '@/components/product/ProductCard';
 
 interface PageProps {
   params: Promise<{ category: string }>;
@@ -138,6 +139,12 @@ export default async function CollectionPage({ params }: PageProps) {
     categorySlug === 'motorised-dual-zebra-shades' ||
     categorySlug === 'motorised-eclipsecore';
 
+  // Collection context for Band F roller shades: controls name prefix and room darkening preselection
+  const collectionContext: CollectionContext =
+    categorySlug === 'light-filtering-roller-shades' ? 'light-filtering' :
+    categorySlug === 'blackout-roller-shades' || categorySlug === 'blackout-roller-shades-category' ? 'blackout' :
+    undefined;
+
   return (
     <div className="min-h-screen bg-[#fafafa]">
       <header className="sticky top-0 z-50 bg-white shadow-sm">
@@ -163,6 +170,7 @@ export default async function CollectionPage({ params }: PageProps) {
                 filterOptions={filterOptions}
                 categoryName={categoryName}
                 preselectedMotorization={preselectedMotorization}
+                collectionContext={collectionContext}
               />
             )}
           </div>

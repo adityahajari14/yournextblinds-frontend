@@ -92,6 +92,40 @@ interface ProductPageProps {
   initialCustomizationPricing?: CustomizationPricingType[];
 }
 
+const ROLLER_BAND_F_INSTALLATION_GUIDES = {
+  cordless: {
+    label: 'Cordless',
+    files: {
+      english: '/guides/Roller Shade_Cordless_Square_Installation Guide_121225.pdf',
+      spanish: '/guides/SP_Roller Shade_Cordless_Square_Installation Guide_120325.pdf',
+    },
+  },
+  motorizedSquare: {
+    label: 'Motorized (Square)',
+    files: {
+      english: '/guides/Roller Shade_Square_Motorized_Installation Guide_121225.pdf',
+      spanish: '/guides/SP_Roller Shade_Square_Motorized_Installation Guide_120325.pdf',
+    },
+  },
+  motorized: {
+    label: 'Motorized',
+    files: {
+      english: '/guides/Roller Shade_Motorized_Installation Guide_120325.pdf',
+    },
+  },
+} as const;
+
+type RollerBandFInstallationGuideMethod = keyof typeof ROLLER_BAND_F_INSTALLATION_GUIDES;
+type RollerBandFInstallationGuideLanguage = 'english' | 'spanish';
+
+const ROLLER_BAND_F_INSTALLATION_GUIDE_LANGUAGES: Array<{
+  id: RollerBandFInstallationGuideLanguage;
+  label: string;
+}> = [
+  { id: 'english', label: 'English' },
+  { id: 'spanish', label: 'Spanish' },
+];
+
 const BAND_H_INSTALLATION_GUIDES = {
   ccl: {
     label: 'Continuous Chain',
@@ -152,6 +186,15 @@ const ProductPage = ({
   const isBandHProduct = useMemo(() => isDayNightBandHProduct(product), [product]);
   const isRollerBandF = useMemo(() => isRollerBandFProduct(product), [product]);
 
+  // Context set by the collection page the user navigated from — affects name prefix and room darkening
+  const collectionContext = searchParams.get('collectionContext') as 'light-filtering' | 'blackout' | null;
+  const isBlackoutContext = isRollerBandF && collectionContext === 'blackout';
+  const displayProductName = isRollerBandF && collectionContext === 'light-filtering'
+    ? `Light Filtering ${product.name}`
+    : isBlackoutContext
+    ? `Blackout ${product.name}`
+    : product.name;
+
   useEffect(() => {
     trackShopifyProductView(product);
   }, [product]);
@@ -163,7 +206,9 @@ const ProductPage = ({
     height: 0,
     heightFraction: '0',
     roomDarkening: isRollerBandFProduct(product)
-      ? (ROLLER_BAND_F_ROOM_DARKENING_OPTIONS.find((o) => o.id === 'dimout')?.id ?? null)
+      ? (isBlackoutContext
+          ? (ROLLER_BAND_F_ROOM_DARKENING_OPTIONS.find((o) => o.id === 'blackout')?.id ?? null)
+          : (ROLLER_BAND_F_ROOM_DARKENING_OPTIONS.find((o) => o.id === 'dimout')?.id ?? null))
       : null,
   });
 
@@ -183,10 +228,13 @@ const ProductPage = ({
   const [isValidating, setIsValidating] = useState(false);
   const fetchingRef = useRef(false);
   const [isBandHInstallationGuideOpen, setIsBandHInstallationGuideOpen] = useState(false);
+  const [isRollerBandFInstallationGuideOpen, setIsRollerBandFInstallationGuideOpen] = useState(false);
   const [isOpeningDirectionGuideOpen, setIsOpeningDirectionGuideOpen] = useState(false);
   const [isBandHCouponOpen, setIsBandHCouponOpen] = useState(false);
   const [selectedBandHGuideMethod, setSelectedBandHGuideMethod] =
     useState<BandHInstallationGuideMethod | null>(null);
+  const [selectedRollerBandFGuideMethod, setSelectedRollerBandFGuideMethod] =
+    useState<RollerBandFInstallationGuideMethod | null>(null);
 
   // Collapsible sections state
   const [isMeasureOpen, setIsMeasureOpen] = useState(true);
@@ -340,6 +388,8 @@ const ProductPage = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hasInitialPricing, product.slug, isMultiTableProduct, selectedVariantSignalKey]);
 
+  const isPleated = product.category.toLowerCase().includes('pleated');
+
   // Determine which options to use based on product category
   const isRollerOrDayNight = useMemo(() => {
     const category = product.category.toLowerCase();
@@ -364,7 +414,9 @@ const ProductPage = ({
     [isBandHProduct, isRollerBandF, product.variants]
   );
   const selectedBandHVariant = useMemo(
-    () => bandHColorVariants.find((variant) => variant.id === config.selectedVariantId) ?? bandHColorVariants[0] ?? null,
+    () => (config.selectedVariantId
+      ? bandHColorVariants.find((variant) => variant.id === config.selectedVariantId) ?? null
+      : null),
     [bandHColorVariants, config.selectedVariantId]
   );
   const selectedBandHVariantOption = selectedBandHVariant
@@ -384,23 +436,7 @@ const ProductPage = ({
     ? Math.max(0, productGalleryImages.indexOf(selectedBandHVariant.image))
     : undefined;
 
-  useEffect(() => {
-    if ((!isBandHProduct && !isRollerBandF) || bandHColorVariants.length === 0) return;
-    if (config.selectedVariantId && bandHColorVariants.some((variant) => variant.id === config.selectedVariantId)) {
-      return;
-    }
-
-    const firstVariant = bandHColorVariants[0];
-    const firstOption = getVariantDisplayOption(firstVariant);
-    setConfig((prev) => ({
-      ...prev,
-      selectedVariantId: firstVariant.id,
-      selectedVariantTitle: firstVariant.title,
-      selectedVariantImage: firstVariant.image ?? null,
-      selectedVariantOptionName: firstOption.name,
-      selectedVariantOptionValue: firstOption.value,
-    }));
-  }, [bandHColorVariants, config.selectedVariantId, isBandHProduct, isRollerBandF]);
+  // No auto-preselection: user must explicitly pick a color variant.
 
   const installationOptions = isDayNight
     ? ZEBRA_INSTALLATION_OPTIONS
@@ -609,6 +645,29 @@ const ProductPage = ({
     visibleOptions,
   ]);
 
+  const sizeRanges = useMemo(() => {
+    if (!priceMatrix || !priceMatrix.widthBands || !priceMatrix.heightBands) {
+      return null;
+    }
+    if (priceMatrix.widthBands.length === 0 || priceMatrix.heightBands.length === 0) {
+      return null;
+    }
+    const widthBands = priceMatrix.widthBands;
+    const heightBands = priceMatrix.heightBands;
+    const minWidth = Math.min(...widthBands.map(b => b.inches));
+    const bandMaxWidth = Math.max(...widthBands.map(b => b.inches));
+    const maxWidth =
+      typeof priceMatrix.maxWidthInches === 'number'
+        ? Math.min(bandMaxWidth, priceMatrix.maxWidthInches)
+        : bandMaxWidth;
+    const minHeight = Math.min(...heightBands.map(b => b.inches));
+    const maxHeight = Math.max(...heightBands.map(b => b.inches));
+    if (process.env.NODE_ENV === 'development') {
+      console.log('Size ranges calculated:', { minWidth, maxWidth, minHeight, maxHeight, priceMatrix: priceMatrix.name });
+    }
+    return { minWidth, maxWidth, minHeight, maxHeight };
+  }, [priceMatrix]);
+
   const missingRequiredCustomizations = useMemo(() => {
     const missingCustomizations = getMissingRequiredCustomizations(
       cartConfiguration,
@@ -630,7 +689,10 @@ const ProductPage = ({
       cartConfiguration.heightFraction,
       cartConfiguration.heightUnit
     );
-    const limits = isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS : ROLLER_BAND_F_SIZE_LIMITS;
+    // Use variant-specific sizeRanges (includes per-color maxWidthInches cap) when available,
+    // fall back to static product-type limits.
+    const staticLimits = isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS : ROLLER_BAND_F_SIZE_LIMITS;
+    const limits = sizeRanges ?? staticLimits;
     const isOutOfRange =
       widthInches < limits.minWidth ||
       widthInches > limits.maxWidth ||
@@ -640,7 +702,7 @@ const ProductPage = ({
     return isOutOfRange
       ? [...missingCustomizations, isBandHProduct ? 'valid Band H size' : 'valid Roller Band F size']
       : missingCustomizations;
-  }, [cartConfiguration, isBandHProduct, isRollerBandF, requiredCustomizationVisibility]);
+  }, [cartConfiguration, isBandHProduct, isRollerBandF, requiredCustomizationVisibility, sizeRanges]);
 
   const isAddToCartDisabled = isValidating || missingRequiredCustomizations.length > 0;
 
@@ -654,6 +716,16 @@ const ProductPage = ({
     );
     setIsBandHInstallationGuideOpen(false);
     setSelectedBandHGuideMethod(null);
+  };
+
+  const openRollerBandFInstallationGuide = (language: RollerBandFInstallationGuideLanguage) => {
+    if (!selectedRollerBandFGuideMethod) return;
+    const files = ROLLER_BAND_F_INSTALLATION_GUIDES[selectedRollerBandFGuideMethod].files as Record<string, string>;
+    const url = files[language];
+    if (!url) return;
+    window.open(url, '_blank', 'noopener,noreferrer');
+    setIsRollerBandFInstallationGuideOpen(false);
+    setSelectedRollerBandFGuideMethod(null);
   };
 
   // Calculate price using new pricing system
@@ -714,41 +786,6 @@ const ProductPage = ({
   const bandHPromoCompareAtPrice = displayedPrice / (1 - BAND_H_PROMO_DISCOUNT_PERCENT / 100);
 
   // Calculate dynamic size ranges from price band
-  const sizeRanges = useMemo(() => {
-    if (!priceMatrix || !priceMatrix.widthBands || !priceMatrix.heightBands) {
-      return null;
-    }
-
-    if (priceMatrix.widthBands.length === 0 || priceMatrix.heightBands.length === 0) {
-      return null;
-    }
-
-    const widthBands = priceMatrix.widthBands;
-    const heightBands = priceMatrix.heightBands;
-
-    const minWidth = Math.min(...widthBands.map(b => b.inches));
-    // Per-color max width (multi-table products) can be tighter than the widest column.
-    const bandMaxWidth = Math.max(...widthBands.map(b => b.inches));
-    const maxWidth =
-      typeof priceMatrix.maxWidthInches === 'number'
-        ? Math.min(bandMaxWidth, priceMatrix.maxWidthInches)
-        : bandMaxWidth;
-    const minHeight = Math.min(...heightBands.map(b => b.inches));
-    const maxHeight = Math.max(...heightBands.map(b => b.inches));
-
-    // Debug log (remove in production)
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Size ranges calculated:', { minWidth, maxWidth, minHeight, maxHeight, priceMatrix: priceMatrix.name });
-    }
-
-    return {
-      minWidth,
-      maxWidth,
-      minHeight,
-      maxHeight,
-    };
-  }, [priceMatrix]);
-
   const handleAddToCart = async () => {
     if (missingRequiredCustomizations.length > 0) {
       return;
@@ -904,7 +941,7 @@ const ProductPage = ({
           <nav className="flex items-center gap-2 text-xs md:text-sm text-gray-500">
             <Link href="/" className="hover:text-[#00473c]">{product.category}</Link>
             <span>&gt;</span>
-            <span className="text-gray-900 truncate">{product.name}</span>
+            <span className="text-gray-900 truncate">{displayProductName}</span>
           </nav>
         </div>
       </div>
@@ -915,7 +952,7 @@ const ProductPage = ({
           <div className="flex flex-col lg:flex-row gap-6 md:gap-8 lg:gap-12">
             <div className="lg:hidden">
               <h1 className="text-xl font-medium text-[#3a3a3a] mb-2">
-                {product.name}
+                {displayProductName}
               </h1>
 
               <div className="flex items-center gap-1 mb-4">
@@ -953,7 +990,7 @@ const ProductPage = ({
               <ProductGallery
                 images={productGalleryImages}
                 videos={product.videos}
-                productName={product.name}
+                productName={displayProductName}
                 selectedIndex={(isBandHProduct || isRollerBandF) ? selectedBandHVariantImageIndex : undefined}
               />
             </div>
@@ -962,7 +999,7 @@ const ProductPage = ({
             <div className="w-full lg:w-1/2">
               {/* Product Title */}
               <h1 className="hidden lg:block text-xl md:text-2xl lg:text-3xl font-medium text-[#3a3a3a] mb-2">
-                {product.name}
+                {displayProductName}
               </h1>
 
               {/* Description */}
@@ -1032,8 +1069,8 @@ const ProductPage = ({
 
               {/* Customization Sections */}
               <div className="space-y-4">
-                {/* Room Darkening — Roller Band F only, above measure card */}
-                {isRollerBandF && (
+                {/* Room Darkening — Roller Band F only; hidden in blackout collection context (blackout is preselected) */}
+                {isRollerBandF && !isBlackoutContext && (
                   <RollerBandFRoomDarkeningSelector
                     config={config}
                     updateConfig={(updates) => setConfig((prev) => ({ ...prev, ...updates }))}
@@ -1685,6 +1722,17 @@ const ProductPage = ({
                     >
                       Installation Guide
                     </button>
+                  ) : isRollerBandF ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedRollerBandFGuideMethod(null);
+                        setIsRollerBandFInstallationGuideOpen(true);
+                      }}
+                      className="flex-1 py-2.5 border border-[#00473c] text-[#00473c] text-sm font-medium rounded-lg text-center hover:bg-[#f0fdf9] transition-colors"
+                    >
+                      Installation Guide
+                    </button>
                   ) : (
                     <a
                       href={PRODUCT_GUIDES[guideType].installation}
@@ -1787,6 +1835,102 @@ const ProductPage = ({
                                 key={language.id}
                                 type="button"
                                 onClick={() => openBandHInstallationGuide(language.id)}
+                                className="rounded-lg border border-[#00473c] px-4 py-3 text-sm font-medium text-[#00473c] transition-colors hover:bg-[#f0fdf9]"
+                              >
+                                {language.label}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {isRollerBandF && isRollerBandFInstallationGuideOpen && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-labelledby="roller-band-f-installation-guide-title"
+                  onClick={() => {
+                    setIsRollerBandFInstallationGuideOpen(false);
+                    setSelectedRollerBandFGuideMethod(null);
+                  }}
+                >
+                  <div
+                    className="w-full max-w-lg rounded-lg bg-white p-5 shadow-xl"
+                    onClick={(event) => event.stopPropagation()}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3
+                          id="roller-band-f-installation-guide-title"
+                          className="text-lg font-semibold text-[#2f2f2f]"
+                        >
+                          Installation Guide
+                        </h3>
+                        <p className="mt-1 text-sm text-gray-600">
+                          Choose the installation option, then select a language.
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsRollerBandFInstallationGuideOpen(false);
+                          setSelectedRollerBandFGuideMethod(null);
+                        }}
+                        className="flex h-8 w-8 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                        aria-label="Close installation guide dialog"
+                      >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <div className="mt-5 space-y-5">
+                      <div>
+                        <p className="mb-2 text-sm font-medium text-[#3a3a3a]">Installation option</p>
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                          {(Object.entries(ROLLER_BAND_F_INSTALLATION_GUIDES) as Array<[
+                            RollerBandFInstallationGuideMethod,
+                            typeof ROLLER_BAND_F_INSTALLATION_GUIDES[RollerBandFInstallationGuideMethod]
+                          ]>).map(([methodId, guide]) => {
+                            const isSelected = selectedRollerBandFGuideMethod === methodId;
+                            return (
+                              <button
+                                key={methodId}
+                                type="button"
+                                onClick={() => setSelectedRollerBandFGuideMethod(methodId)}
+                                className={`rounded-lg border-2 p-3 text-left transition-colors ${
+                                  isSelected
+                                    ? 'border-[#00473c] bg-[#f6fffd]'
+                                    : 'border-gray-200 bg-white hover:border-[#00473c]'
+                                }`}
+                              >
+                                <span className="block text-sm font-semibold text-[#2f2f2f]">
+                                  {guide.label}
+                                </span>
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {selectedRollerBandFGuideMethod && (
+                        <div className="border-t border-gray-100 pt-4">
+                          <p className="mb-2 text-sm font-medium text-[#3a3a3a]">Language</p>
+                          <div className="grid grid-cols-2 gap-3">
+                            {ROLLER_BAND_F_INSTALLATION_GUIDE_LANGUAGES.filter((language) =>
+                              selectedRollerBandFGuideMethod &&
+                              language.id in (ROLLER_BAND_F_INSTALLATION_GUIDES[selectedRollerBandFGuideMethod].files as Record<string, string>)
+                            ).map((language) => (
+                              <button
+                                key={language.id}
+                                type="button"
+                                onClick={() => openRollerBandFInstallationGuide(language.id)}
                                 className="rounded-lg border border-[#00473c] px-4 py-3 text-sm font-medium text-[#00473c] transition-colors hover:bg-[#f0fdf9]"
                               >
                                 {language.label}
@@ -1931,6 +2075,54 @@ const ProductPage = ({
           </div>
         </div>
       </section>
+
+      {/* Key Features — EclipseCore / Pleated Blackout only */}
+      {isPleated && (
+        <section className="bg-[#f8f9f8] border-t border-gray-100 px-4 md:px-6 lg:px-20 py-10 md:py-14">
+          <div className="max-w-[1400px] mx-auto">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+              {/* Feature 1 — Total Blackout */}
+              <div className="flex gap-4 bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+                <div className="shrink-0 w-10 h-10 rounded-lg bg-[#00473c]/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#00473c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#1a1a1a] mb-1">Total Blackout Fabric</p>
+                  <p className="text-xs text-gray-500 leading-relaxed">Enjoy complete darkness anytime with total blackout fabric that blocks all external light.</p>
+                </div>
+              </div>
+
+              {/* Feature 2 — Cordless Safety */}
+              <div className="flex gap-4 bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+                <div className="shrink-0 w-10 h-10 rounded-lg bg-[#00473c]/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#00473c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#1a1a1a] mb-1">Cordless Safety Design</p>
+                  <p className="text-xs text-gray-500 leading-relaxed">Designed with safety in mind, featuring a sleek cordless system with no cords or chains.</p>
+                </div>
+              </div>
+
+              {/* Feature 3 — Energy Efficient */}
+              <div className="flex gap-4 bg-white rounded-xl border border-gray-100 p-5 shadow-sm">
+                <div className="shrink-0 w-10 h-10 rounded-lg bg-[#00473c]/10 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-[#00473c]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-[#1a1a1a] mb-1">Energy-Efficient Thermal Fabric</p>
+                  <p className="text-xs text-gray-500 leading-relaxed">Thermal pleated fabric helps keep rooms cooler in summer and warmer in winter.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Product Details Section - Full Width */}
       <CategoryInfoSection
