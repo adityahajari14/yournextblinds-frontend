@@ -5,8 +5,12 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StarRating } from '@/components/product';
 import { formatPriceWithCurrency } from '@/lib/api';
+import { ROLLER_BAND_F_ROOM_DARKENING_OPTIONS } from '@/data/rollerBandF';
 
 export type CollectionContext = 'light-filtering' | 'blackout' | undefined;
+
+const BLACKOUT_ROOM_DARKENING_SURCHARGE =
+  ROLLER_BAND_F_ROOM_DARKENING_OPTIONS.find((option) => option.id === 'blackout')?.price ?? 0;
 
 interface ProductCardProps {
   product: {
@@ -35,6 +39,10 @@ export default function ProductCard({ product, className = '', preselectedMotori
 
   const isBandF = product.tags?.includes(ROLLER_BAND_F_TAG_CLIENT);
   const contextParam = isBandF && collectionContext ? `collectionContext=${collectionContext}` : '';
+  const displayPrice =
+    isBandF && collectionContext === 'blackout'
+      ? product.price + BLACKOUT_ROOM_DARKENING_SURCHARGE
+      : product.price;
 
   const displayName = isBandF && collectionContext === 'light-filtering'
     ? `Light Filtering ${product.name}`
@@ -77,7 +85,7 @@ export default function ProductCard({ product, className = '', preselectedMotori
             </h3>
             <div className="flex gap-2 md:gap-3 items-end">
               <span className="text-lg md:text-xl font-bold text-black">
-                {formatPriceWithCurrency(product.price, currency)}
+                {formatPriceWithCurrency(displayPrice, currency)}
               </span>
             </div>
           </div>

@@ -48,8 +48,9 @@ export default function ContactPage() {
               <div className="bg-neutral-50 rounded-xl p-6 border border-neutral-200">
                 <h2 className="text-sm font-semibold uppercase tracking-widest text-[#00473c] mb-3">Address</h2>
                 <address className="not-italic text-lg font-medium text-[#1a1a1a] leading-snug">
-                  16819 Gentle Stone Dr<br />
-                  Houston, TX 77095
+                  8102 Fry Rd<br />
+                  Ste A #1010<br />
+                  Cypress, TX 77433 United States
                 </address>
               </div>
             </div>

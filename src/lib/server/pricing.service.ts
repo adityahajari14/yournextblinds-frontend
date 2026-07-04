@@ -784,6 +784,28 @@ export async function validateCartPrice(
   };
 }
 
+/**
+ * The legacy flat bands (`Roller - Band F`, `Dayandnight - Band H`) are stub
+ * placeholders with a single price cell (see representativeGroupBandByLegacyName
+ * above) — using their "minimum" price shows a meaningless single-cell price
+ * instead of the product's true starting price. Real per-color pricing lives
+ * in the "{legacy name} - Group N" bands, so the true minimum for a legacy
+ * name is the lowest minimum across all of its group bands.
+ */
+function resolveMinimumPriceBandIds(
+  legacyBandName: string,
+  data: PricingIndexes
+): string[] {
+  const groupPrefix = `${legacyBandName} - Group `;
+  const groupBandIds = Array.from(data.priceBandsByName.values())
+    .filter((band) => band.name.startsWith(groupPrefix))
+    .map((band) => band.id);
+  if (groupBandIds.length > 0) return groupBandIds;
+
+  const legacyBand = data.priceBandsByName.get(legacyBandName);
+  return legacyBand ? [legacyBand.id] : [];
+}
+
 export async function getMinimumPricesByHandle(): Promise<Record<string, number>> {
   const allProducts = await getAllCachedProducts();
   const data = getIndexes();
@@ -797,24 +819,30 @@ export async function getMinimumPricesByHandle(): Promise<Record<string, number>
     bandNames.add(priceBandName);
   }
 
-  const priceBands = Array.from(bandNames)
-    .map((bandName) => data.priceBandsByName.get(bandName))
-    .filter((band): band is JsonPriceBand => Boolean(band));
-  const bandNameToId = new Map(priceBands.map((band) => [band.name, band.id]));
-  const minPrices = getMinimumPricesBatch(priceBands.map((band) => band.id));
+  const bandNameToIds = new Map(
+    Array.from(bandNames).map((bandName) => [bandName, resolveMinimumPriceBandIds(bandName, data)])
+  );
+  const allBandIds = Array.from(bandNameToIds.values()).flat();
+  const minPrices = getMinimumPricesBatch(allBandIds);
+
+  const minPriceForBandName = (bandName: string): number | undefined => {
+    const bandIds = bandNameToIds.get(bandName) ?? [];
+    const prices = bandIds
+      .map((id) => minPrices.get(id))
+      .filter((price): price is number => price !== undefined);
+    return prices.length > 0 ? Math.min(...prices) : undefined;
+  };
 
   for (const [handle, product] of Object.entries(allProducts)) {
     if (!product.priceBandName) continue;
 
-    const bandId = bandNameToId.get(product.priceBandName);
-    const price = bandId ? minPrices.get(bandId) : undefined;
+    const price = minPriceForBandName(product.priceBandName);
     if (price !== undefined) {
       result[handle] = price;
     }
   }
   for (const [handle, priceBandName] of Object.entries(localPriceBandByHandle)) {
-    const bandId = bandNameToId.get(priceBandName);
-    const price = bandId ? minPrices.get(bandId) : undefined;
+    const price = minPriceForBandName(priceBandName);
     if (price !== undefined) {
       result[handle] = price;
     }

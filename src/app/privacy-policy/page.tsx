@@ -177,7 +177,7 @@ export default function PrivacyPolicyPage() {
                 >
                   enquiries@yournextblinds.com
                 </a>{' '}
-                or contact us at 16819 Gentle Stone Dr, Houston, TX, 77095, US.
+                or contact us at 8102 Fry Rd, Ste A #1010, Cypress, TX, 77433, United States.
               </p>
             </div>
           </div>

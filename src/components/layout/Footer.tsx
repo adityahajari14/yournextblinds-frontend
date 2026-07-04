@@ -36,8 +36,8 @@ const Footer = () => {
           <div className="flex flex-col gap-1 text-sm text-[#484848] text-center lg:text-right">
             <a href="tel:+18326706705" className="hover:text-[#00473c] transition-colors">+1 832-670-6705</a>
             <a href="mailto:enquiries@yournextblinds.com" className="hover:text-[#00473c] transition-colors">enquiries@yournextblinds.com</a>
-            <span>16819 Gentle Stone Dr</span>
-            <span>Houston, TX 77095</span>
+            <span>8102 Fry Rd, Ste A #1010</span>
+            <span>Cypress, TX 77433 United States</span>
           </div>
           
         </div>

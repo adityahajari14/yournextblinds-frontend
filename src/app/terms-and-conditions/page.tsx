@@ -230,7 +230,7 @@ export default function TermsAndConditionsPage() {
                 </p>
                 <p>Response Time: 1-3 working days.</p>
                 <p className="font-medium pt-3">YOUR NEXT BLINDS LLC</p>
-                <p>16819 Gentle Stone Dr, Houston, TX 77095, US</p>
+                <p>8102 Fry Rd, Ste A #1010, Cypress, TX 77433, United States</p>
               </div>
             </div>
           </div>
