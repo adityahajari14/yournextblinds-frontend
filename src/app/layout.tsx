@@ -3,6 +3,7 @@ import { Inter, Montserrat } from 'next/font/google';
 import { Suspense } from 'react';
 import './globals.css';
 import { CartProvider } from '@/context/CartContext';
+import { SampleProvider } from '@/context/SampleContext';
 import { AuthProvider } from '@/context/AuthContext';
 import ShopifyAnalytics from '@/components/analytics/ShopifyAnalytics';
 
@@ -37,7 +38,9 @@ export default function RootLayout({
         </Suspense>
         <AuthProvider>
           <CartProvider>
-            {children}
+            <SampleProvider>
+              {children}
+            </SampleProvider>
           </CartProvider>
         </AuthProvider>
       </body>

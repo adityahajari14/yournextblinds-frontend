@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 const features = [
   { id: 1, title: 'First in your Letterbox', description: 'Samples are posted directly through your letterbox — no signature required.' },
@@ -39,9 +40,12 @@ const FreeSamples = () => {
               ))}
             </div>
             
-            <button className="mt-6 md:mt-8 lg:mt-0 w-full md:w-fit mx-auto lg:mx-0 bg-[#00473c] text-white px-6 md:px-8 py-3 md:py-4 rounded text-sm md:text-base lg:text-lg font-medium tracking-wider hover:bg-[#003a31] transition-colors">
+            <Link
+              href="/samples"
+              className="mt-6 md:mt-8 lg:mt-0 w-full md:w-fit mx-auto lg:mx-0 bg-[#00473c] text-white px-6 md:px-8 py-3 md:py-4 rounded text-sm md:text-base lg:text-lg font-medium tracking-wider hover:bg-[#003a31] transition-colors text-center"
+            >
               Order Now
-            </button>
+            </Link>
           </div>
           
           <div className="relative w-full lg:w-[787px] h-[300px] md:h-[400px] lg:h-[525px] order-1 lg:order-2">

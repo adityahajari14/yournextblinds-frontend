@@ -189,6 +189,72 @@ export interface CartContextType {
 }
 
 // ============================================
+// Free Sample Types
+// ============================================
+
+/**
+ * A single fabric/colour swatch requested as a free sample. This is deliberately
+ * NOT a configured, priced product — samples carry no size, add-ons, or price, and
+ * they never touch the priced cart or fire commerce analytics.
+ */
+export interface SampleItem {
+  /** Shopify product handle the swatch belongs to. */
+  productHandle: string;
+  /** Human-readable product title, for display in the basket. */
+  productTitle: string;
+  /** Shopify variant GID — the canonical identity of the swatch (dedupe key). */
+  variantId: string;
+  /** Colour/fabric name shown to the customer. */
+  colorName: string;
+  /** Swatch image URL for the basket thumbnail. */
+  swatchImage: string | null;
+}
+
+/**
+ * A single selectable sample within a product. For multi-variant products this is
+ * one colour/fabric variant; for products with no real variants it is the product
+ * itself (a single "whole product" swatch).
+ */
+export interface SampleVariantOption {
+  variantId: string;
+  /** Display name — the colour name, or the product name for no-variant products. */
+  label: string;
+  image: string | null;
+}
+
+/** A sample-eligible product, grouped under its category, with its selectable swatches. */
+export interface SampleProduct {
+  handle: string;
+  title: string;
+  category: string;
+  /** Product-level image, used as the card thumbnail. */
+  image: string | null;
+  /** True when the product has real colour variants to choose from. */
+  hasVariants: boolean;
+  variants: SampleVariantOption[];
+}
+
+/** Sample-eligible products grouped by category, for the stepped picker. */
+export interface SampleCategory {
+  name: string;
+  /** Number of products in this category (for the category card). */
+  productCount: number;
+  products: SampleProduct[];
+}
+
+export interface SampleContextType {
+  samples: SampleItem[];
+  /** Number of swatches currently in the basket. */
+  count: number;
+  /** True once the basket has reached MAX_FREE_SAMPLES. */
+  isFull: boolean;
+  addSample: (sample: SampleItem) => void;
+  removeSample: (variantId: string) => void;
+  isInBasket: (variantId: string) => boolean;
+  clearSamples: () => void;
+}
+
+// ============================================
 // API Response Types
 // ============================================
 

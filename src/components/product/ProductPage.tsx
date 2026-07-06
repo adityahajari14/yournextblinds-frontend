@@ -5,6 +5,8 @@ import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Product, ProductConfiguration, DEFAULT_CONFIGURATION, PriceBandMatrix, CustomizationPricing as CustomizationPricingType, ProductVariant } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { useSamples } from '@/context/SampleContext';
+import { isSampleEligible, MAX_FREE_SAMPLES } from '@/data/samples';
 import ProductGallery from './ProductGallery';
 import ProductReviews from './ProductReviews';
 import RelatedProducts from './RelatedProducts';
@@ -182,6 +184,8 @@ const ProductPage = ({
   initialCustomizationPricing = [],
 }: ProductPageProps) => {
   const { addToCart } = useCart();
+  const { addSample, removeSample, isInBasket, isFull, count: sampleCount } = useSamples();
+  const productSampleEligible = useMemo(() => isSampleEligible(product), [product]);
   const searchParams = useSearchParams();
   const isBandHProduct = useMemo(() => isDayNightBandHProduct(product), [product]);
   const isRollerBandF = useMemo(() => isRollerBandFProduct(product), [product]);
@@ -852,47 +856,93 @@ const ProductPage = ({
 
     return (
       <div className={className}>
-        <div className="mb-5">
+        <div className="mb-5 flex items-center justify-between gap-3">
           <h3 className="min-w-0 text-lg font-semibold text-[#1f1f1f] sm:text-xl">
             Color - {selectedBandHVariantOption?.value ?? 'Select Color'}
           </h3>
+          {productSampleEligible && sampleCount > 0 && (
+            <Link
+              href="/samples"
+              className="shrink-0 text-xs font-semibold text-[#00473c] underline underline-offset-2 hover:opacity-70"
+            >
+              {sampleCount} sample{sampleCount === 1 ? '' : 's'} ›
+            </Link>
+          )}
         </div>
 
         <div className="grid grid-cols-5 gap-3 sm:grid-cols-6">
           {bandHColorVariants.map((variant) => {
             const option = getVariantDisplayOption(variant);
             const isSelected = config.selectedVariantId === variant.id;
+            const inSampleBasket = isInBasket(variant.id);
 
             return (
-              <button
-                key={variant.id}
-                type="button"
-                onClick={() => {
-                  setConfig((prev) => ({
-                    ...prev,
-                    selectedVariantId: variant.id,
-                    selectedVariantTitle: variant.title,
-                    selectedVariantImage: variant.image ?? null,
-                    selectedVariantOptionName: option.name,
-                    selectedVariantOptionValue: option.value,
-                  }));
-                }}
-                className={`relative aspect-square overflow-hidden rounded-md bg-gray-50 transition-all ${
-                  isSelected
-                    ? 'border-2 border-[#00473c] p-0.5 shadow-sm'
-                    : 'border border-transparent hover:border-[#d4c7c2]'
-                }`}
-                aria-label={`Select color ${option.value}`}
-                title={option.value}
-              >
-                <Image
-                  src={variant.image || product.images[0] || '/home/products/vertical-blinds-1.jpg'}
-                  alt={option.value}
-                  fill
-                  className="rounded-[4px] object-cover"
-                  unoptimized
-                />
-              </button>
+              <div key={variant.id} className="flex flex-col gap-1.5">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setConfig((prev) => ({
+                      ...prev,
+                      selectedVariantId: variant.id,
+                      selectedVariantTitle: variant.title,
+                      selectedVariantImage: variant.image ?? null,
+                      selectedVariantOptionName: option.name,
+                      selectedVariantOptionValue: option.value,
+                    }));
+                  }}
+                  className={`relative aspect-square overflow-hidden rounded-md bg-gray-50 transition-all ${
+                    isSelected
+                      ? 'border-2 border-[#00473c] p-0.5 shadow-sm'
+                      : 'border border-transparent hover:border-[#d4c7c2]'
+                  }`}
+                  aria-label={`Select color ${option.value}`}
+                  title={option.value}
+                >
+                  <Image
+                    src={variant.image || product.images[0] || '/home/products/vertical-blinds-1.jpg'}
+                    alt={option.value}
+                    fill
+                    className="rounded-[4px] object-cover"
+                    unoptimized
+                  />
+                </button>
+
+                {productSampleEligible && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (inSampleBasket) {
+                        removeSample(variant.id);
+                      } else {
+                        addSample({
+                          productHandle: product.slug,
+                          productTitle: product.name,
+                          variantId: variant.id,
+                          colorName: option.value,
+                          swatchImage: variant.image ?? null,
+                        });
+                      }
+                    }}
+                    disabled={!inSampleBasket && isFull}
+                    className={`rounded border px-1 py-1 text-[10px] font-semibold leading-tight transition-colors ${
+                      inSampleBasket
+                        ? 'border-[#00473c] bg-[#00473c] text-white'
+                        : isFull
+                          ? 'cursor-not-allowed border-gray-200 bg-gray-50 text-gray-300'
+                          : 'border-[#00473c] bg-white text-[#00473c] hover:bg-[#f6fffd]'
+                    }`}
+                    title={
+                      !inSampleBasket && isFull
+                        ? `You can request up to ${MAX_FREE_SAMPLES} free samples`
+                        : inSampleBasket
+                          ? 'Remove free sample'
+                          : 'Add free sample'
+                    }
+                  >
+                    {inSampleBasket ? '✓ Added' : 'Free Sample'}
+                  </button>
+                )}
+              </div>
             );
           })}
         </div>

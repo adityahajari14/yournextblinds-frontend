@@ -11,7 +11,7 @@ const TopBar = () => {
         <a href="#" className="text-xs text-black underline hover:opacity-70 transition-opacity">
           Measure Size
         </a>
-        <a href="#" className="text-xs text-black underline hover:opacity-70 transition-opacity">
+        <a href="/samples" className="text-xs text-black underline hover:opacity-70 transition-opacity">
           Free Sample
         </a>
         <a href="#" className="text-xs text-black underline hover:opacity-70 transition-opacity">
