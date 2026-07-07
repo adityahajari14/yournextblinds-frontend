@@ -14,6 +14,8 @@ import StarRating from './StarRating';
 import CategoryInfoSection from '@/components/collection/CategoryInfoSection';
 import { formatPrice, formatPriceWithCurrency, fetchPriceMatrix, fetchCustomizationPricing, validateCartPrice } from '@/lib/api';
 import { PRODUCT_GUIDES } from '@/data/guides';
+import { PROMO_CODE, PROMO_CODE_PERCENT } from '@/data/promo';
+import CountdownTimer from '@/components/common/CountdownTimer';
 import { trackShopifyProductView } from '@/lib/shopify-analytics';
 import {
   calculateTotalPrice,
@@ -164,7 +166,7 @@ const BAND_H_INSTALLATION_GUIDE_LANGUAGES: Array<{
 ];
 
 const BAND_H_PROMO_DISCOUNT_PERCENT = 50;
-const BAND_H_COUPON_CODE = 'Sale15';
+const BAND_H_COUPON_CODE = PROMO_CODE;
 
 function getVariantDisplayOption(variant: ProductVariant) {
   const colorOption =
@@ -958,27 +960,27 @@ const ProductPage = ({
             type="button"
             onClick={() => setIsBandHCouponOpen(true)}
             className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-[#0f5f52] bg-[#00473c] px-2.5 py-3 text-white shadow-lg transition-colors hover:bg-[#003830] lg:px-3 lg:py-4"
-            aria-label="Open 15 percent off coupon"
+            aria-label={`Open ${PROMO_CODE_PERCENT} percent off coupon`}
           >
             <span
               className="block text-xs font-semibold uppercase tracking-wide text-white/90 lg:text-sm"
               style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
             >
-              Extra 15% off
+              Extra {PROMO_CODE_PERCENT}% off
             </span>
           </button>
 
           <div className="fixed bottom-4 left-4 z-40 w-24 overflow-hidden rounded-md border border-[#c8ded9] bg-white text-center text-[#00473c] shadow-lg lg:bottom-5 lg:left-5 lg:w-28">
             <div className="border-b border-[#dcebe7] bg-[#f6fffd] px-2 py-1.5">
               <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#4d6b65]">
-                Summer Sale
+                Flash Sale
               </span>
             </div>
             <div className="px-2 py-2">
-              <span className="block text-xl font-black leading-none lg:text-2xl">50%</span>
+              <span className="block text-xl font-black leading-none lg:text-2xl">{BAND_H_PROMO_DISCOUNT_PERCENT}%</span>
               <span className="mt-0.5 block text-[11px] font-bold uppercase tracking-wide">Off</span>
-              <span className="mt-1.5 block rounded bg-[#e8f5f2] px-1.5 py-1 text-[9px] font-bold uppercase tracking-wide">
-                Ends Today
+              <span className="mt-1.5 block rounded bg-[#e8f5f2] px-1 py-1 text-[9px] font-bold uppercase tracking-wide">
+                <CountdownTimer variant="inline" />
               </span>
             </div>
           </div>
@@ -1022,7 +1024,7 @@ const ProductPage = ({
                     </span>
                     {isBandHProduct && (
                       <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
-                        {BAND_H_PROMO_DISCOUNT_PERCENT}% Off Summer Sale - Ends Today
+                        {BAND_H_PROMO_DISCOUNT_PERCENT}% Off Flash Sale
                       </span>
                     )}
                   </div>
@@ -1102,7 +1104,7 @@ const ProductPage = ({
                     {isBandHProduct && (
                       <>
                         <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
-                          {BAND_H_PROMO_DISCOUNT_PERCENT}% Off Summer Sale - Ends Today
+                          {BAND_H_PROMO_DISCOUNT_PERCENT}% Off Flash Sale
                         </span>
                       </>
                     )}
@@ -2013,7 +2015,7 @@ const ProductPage = ({
                             Limited-time saving
                           </p>
                           <h3 id="band-h-coupon-title" className="mt-1 text-2xl font-bold text-[#2f2f2f]">
-                            Take an extra 15% off
+                            Take an extra {PROMO_CODE_PERCENT}% off
                           </h3>
                         </div>
                         <button

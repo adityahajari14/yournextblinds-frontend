@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Craftsmanship = () => {
   return (
@@ -25,9 +26,12 @@ const Craftsmanship = () => {
             </p>
           </div>
           
-          <button className="w-full md:w-fit border border-white text-white px-6 md:px-8 py-3 md:py-3.5 rounded-full text-sm md:text-base lg:text-lg font-medium tracking-wide hover:bg-white hover:text-black transition-colors">
+          <Link
+            href="/about"
+            className="w-full md:w-fit border border-white text-white px-6 md:px-8 py-3 md:py-3.5 rounded-full text-sm md:text-base lg:text-lg font-medium tracking-wide hover:bg-white hover:text-black transition-colors text-center"
+          >
             Discover Craftsmanship
-          </button>
+          </Link>
         </div>
       </div>
     </section>

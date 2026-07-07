@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 const Installation = () => {
   return (
@@ -27,9 +28,12 @@ const Installation = () => {
               We offer a complete blinds installation service. Simply order your chosen blinds and add contact us about installation once your order is confirmed. Our team will give you a call to arrange a convenient installation date and time.
             </p>
           </div>
-          <button className="w-full md:w-fit bg-[#00473c] text-white px-6 md:px-8 py-3 md:py-4 rounded text-sm md:text-base lg:text-lg font-medium tracking-wider hover:bg-[#003a31] transition-colors">
+          <Link
+            href="/contact"
+            className="w-full md:w-fit bg-[#00473c] text-white px-6 md:px-8 py-3 md:py-4 rounded text-sm md:text-base lg:text-lg font-medium tracking-wider hover:bg-[#003a31] transition-colors text-center"
+          >
             Book Now
-          </button>
+          </Link>
         </div>
         
         <div className="relative w-full lg:w-[578px] h-[300px] md:h-[350px] lg:h-[488px] max-lg:hidden">

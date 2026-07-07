@@ -561,9 +561,12 @@ export default function CartPage() {
                   )}
                 </button>
 
-                <button className="w-full border border-gray-300 text-[#3a3a3a] py-3 px-6 rounded-lg text-base font-medium hover:bg-gray-50 transition-colors">
+                <Link
+                  href="/samples"
+                  className="block w-full border border-gray-300 text-[#3a3a3a] py-3 px-6 rounded-lg text-base font-medium hover:bg-gray-50 transition-colors text-center"
+                >
                   Request Free Samples
-                </button>
+                </Link>
 
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="space-y-3">
@@ -571,13 +574,36 @@ export default function CartPage() {
                       <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-sm text-gray-600">Faulty item support</span>
+                      <span className="text-sm text-gray-600">Secure checkout</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-sm text-gray-600">Secure checkout</span>
+                      <span className="text-sm text-gray-600">Free delivery on every order</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <p className="text-xs text-gray-400 mb-2">We accept</p>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      {[
+                        { name: 'Visa', src: '/icons/payment/visa.svg' },
+                        { name: 'Mastercard', src: '/icons/payment/mastercard.svg' },
+                        { name: 'American Express', src: '/icons/payment/amex.svg' },
+                        { name: 'PayPal', src: '/icons/payment/paypal.svg' },
+                        { name: 'Apple Pay', src: '/icons/payment/apple-pay.svg' },
+                        { name: 'Google Pay', src: '/icons/payment/google-pay.svg' },
+                      ].map((method) => (
+                        <Image
+                          key={method.name}
+                          src={method.src}
+                          alt={method.name}
+                          width={60}
+                          height={39}
+                          className="h-9 w-auto"
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>

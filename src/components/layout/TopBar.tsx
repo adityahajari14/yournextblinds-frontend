@@ -5,16 +5,16 @@ const TopBar = () => {
         Toll Free: 1800 245 2525
       </p>
       <div className="hidden md:flex gap-8 lg:gap-14 items-center">
-        <a href="#" className="text-xs text-black underline hover:opacity-70 transition-opacity">
+        <a href="/contact" className="text-xs text-black underline hover:opacity-70 transition-opacity">
           Get Help
         </a>
-        <a href="#" className="text-xs text-black underline hover:opacity-70 transition-opacity">
+        <a href="/guides" className="text-xs text-black underline hover:opacity-70 transition-opacity">
           Measure Size
         </a>
         <a href="/samples" className="text-xs text-black underline hover:opacity-70 transition-opacity">
           Free Sample
         </a>
-        <a href="#" className="text-xs text-black underline hover:opacity-70 transition-opacity">
+        <a href="/account" className="text-xs text-black underline hover:opacity-70 transition-opacity">
           Track an Order
         </a>
       </div>

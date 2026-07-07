@@ -5,6 +5,7 @@ import './globals.css';
 import { CartProvider } from '@/context/CartContext';
 import { SampleProvider } from '@/context/SampleContext';
 import { AuthProvider } from '@/context/AuthContext';
+import { PromoBar } from '@/components/layout';
 import ShopifyAnalytics from '@/components/analytics/ShopifyAnalytics';
 
 const inter = Inter({
@@ -39,6 +40,7 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <SampleProvider>
+              <PromoBar />
               {children}
             </SampleProvider>
           </CartProvider>
