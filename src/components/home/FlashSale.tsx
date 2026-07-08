@@ -27,12 +27,12 @@ const FlashSale = () => {
         <div className="h-[43px] bg-white/25" />
       </div>
 
-      <div className="relative z-10 px-4 md:px-6 lg:px-20 py-12 md:py-16 lg:py-20 flex flex-col gap-6 md:gap-8 items-center">
-        <div className="flex flex-col gap-2 md:gap-3 items-center text-center max-w-[760px]">
-          <h2 className="text-xl md:text-2xl lg:text-[40px] font-semibold text-white tracking-tight leading-tight">
+      <div className="relative z-10 px-4 md:px-6 lg:px-20 py-12 md:py-16 lg:py-20 flex flex-col gap-6 md:gap-7 items-center">
+        <div className="flex flex-col gap-2 md:gap-3 items-center text-center max-w-[720px]">
+          <h2 className="text-xl md:text-2xl lg:text-[32px] font-semibold text-white tracking-tight leading-tight">
             OUR BIGGEST FLASH SALE EVER
           </h2>
-          <p className="text-sm md:text-base lg:text-xl text-white/90 leading-relaxed">
+          <p className="text-sm md:text-base lg:text-lg text-white/90 leading-relaxed">
             {PROMO_HEADLINE} + Get an Extra {PROMO_CODE_PERCENT}% Off with code{' '}
             <button
               type="button"
@@ -56,7 +56,7 @@ const FlashSale = () => {
 
         <Link
           href="/collections"
-          className="w-full md:w-fit bg-white text-[#00473c] px-6 md:px-8 py-3 md:py-4 rounded text-sm md:text-base lg:text-lg font-medium tracking-wider hover:bg-gray-100 transition-colors text-center"
+          className="w-full md:w-fit bg-white text-[#00473c] px-6 md:px-8 py-3 rounded text-sm md:text-base font-medium tracking-wider hover:bg-gray-100 transition-colors text-center"
         >
           Shop the Sale
         </Link>

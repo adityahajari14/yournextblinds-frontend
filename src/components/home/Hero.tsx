@@ -5,10 +5,30 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
 const slides = [
-  { src: '/home/hero/hero-zebra.webp', alt: 'Dual Zebra Shades — Light, Your Way', href: '/collections/dual-zebra-shades' },
-  { src: '/home/hero/hero-roller.webp', alt: 'Blackout Roller Shades — Sleep in Total Dark', href: '/collections/blackout-roller-shades' },
-  { src: '/home/hero/hero-vertical.webp', alt: 'Vertical Blinds — Made to Fit, Made for You', href: '/collections/light-filtering-vertical-blinds' },
-  { src: '/home/hero/hero-sale.webp', alt: 'Beat the Heatwave — 10% off with code FINAL10', href: '/product/non-driii-honeycomb-blackout-blinds' },
+  {
+    src: '/home/hero/hero-zebra.webp',
+    mobileSrc: '/home/hero/hero-zebra-mobile.webp',
+    alt: 'Dual Zebra Shades — Light, Your Way',
+    href: '/collections/dual-zebra-shades',
+  },
+  {
+    src: '/home/hero/hero-roller.webp',
+    mobileSrc: '/home/hero/hero-roller-mobile.webp',
+    alt: 'Blackout Roller Shades — Sleep in Total Dark',
+    href: '/collections/blackout-roller-shades',
+  },
+  {
+    src: '/home/hero/hero-vertical.webp',
+    mobileSrc: '/home/hero/hero-vertical-mobile.webp',
+    alt: 'Vertical Blinds — Made to Fit, Made for You',
+    href: '/collections/light-filtering-vertical-blinds',
+  },
+  {
+    src: '/home/hero/hero-sale.webp',
+    mobileSrc: '/home/hero/hero-sale-mobile.webp',
+    alt: 'Beat the Heatwave — 10% off with code FINAL10',
+    href: '/product/non-driii-honeycomb-blackout-blinds',
+  },
 ];
 
 const INTERVAL_MS = 5000;
@@ -27,7 +47,7 @@ const Hero = () => {
   const goToNext = () => setCurrent((prev) => (prev + 1) % slides.length);
 
   return (
-    <section className="relative h-[450px] md:h-[600px] lg:h-[734px] w-full overflow-hidden">
+    <section className="relative aspect-[1792/2400] sm:aspect-[2752/1536] w-full overflow-hidden">
       {slides.map((slide, index) => (
         <div
           key={index}
@@ -37,11 +57,22 @@ const Hero = () => {
           aria-hidden={index !== current}
         >
           <Link href={slide.href} className="block h-full w-full" tabIndex={index === current ? 0 : -1}>
+            {/* Mobile: 3:4 portrait art-directed image */}
+            <Image
+              src={slide.mobileSrc}
+              alt={slide.alt}
+              fill
+              sizes="100vw"
+              className="object-cover sm:hidden"
+              priority={index === 0}
+            />
+            {/* Desktop/tablet: wide landscape image */}
             <Image
               src={slide.src}
               alt={slide.alt}
               fill
-              className="object-cover"
+              sizes="100vw"
+              className="hidden object-cover sm:block"
               priority={index === 0}
             />
           </Link>

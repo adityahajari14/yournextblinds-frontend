@@ -36,9 +36,9 @@ const FAQ = () => {
   const [openId, setOpenId] = useState<number | null>(null);
 
   return (
-    <section className="bg-neutral-50 px-4 md:px-6 lg:px-20 py-12 md:py-16 lg:py-24">
-      <div className="max-w-[900px] mx-auto flex flex-col gap-6 md:gap-8 lg:gap-10">
-        <h2 className="text-2xl md:text-3xl lg:text-[40px] font-medium text-[#3a3a3a] text-center tracking-tight">
+    <section className="bg-neutral-50 px-4 md:px-6 lg:px-20 py-12 md:py-16 lg:py-20">
+      <div className="max-w-[860px] mx-auto flex flex-col gap-6 md:gap-8">
+        <h2 className="text-xl md:text-2xl lg:text-[32px] font-medium text-[#3a3a3a] text-center tracking-tight">
           FAQ
         </h2>
         
