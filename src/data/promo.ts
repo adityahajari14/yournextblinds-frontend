@@ -8,6 +8,12 @@
 /** The customer-facing coupon code (must match the Shopify discount exactly). */
 export const PROMO_CODE = 'FINAL10';
 
+/** Newsletter signup popup coupon code (must also exist as a real discount in Shopify). */
+export const SUBSCRIBE_POPUP_CODE = 'SUBSCRIBE10';
+
+/** Discount the subscribe popup code applies, as a percentage. */
+export const SUBSCRIBE_POPUP_PERCENT = 10;
+
 /** Extra discount the code applies, as a percentage. */
 export const PROMO_CODE_PERCENT = 10;
 

@@ -146,9 +146,11 @@ export default async function ProductPageRoute({ params }: ProductPageProps) {
 
   return (
     <>
-      {/* <TopBar /> */}
-      <Header />
-      <NavBar />
+      <header className="sticky top-0 z-50 bg-white shadow-sm">
+        {/* <TopBar /> */}
+        <Header />
+        <NavBar />
+      </header>
       <main className="bg-white min-h-screen">
         <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
           <ProductPage

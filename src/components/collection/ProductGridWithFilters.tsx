@@ -49,7 +49,7 @@ export default function ProductGridWithFilters({
     purple: { name: 'Purple', hex: '#8B5CF6' },
     brown: { name: 'Brown', hex: '#8B4513' },
     beige: { name: 'Beige', hex: '#F5F5DC' },
-    cream: { name: 'Cream', hex: '#FFFDD0' },
+    cream: { name: 'Cream', hex: '#E6E5DE' },
     ivory: { name: 'Ivory', hex: '#FFFFF0' },
     silver: { name: 'Silver', hex: '#C0C0C0' },
     gold: { name: 'Gold', hex: '#FFD700' },
