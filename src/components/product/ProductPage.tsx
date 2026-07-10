@@ -14,7 +14,7 @@ import StarRating from './StarRating';
 import CategoryInfoSection from '@/components/collection/CategoryInfoSection';
 import { formatPrice, formatPriceWithCurrency, fetchPriceMatrix, fetchCustomizationPricing, validateCartPrice } from '@/lib/api';
 import { PRODUCT_GUIDES } from '@/data/guides';
-import { PROMO_CODE, PROMO_CODE_PERCENT } from '@/data/promo';
+import { PROMO_CODE } from '@/data/promo';
 import CountdownTimer from '@/components/common/CountdownTimer';
 import { trackShopifyProductView } from '@/lib/shopify-analytics';
 import {
@@ -165,8 +165,8 @@ const BAND_H_INSTALLATION_GUIDE_LANGUAGES: Array<{
   { id: 'spanish', label: 'Spanish' },
 ];
 
-const BAND_H_PROMO_DISCOUNT_PERCENT = 50;
-const BAND_H_COUPON_CODE = PROMO_CODE;
+const FLASH_SALE_DISCOUNT_PERCENT = 50;
+const FLASH_SALE_COUPON_CODE = PROMO_CODE;
 
 function getVariantDisplayOption(variant: ProductVariant) {
   const colorOption =
@@ -236,7 +236,7 @@ const ProductPage = ({
   const [isBandHInstallationGuideOpen, setIsBandHInstallationGuideOpen] = useState(false);
   const [isRollerBandFInstallationGuideOpen, setIsRollerBandFInstallationGuideOpen] = useState(false);
   const [isOpeningDirectionGuideOpen, setIsOpeningDirectionGuideOpen] = useState(false);
-  const [isBandHCouponOpen, setIsBandHCouponOpen] = useState(false);
+  const [isFlashSaleCouponOpen, setIsFlashSaleCouponOpen] = useState(false);
   const [selectedBandHGuideMethod, setSelectedBandHGuideMethod] =
     useState<BandHInstallationGuideMethod | null>(null);
   const [selectedRollerBandFGuideMethod, setSelectedRollerBandFGuideMethod] =
@@ -789,7 +789,7 @@ const ProductPage = ({
       ? matrixMinPrice ?? product.price
       : product.price
     : totalPrice;
-  const bandHPromoCompareAtPrice = displayedPrice / (1 - BAND_H_PROMO_DISCOUNT_PERCENT / 100);
+  const flashSaleCompareAtPrice = displayedPrice / (1 - FLASH_SALE_DISCOUNT_PERCENT / 100);
 
   // Calculate dynamic size ranges from price band
   const handleAddToCart = async () => {
@@ -953,39 +953,35 @@ const ProductPage = ({
   };
 
   return (
-    <div className={(isBandHProduct || isRollerBandF) ? 'bg-white pb-20 lg:pb-0' : 'bg-white'}>
-      {isBandHProduct && (
-        <>
-          <button
-            type="button"
-            onClick={() => setIsBandHCouponOpen(true)}
-            className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-[#0f5f52] bg-[#00473c] px-2.5 py-3 text-white shadow-lg transition-colors hover:bg-[#003830] lg:px-3 lg:py-4"
-            aria-label={`Open ${PROMO_CODE_PERCENT} percent off coupon`}
-          >
-            <span
-              className="block text-xs font-semibold uppercase tracking-wide text-white/90 lg:text-sm"
-              style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
-            >
-              Extra {PROMO_CODE_PERCENT}% off
-            </span>
-          </button>
+    <div className="bg-white pb-20 lg:pb-0">
+      <button
+        type="button"
+        onClick={() => setIsFlashSaleCouponOpen(true)}
+        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-[#0f5f52] bg-[#00473c] px-2.5 py-3 text-white shadow-lg transition-colors hover:bg-[#003830] lg:px-3 lg:py-4"
+        aria-label={`Open ${FLASH_SALE_DISCOUNT_PERCENT} percent off coupon`}
+      >
+        <span
+          className="block text-xs font-semibold uppercase tracking-wide text-white/90 lg:text-sm"
+          style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+        >
+          Extra {FLASH_SALE_DISCOUNT_PERCENT}% off
+        </span>
+      </button>
 
-          <div className="fixed bottom-4 left-4 z-40 w-24 overflow-hidden rounded-md border border-[#c8ded9] bg-white text-center text-[#00473c] shadow-lg lg:bottom-5 lg:left-5 lg:w-28">
-            <div className="border-b border-[#dcebe7] bg-[#f6fffd] px-2 py-1.5">
-              <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#4d6b65]">
-                Flash Sale
-              </span>
-            </div>
-            <div className="px-2 py-2">
-              <span className="block text-xl font-black leading-none lg:text-2xl">{BAND_H_PROMO_DISCOUNT_PERCENT}%</span>
-              <span className="mt-0.5 block text-[11px] font-bold uppercase tracking-wide">Off</span>
-              <span className="mt-1.5 block rounded bg-[#e8f5f2] px-1 py-1 text-[9px] font-bold uppercase tracking-wide">
-                <CountdownTimer variant="inline" />
-              </span>
-            </div>
-          </div>
-        </>
-      )}
+      <div className="fixed bottom-4 left-4 z-40 w-24 overflow-hidden rounded-md border border-[#c8ded9] bg-white text-center text-[#00473c] shadow-lg lg:bottom-5 lg:left-5 lg:w-28">
+        <div className="border-b border-[#dcebe7] bg-[#f6fffd] px-2 py-1.5">
+          <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#4d6b65]">
+            Flash Sale
+          </span>
+        </div>
+        <div className="px-2 py-2">
+          <span className="block text-xl font-black leading-none lg:text-2xl">{FLASH_SALE_DISCOUNT_PERCENT}%</span>
+          <span className="mt-0.5 block text-[11px] font-bold uppercase tracking-wide">Off</span>
+          <span className="mt-1.5 block rounded bg-[#e8f5f2] px-1 py-1 text-[9px] font-bold uppercase tracking-wide">
+            <CountdownTimer variant="inline" />
+          </span>
+        </div>
+      </div>
 
       {/* Breadcrumb */}
       <div className="px-4 md:px-6 lg:px-20 py-3 md:py-4">
@@ -1014,19 +1010,15 @@ const ProductPage = ({
               <div className="border border-gray-200 rounded-lg p-4 mb-4">
                 <div className="flex flex-col items-start">
                   <div className="flex flex-wrap items-baseline gap-2">
-                    {isBandHProduct && (
-                      <span className="text-sm font-medium text-gray-400 line-through">
-                        {formatPriceWithCurrency(formatPrice(bandHPromoCompareAtPrice), product.currency)}
-                      </span>
-                    )}
+                    <span className="text-sm font-medium text-gray-400 line-through">
+                      {formatPriceWithCurrency(formatPrice(flashSaleCompareAtPrice), product.currency)}
+                    </span>
                     <span className="text-2xl font-bold text-[#3a3a3a]">
                       {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
                     </span>
-                    {isBandHProduct && (
-                      <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
-                        {BAND_H_PROMO_DISCOUNT_PERCENT}% Off Flash Sale
-                      </span>
-                    )}
+                    <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
+                      {FLASH_SALE_DISCOUNT_PERCENT}% Off Flash Sale
+                    </span>
                   </div>
                   {priceCalculation && !showMinPriceIndicator && (
                     <div className="mt-3 text-xs text-gray-400">
@@ -1093,21 +1085,15 @@ const ProductPage = ({
               <div className="hidden lg:block border border-gray-200 rounded-lg p-4 md:p-5 mb-4 md:mb-6">
                 <div className="flex flex-col items-center lg:items-start">
                   <div className="flex flex-wrap items-baseline justify-center gap-2 mb-3 md:mb-4 lg:justify-start">
-                    {isBandHProduct && (
-                      <span className="text-sm font-medium text-gray-400 line-through">
-                        {formatPriceWithCurrency(formatPrice(bandHPromoCompareAtPrice), product.currency)}
-                      </span>
-                    )}
+                    <span className="text-sm font-medium text-gray-400 line-through">
+                      {formatPriceWithCurrency(formatPrice(flashSaleCompareAtPrice), product.currency)}
+                    </span>
                     <span className="text-xl md:text-2xl font-bold text-[#3a3a3a]">
                       {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
                     </span>
-                    {isBandHProduct && (
-                      <>
-                        <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
-                          {BAND_H_PROMO_DISCOUNT_PERCENT}% Off Flash Sale
-                        </span>
-                      </>
-                    )}
+                    <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
+                      {FLASH_SALE_DISCOUNT_PERCENT}% Off Flash Sale
+                    </span>
                   </div>
                   {priceCalculation && !showMinPriceIndicator && (
                     <div className="text-xs text-gray-400 mb-3">
@@ -1996,13 +1982,13 @@ const ProductPage = ({
                 </div>
               )}
 
-              {isBandHProduct && isBandHCouponOpen && (
+              {isFlashSaleCouponOpen && (
                 <div
                   className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6"
                   role="dialog"
                   aria-modal="true"
-                  aria-labelledby="band-h-coupon-title"
-                  onClick={() => setIsBandHCouponOpen(false)}
+                  aria-labelledby="flash-sale-coupon-title"
+                  onClick={() => setIsFlashSaleCouponOpen(false)}
                 >
                   <div
                     className="w-full max-w-md overflow-hidden rounded-lg bg-white shadow-xl"
@@ -2014,13 +2000,13 @@ const ProductPage = ({
                           <p className="text-xs font-semibold uppercase tracking-wide text-[#00473c]">
                             Limited-time saving
                           </p>
-                          <h3 id="band-h-coupon-title" className="mt-1 text-2xl font-bold text-[#2f2f2f]">
-                            Take an extra {PROMO_CODE_PERCENT}% off
+                          <h3 id="flash-sale-coupon-title" className="mt-1 text-2xl font-bold text-[#2f2f2f]">
+                            Take an extra {FLASH_SALE_DISCOUNT_PERCENT}% off
                           </h3>
                         </div>
                         <button
                           type="button"
-                          onClick={() => setIsBandHCouponOpen(false)}
+                          onClick={() => setIsFlashSaleCouponOpen(false)}
                           className="flex h-8 w-8 items-center justify-center rounded-md border border-[#d6e7e3] text-gray-500 hover:bg-white hover:text-gray-700"
                           aria-label="Close coupon dialog"
                         >
@@ -2042,7 +2028,7 @@ const ProductPage = ({
                           Checkout code
                         </p>
                         <p className="mt-1 text-3xl font-black tracking-wide text-[#00473c]">
-                          {BAND_H_COUPON_CODE}
+                          {FLASH_SALE_COUPON_CODE}
                         </p>
                         <p className="mt-2 text-xs text-gray-500">
                           Apply this code in the discount field while the offer is available.
@@ -2054,7 +2040,7 @@ const ProductPage = ({
                           type="button"
                           onClick={() => {
                             if (typeof navigator !== 'undefined') {
-                              navigator.clipboard?.writeText(BAND_H_COUPON_CODE);
+                              navigator.clipboard?.writeText(FLASH_SALE_COUPON_CODE);
                             }
                           }}
                           className="rounded-lg border border-[#00473c] px-4 py-3 text-sm font-semibold text-[#00473c] transition-colors hover:bg-[#f0fdf9]"
@@ -2063,7 +2049,7 @@ const ProductPage = ({
                         </button>
                         <button
                           type="button"
-                          onClick={() => setIsBandHCouponOpen(false)}
+                          onClick={() => setIsFlashSaleCouponOpen(false)}
                           className="rounded-lg bg-[#00473c] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#003830]"
                         >
                           Continue
