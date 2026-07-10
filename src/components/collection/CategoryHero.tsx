@@ -6,17 +6,25 @@ interface CategoryHeroProps {
   productCount: number;
 }
 
-// Category images mapping
+// Category images mapping. Keys are the display titles from COLLECTION_DISPLAY_NAMES
+// (src/data/navigation.ts) — they must match exactly or the hero falls back to the default.
+// Kept in sync with IMAGE_MAP in the home "Shop by Category" grid
+// (src/components/home/CategoryGrid.tsx), which is keyed by collection href instead.
 const categoryImages: Record<string, string> = {
-  'Vertical Blinds': '/home/products/vertical-blinds-1.jpg',
-  'Roller Blinds': '/home/products/vertical-blinds-2.jpg',
-  'Metal Venetian Blinds': '/home/products/vertical-blinds-5.jpg',
-  'Venetian Blinds': '/home/products/vertical-blinds-5.jpg',
-  'Roman Blinds': '/home/products/vertical-blinds-3.jpg',
-  'Day and Night Blinds': '/home/products/vertical-blinds.jpg',
-  'Dual zebra Shades': '/home/categories/dual-zebra-shades.webp',
   'Light filtering roller Shades': '/home/categories/light-filtering-roller-shades.webp',
   'Blackout roller Shades': '/home/categories/blackout-roller-shades.webp',
+  'Waterproof Blackout roller Shades': '/home/categories/Waterproof%20Blackout%20roller%20Shades.png',
+  'Dual zebra Shades': '/home/categories/dual-zebra-shades.webp',
+  'Light filtering Vertical blinds': '/home/categories/light%20filtering%20vertical%20blinds.png',
+  'Blackout vertical blinds': '/home/categories/blackout%20vertical%20blinds.png',
+  'Waterproof Blackout vertical blinds': '/home/categories/water%20proof%20vertical%20blinds.png',
+  'Motorised roller shades': '/home/categories/Motorised%20roller%20shades.png',
+  'Motorised Dual zebra shades': '/home/categories/motorised%20zebra%20dual%20shades.png',
+  'Motorised EclipseCore': '/home/categories/motorised%20eclipsecore.png',
+  'Roller Shades': '/home/categories/blackout-roller-shades.webp',
+  'Dual zebra shades': '/home/categories/Dual%20zebra%20Shades.png',
+  'Vertical blinds': '/home/categories/blackout%20vertical%20blinds.png',
+  'EclipseCore shades': '/home/categories/eclipse%20core%20shades.png',
 };
 
 export default function CategoryHero({ title, description, productCount }: CategoryHeroProps) {
