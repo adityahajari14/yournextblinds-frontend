@@ -20,6 +20,9 @@ export const PROMO_CODE_PERCENT = 10;
 /** Headline "up to" sale depth used in banner/section copy. */
 export const SALE_MAX_PERCENT = 60;
 
+/** Flash sale discount applied directly to product prices (shown as a badge/strikethrough). */
+export const FLASH_SALE_DISCOUNT_PERCENT = 50;
+
 /** Short reusable copy fragments. */
 export const PROMO_HEADLINE = `Up to ${SALE_MAX_PERCENT}% Off`;
 export const PROMO_CODE_LINE = `Extra ${PROMO_CODE_PERCENT}% off with code ${PROMO_CODE}`;

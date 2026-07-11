@@ -14,7 +14,7 @@ import StarRating from './StarRating';
 import CategoryInfoSection from '@/components/collection/CategoryInfoSection';
 import { formatPrice, formatPriceWithCurrency, fetchPriceMatrix, fetchCustomizationPricing, validateCartPrice } from '@/lib/api';
 import { PRODUCT_GUIDES } from '@/data/guides';
-import { PROMO_CODE } from '@/data/promo';
+import { PROMO_CODE, FLASH_SALE_DISCOUNT_PERCENT } from '@/data/promo';
 import CountdownTimer from '@/components/common/CountdownTimer';
 import { trackShopifyProductView } from '@/lib/shopify-analytics';
 import {
@@ -165,7 +165,6 @@ const BAND_H_INSTALLATION_GUIDE_LANGUAGES: Array<{
   { id: 'spanish', label: 'Spanish' },
 ];
 
-const FLASH_SALE_DISCOUNT_PERCENT = 50;
 const FLASH_SALE_COUPON_CODE = PROMO_CODE;
 
 function getVariantDisplayOption(variant: ProductVariant) {
@@ -237,6 +236,7 @@ const ProductPage = ({
   const [isRollerBandFInstallationGuideOpen, setIsRollerBandFInstallationGuideOpen] = useState(false);
   const [isOpeningDirectionGuideOpen, setIsOpeningDirectionGuideOpen] = useState(false);
   const [isFlashSaleCouponOpen, setIsFlashSaleCouponOpen] = useState(false);
+  const [flashSaleCouponCopied, setFlashSaleCouponCopied] = useState(false);
   const [selectedBandHGuideMethod, setSelectedBandHGuideMethod] =
     useState<BandHInstallationGuideMethod | null>(null);
   const [selectedRollerBandFGuideMethod, setSelectedRollerBandFGuideMethod] =
@@ -2038,18 +2038,46 @@ const ProductPage = ({
                       <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         <button
                           type="button"
-                          onClick={() => {
-                            if (typeof navigator !== 'undefined') {
-                              navigator.clipboard?.writeText(FLASH_SALE_COUPON_CODE);
+                          onClick={async () => {
+                            let copied = false;
+                            try {
+                              if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                                await navigator.clipboard.writeText(FLASH_SALE_COUPON_CODE);
+                                copied = true;
+                              }
+                            } catch {
+                              copied = false;
+                            }
+                            if (!copied && typeof document !== 'undefined') {
+                              const textarea = document.createElement('textarea');
+                              textarea.value = FLASH_SALE_COUPON_CODE;
+                              textarea.style.position = 'fixed';
+                              textarea.style.opacity = '0';
+                              document.body.appendChild(textarea);
+                              textarea.focus();
+                              textarea.select();
+                              try {
+                                copied = document.execCommand('copy');
+                              } catch {
+                                copied = false;
+                              }
+                              document.body.removeChild(textarea);
+                            }
+                            if (copied) {
+                              setFlashSaleCouponCopied(true);
+                              setTimeout(() => setFlashSaleCouponCopied(false), 2000);
                             }
                           }}
                           className="rounded-lg border border-[#00473c] px-4 py-3 text-sm font-semibold text-[#00473c] transition-colors hover:bg-[#f0fdf9]"
                         >
-                          Copy Coupon
+                          {flashSaleCouponCopied ? 'Copied!' : 'Copy Coupon'}
                         </button>
                         <button
                           type="button"
-                          onClick={() => setIsFlashSaleCouponOpen(false)}
+                          onClick={() => {
+                            setIsFlashSaleCouponOpen(false);
+                            setFlashSaleCouponCopied(false);
+                          }}
                           className="rounded-lg bg-[#00473c] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#003830]"
                         >
                           Continue

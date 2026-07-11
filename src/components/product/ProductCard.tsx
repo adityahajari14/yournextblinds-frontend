@@ -4,8 +4,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { StarRating } from '@/components/product';
-import { formatPriceWithCurrency } from '@/lib/api';
+import { formatPrice, formatPriceWithCurrency } from '@/lib/api';
 import { ROLLER_BAND_F_ROOM_DARKENING_OPTIONS } from '@/data/rollerBandF';
+import { FLASH_SALE_DISCOUNT_PERCENT } from '@/data/promo';
 
 export type CollectionContext = 'light-filtering' | 'blackout' | undefined;
 
@@ -50,6 +51,8 @@ export default function ProductCard({ product, className = '', preselectedMotori
     ? `Blackout ${product.name}`
     : product.name;
 
+  const compareAtPrice = formatPrice(displayPrice / (1 - FLASH_SALE_DISCOUNT_PERCENT / 100));
+
   function buildUrl(base: string, extraParams: string): string {
     if (!extraParams) return base;
     return base.includes('?') ? `${base}&${extraParams}` : `${base}?${extraParams}`;
@@ -83,13 +86,19 @@ export default function ProductCard({ product, className = '', preselectedMotori
             <h3 className="text-base md:text-lg font-normal text-black capitalize line-clamp-2">
               {displayName}
             </h3>
-            <div className="flex gap-2 md:gap-3 items-end">
-              <span className="text-lg md:text-xl font-bold text-black">
-                {formatPriceWithCurrency(displayPrice, currency)}
-              </span>
-            </div>
+            <StarRating rating={product.rating} size="sm" filledColor="text-[#00473c]" />
           </div>
-          <StarRating rating={product.rating} size="sm" filledColor="text-[#00473c]" />
+          <div className="flex flex-wrap gap-1.5 md:gap-2 items-baseline">
+            <span className="text-xs md:text-sm font-medium text-gray-400 line-through">
+              {formatPriceWithCurrency(compareAtPrice, currency)}
+            </span>
+            <span className="text-lg md:text-xl font-bold text-black">
+              {formatPriceWithCurrency(displayPrice, currency)}
+            </span>
+            <span className="rounded-md bg-[#00473c] px-1.5 py-0.5 text-[10px] md:text-xs font-semibold text-white">
+              {FLASH_SALE_DISCOUNT_PERCENT}% Off
+            </span>
+          </div>
         </div>
         
         <button 
