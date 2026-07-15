@@ -109,13 +109,19 @@ const Header = () => {
 
       {/* Action Icons */}
       <div className="flex gap-3 md:gap-4 items-center shrink-0">
-        <Link href="/search" aria-label="Search" className="hover:opacity-70 transition-opacity">
+        <Link href="/search" aria-label="Search" className="group relative hover:opacity-70 transition-opacity">
           <Image src="/icons/search.svg" alt="Search" width={20} height={20} className="md:w-[22px] md:h-[22px]" />
+          <span className="pointer-events-none absolute top-full right-1/2 translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#00473c] px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            Search
+          </span>
         </Link>
-        <Link href="/account" aria-label="Account" className="hover:opacity-70 transition-opacity">
+        <Link href="/account" aria-label="Account" className="group relative hover:opacity-70 transition-opacity">
           <Image src="/icons/profile.svg" alt="Profile" width={20} height={20} className="md:w-[22px] md:h-[22px]" />
+          <span className="pointer-events-none absolute top-full right-1/2 translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#00473c] px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            Account
+          </span>
         </Link>
-        <Link href="/samples" aria-label="Free samples" className="hover:opacity-70 transition-opacity relative">
+        <Link href="/samples" aria-label="Free samples" className="group relative hover:opacity-70 transition-opacity">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width={20}
@@ -138,14 +144,20 @@ const Header = () => {
               {sampleCount > 99 ? '99+' : sampleCount}
             </span>
           )}
+          <span className="pointer-events-none absolute top-full right-1/2 translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#00473c] px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            Free samples
+          </span>
         </Link>
-        <Link href="/cart" aria-label="Cart" className="hover:opacity-70 transition-opacity relative">
+        <Link href="/cart" aria-label="Cart" className="group relative hover:opacity-70 transition-opacity">
           <Image src="/icons/cart.svg" alt="Cart" width={20} height={20} className="md:w-[22px] md:h-[22px]" />
           {cart.itemCount > 0 && (
             <span className="absolute -top-2 -right-2 bg-[#00473c] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
               {cart.itemCount > 99 ? '99+' : cart.itemCount}
             </span>
           )}
+          <span className="pointer-events-none absolute top-full right-1/2 translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#00473c] px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            Cart
+          </span>
         </Link>
       </div>
     </div>
