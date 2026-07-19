@@ -99,6 +99,7 @@ export default function CartPage() {
           openingDirection: config.openingDirection || undefined,
           bottomBar: config.bottomBar || undefined,
           rollStyle: config.rollStyle || undefined,
+          roomDarkening: config.roomDarkening || undefined,
           selectedVariantId: config.selectedVariantId || undefined,
           selectedVariantTitle: config.selectedVariantTitle || undefined,
           selectedVariantImage: config.selectedVariantImage || undefined,

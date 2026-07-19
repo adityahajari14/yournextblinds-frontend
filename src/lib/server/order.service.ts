@@ -32,6 +32,7 @@ export interface CheckoutItemRequest {
     openingDirection?: string;
     bottomBar?: string;
     rollStyle?: string;
+    roomDarkening?: string;
     selectedVariantId?: string;
     selectedVariantTitle?: string;
     selectedVariantImage?: string;
@@ -97,6 +98,7 @@ function configToCustomizations(config: CheckoutItemRequest['configuration']): P
     openingDirection: 'opening-direction',
     bottomBar: 'bottom-bar',
     rollStyle: 'roll-style',
+    roomDarkening: 'room-darkening',
   };
 
   for (const [configKey, category] of Object.entries(mappings)) {
@@ -149,6 +151,7 @@ function buildLineItemProperties(
     openingDirection: 'Opening Direction',
     bottomBar: 'Bottom Bar',
     rollStyle: 'Roll Style',
+    roomDarkening: 'Room Darkening',
   };
 
   for (const [key, label] of Object.entries(labelMap)) {

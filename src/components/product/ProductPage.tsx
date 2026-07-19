@@ -770,24 +770,17 @@ const ProductPage = ({
     return product.price;
   }, [priceCalculation, oversizeSurcharge, product.price]);
 
-  // Minimum price from the currently-loaded matrix (the selected variant's band
-  // for multi-table products), used as the "from" price before a size is entered.
-  const matrixMinPrice = useMemo(() => {
-    if (!priceMatrix || priceMatrix.prices.length === 0) return null;
-    return priceMatrix.prices.reduce(
-      (min, cell) => (cell.price < min ? cell.price : min),
-      priceMatrix.prices[0].price
-    );
-  }, [priceMatrix]);
-
   // Show minimum price indicator when no dimensions selected
   const showMinPriceIndicator = config.width === 0 || config.height === 0;
-  // Multi-table products (Roller Band F / Dayandnight Band H) show the selected
-  // variant's band minimum until a size is entered, then the computed price.
+  // Blackout context adds a surcharge on top of the base price, matching the
+  // collection card's price so the two don't disagree before a size is entered.
+  const blackoutSurcharge = isBlackoutContext
+    ? ROLLER_BAND_F_ROOM_DARKENING_OPTIONS.find((o) => o.id === 'blackout')?.price ?? 0
+    : 0;
+  // Use the same cross-group minimum price as the collection card (product.price)
+  // as the "from" price before a size is entered, so the two always agree.
   const displayedPrice = showMinPriceIndicator
-    ? isMultiTableProduct
-      ? matrixMinPrice ?? product.price
-      : product.price
+    ? product.price + blackoutSurcharge
     : totalPrice;
   const flashSaleCompareAtPrice = displayedPrice / (1 - FLASH_SALE_DISCOUNT_PERCENT / 100);
 
