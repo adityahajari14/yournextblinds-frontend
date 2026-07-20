@@ -2,7 +2,7 @@
 export { TopBar, Header, NavBar, Footer } from './layout';
 
 // Home page sections
-export { Hero, WindowTypes, Categories, CategoryGrid, Installation, BestSelling, Craftsmanship, FreeSamples, FlashSale, FAQ } from './home';
+export { Hero, UspBar, WindowTypes, Categories, CategoryGrid, Installation, BestSelling, Craftsmanship, FreeSamples, FlashSale, FAQ } from './home';
 
 // Product components
 export * from './product';

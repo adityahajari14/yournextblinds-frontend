@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 import { Product } from '@/types';
 import { ProductCard } from '@/components/product';
 import type { CollectionContext } from '@/components/product/ProductCard';
+import { track } from '@/lib/track';
 
 interface FilterOptions {
   colors: string[];
@@ -113,6 +114,9 @@ export default function ProductGridWithFilters({
   const hasMore = visibleCount < filteredProducts.length;
 
   const toggleColor = (color: string) => {
+    if (!selectedColors.includes(color)) {
+      track('filter_used', { type: 'color', value: color, category: categoryName });
+    }
     setSelectedColors((prev) =>
       prev.includes(color) ? prev.filter((c) => c !== color) : [...prev, color]
     );
@@ -120,6 +124,9 @@ export default function ProductGridWithFilters({
   };
 
   const togglePattern = (pattern: string) => {
+    if (!selectedPatterns.includes(pattern)) {
+      track('filter_used', { type: 'pattern', value: pattern, category: categoryName });
+    }
     setSelectedPatterns((prev) =>
       prev.includes(pattern) ? prev.filter((p) => p !== pattern) : [...prev, pattern]
     );
@@ -283,7 +290,10 @@ export default function ProductGridWithFilters({
             <select
               id="sort"
               value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              onChange={(e) => {
+                setSortBy(e.target.value as SortOption);
+                track('sort_used', { value: e.target.value, category: categoryName });
+              }}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#00473c]"
             >
               <option value="best-selling">Best Selling</option>

@@ -13,7 +13,7 @@ import SampleBrowser from '@/components/samples/SampleBrowser';
 export const metadata = {
   title: 'Order Free Fabric Samples | Your Next Blinds',
   description:
-    'Order up to 10 free fabric samples, delivered straight through your letterbox. See how our colours look in your home before you buy.',
+    'Order up to 10 free fabric samples, delivered straight to your mailbox. See how our colors look in your home before you buy.',
 };
 
 export const revalidate = 3_600;
@@ -157,8 +157,8 @@ export default async function SamplesPage() {
               Order Free Fabric Samples
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-[#484848] md:text-base">
-              Feel the quality and see the true colour before you buy. Choose up to 10 free
-              swatches and we&apos;ll post them straight through your letterbox — completely free.
+              Feel the quality and see the true color before you buy. Choose up to 10 free
+              swatches and we&apos;ll deliver them straight to your mailbox — completely free.
             </p>
           </div>
 

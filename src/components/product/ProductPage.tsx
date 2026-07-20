@@ -12,11 +12,14 @@ import ProductReviews from './ProductReviews';
 import RelatedProducts from './RelatedProducts';
 import StarRating from './StarRating';
 import CategoryInfoSection from '@/components/collection/CategoryInfoSection';
-import { formatPrice, formatPriceWithCurrency, fetchPriceMatrix, fetchCustomizationPricing, validateCartPrice } from '@/lib/api';
+import { formatPrice, formatPriceWithCurrency, fetchPriceMatrix, fetchCustomizationPricing, validateCartPrice, createCheckout } from '@/lib/api';
+import { buildCheckoutItem } from '@/lib/checkout';
+import StickyBottomBar from './StickyBottomBar';
 import { PRODUCT_GUIDES } from '@/data/guides';
-import { PROMO_CODE, FLASH_SALE_DISCOUNT_PERCENT } from '@/data/promo';
+import { PROMO_CODE, PROMO_CODE_PERCENT, FLASH_SALE_DISCOUNT_PERCENT } from '@/data/promo';
 import CountdownTimer from '@/components/common/CountdownTimer';
 import { trackShopifyProductView } from '@/lib/shopify-analytics';
+import { track, getAnalyticsSessionId } from '@/lib/track';
 import {
   calculateTotalPrice,
   configToCustomizations,
@@ -167,6 +170,15 @@ const BAND_H_INSTALLATION_GUIDE_LANGUAGES: Array<{
 
 const FLASH_SALE_COUPON_CODE = PROMO_CODE;
 
+// Turn the internal missing-requirement labels into a readable sentence
+// fragment, e.g. "width and height, a control option and a headrail".
+function formatMissingRequirements(labels: string[]): string[] {
+  return labels.map((label) => {
+    if (label.startsWith('valid ')) return 'A size within the available range';
+    return label.charAt(0).toUpperCase() + label.slice(1);
+  });
+}
+
 function getVariantDisplayOption(variant: ProductVariant) {
   const colorOption =
     variant.selectedOptions.find((option) => /colou?r/i.test(option.name)) ??
@@ -202,6 +214,7 @@ const ProductPage = ({
 
   useEffect(() => {
     trackShopifyProductView(product);
+    track('view_item', { handle: product.slug, priceFrom: product.price });
   }, [product]);
 
   const [config, setConfig] = useState<ProductConfiguration>({
@@ -231,6 +244,8 @@ const ProductPage = ({
   );
   const [pricingLoaded, setPricingLoaded] = useState(hasInitialPricing);
   const [isValidating, setIsValidating] = useState(false);
+  const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [buyNowError, setBuyNowError] = useState<string | null>(null);
   const fetchingRef = useRef(false);
   const [isBandHInstallationGuideOpen, setIsBandHInstallationGuideOpen] = useState(false);
   const [isRollerBandFInstallationGuideOpen, setIsRollerBandFInstallationGuideOpen] = useState(false);
@@ -668,9 +683,6 @@ const ProductPage = ({
         : bandMaxWidth;
     const minHeight = Math.min(...heightBands.map(b => b.inches));
     const maxHeight = Math.max(...heightBands.map(b => b.inches));
-    if (process.env.NODE_ENV === 'development') {
-      console.log('Size ranges calculated:', { minWidth, maxWidth, minHeight, maxHeight, priceMatrix: priceMatrix.name });
-    }
     return { minWidth, maxWidth, minHeight, maxHeight };
   }, [priceMatrix]);
 
@@ -761,6 +773,18 @@ const ProductPage = ({
     return widthInches > 93 ? 100 : 0;
   }, [isRollerBandF, config.width, config.widthFraction, config.widthUnit]);
 
+  // Track settled price calculations (debounced so per-keystroke recalcs don't spam)
+  useEffect(() => {
+    if (!priceCalculation) return;
+    const timer = setTimeout(() => {
+      track('price_calculated', {
+        handle: product.slug,
+        price: priceCalculation.totalPrice + oversizeSurcharge,
+      });
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [priceCalculation, oversizeSurcharge, product.slug]);
+
   // Get display price - use new pricing system if available, otherwise fallback
   const totalPrice = useMemo(() => {
     if (priceCalculation) {
@@ -843,6 +867,72 @@ const ProductPage = ({
       addToCart(productWithPrice, cartConfiguration);
     } finally {
       setIsValidating(false);
+    }
+  };
+
+  // Buy Now: validate the configuration, create a single-item checkout, and go
+  // straight to payment. The cart is not touched.
+  const handleBuyNow = async () => {
+    if (missingRequiredCustomizations.length > 0) {
+      document.getElementById('add-to-cart-cta')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+    if (isBuyingNow || isValidating) return;
+
+    setIsBuyingNow(true);
+    setBuyNowError(null);
+
+    try {
+      const widthInches = getTotalInches(config.width, config.widthFraction, config.widthUnit);
+      const heightInches = getTotalInches(config.height, config.heightFraction, config.heightUnit);
+
+      // Server-side re-price first so the checkout request always matches.
+      let price = totalPrice;
+      try {
+        const validation = await validateCartPrice(
+          {
+            handle: product.slug,
+            widthInches,
+            heightInches,
+            customizations: selectedCustomizations,
+            ...(isMultiTableProduct
+              ? {
+                  variantId: config.selectedVariantId,
+                  variantLabel: config.selectedVariantOptionValue,
+                }
+              : {}),
+          },
+          totalPrice
+        );
+        if (!validation.valid) {
+          price = validation.calculatedPrice;
+        }
+      } catch {
+        // Validation endpoint unavailable — proceed with the client price; the
+        // checkout API re-validates anyway.
+      }
+
+      track('buy_now_click', { handle: product.slug, price });
+      track('begin_checkout', { itemCount: 1, cartValue: price, source: 'buy_now' });
+
+      const result = await createCheckout(
+        [buildCheckoutItem(product.slug, cartConfiguration, 1, price)],
+        undefined,
+        getAnalyticsSessionId()
+      );
+
+      window.location.href = result.checkoutUrl;
+    } catch (error) {
+      console.error('Buy Now failed:', error);
+      track('checkout_error', {
+        code: 'buy_now',
+        message: error instanceof Error ? error.message.slice(0, 200) : 'unknown',
+      });
+      setBuyNowError(
+        "We couldn't start your checkout. Please try again, or add the blind to your cart — " +
+        'or call +1 832-670-6705 and we’ll take your order directly.'
+      );
+      setIsBuyingNow(false);
     }
   };
 
@@ -946,22 +1036,26 @@ const ProductPage = ({
   };
 
   return (
-    <div className="bg-white pb-20 lg:pb-0">
+    <div className="bg-white pb-28 lg:pb-0">
+      {/* Desktop-only: on mobile these fixed badges compete with the sticky
+          checkout bar and obstruct content for the whole scroll depth of the
+          page. Mobile already surfaces the same offer inline near the price
+          and in the sticky bar, so the floating badges are hidden below lg. */}
       <button
         type="button"
         onClick={() => setIsFlashSaleCouponOpen(true)}
-        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-[#0f5f52] bg-[#00473c] px-2.5 py-3 text-white shadow-lg transition-colors hover:bg-[#003830] lg:px-3 lg:py-4"
-        aria-label={`Open ${FLASH_SALE_DISCOUNT_PERCENT} percent off coupon`}
+        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-[#0f5f52] bg-[#00473c] px-2.5 py-3 text-white shadow-lg transition-colors hover:bg-[#003830] max-lg:hidden lg:px-3 lg:py-4"
+        aria-label={`Open ${PROMO_CODE_PERCENT} percent off coupon`}
       >
         <span
           className="block text-xs font-semibold uppercase tracking-wide text-white/90 lg:text-sm"
           style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
         >
-          Extra {FLASH_SALE_DISCOUNT_PERCENT}% off
+          Extra {PROMO_CODE_PERCENT}% off
         </span>
       </button>
 
-      <div className="fixed bottom-4 left-4 z-40 w-24 overflow-hidden rounded-md border border-[#c8ded9] bg-white text-center text-[#00473c] shadow-lg lg:bottom-5 lg:left-5 lg:w-28">
+      <div className="fixed bottom-5 left-5 z-40 hidden w-28 overflow-hidden rounded-md border border-[#c8ded9] bg-white text-center text-[#00473c] shadow-lg lg:block">
         <div className="border-b border-[#dcebe7] bg-[#f6fffd] px-2 py-1.5">
           <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#4d6b65]">
             Flash Sale
@@ -1062,7 +1156,7 @@ const ProductPage = ({
                   <div className="text-[10px] md:text-xs text-gray-500">Estimated Delivery Date</div>
                   <div className="text-xs md:text-sm font-semibold text-[#00473c]">
                     {(() => {
-                      const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                      const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                       const addDays = (d: Date, n: number) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
                       const today = new Date();
                       if (isBandHProduct) {
@@ -1727,17 +1821,78 @@ const ProductPage = ({
                 </div>
               </div>
 
-              {/* Add to Cart Button */}
-              <button
-                onClick={handleAddToCart}
-                disabled={isAddToCartDisabled}
-                className={`w-full mt-4 md:mt-6 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors ${isAddToCartDisabled
-                  ? 'bg-gray-400 text-white cursor-not-allowed'
-                  : 'bg-[#00473c] text-white hover:bg-[#003830]'
-                  }`}
-              >
-                {isValidating ? 'Adding to Cart...' : 'Add to Cart'}
-              </button>
+              {/* Add to Cart + Buy Now */}
+              <div id="add-to-cart-cta" className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-6">
+                <button
+                  onClick={handleAddToCart}
+                  disabled={isAddToCartDisabled || isBuyingNow}
+                  className={`flex-1 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors ${isAddToCartDisabled || isBuyingNow
+                    ? 'bg-gray-400 text-white cursor-not-allowed'
+                    : 'bg-[#00473c] text-white hover:bg-[#003830]'
+                    }`}
+                >
+                  {isValidating ? 'Adding to Cart...' : 'Add to Cart'}
+                </button>
+                <button
+                  onClick={handleBuyNow}
+                  disabled={isAddToCartDisabled || isBuyingNow}
+                  className={`flex-1 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors border ${isAddToCartDisabled || isBuyingNow
+                    ? 'border-gray-300 text-gray-400 cursor-not-allowed'
+                    : 'border-[#00473c] text-[#00473c] hover:bg-[#f0fdf9]'
+                    }`}
+                >
+                  {isBuyingNow ? 'Preparing Checkout...' : 'Buy Now'}
+                </button>
+              </div>
+
+              {/* Why the buttons are disabled — spell it out instead of a dead grey button */}
+              {!isValidating && missingRequiredCustomizations.length > 0 && (
+                <p className="mt-2.5 flex items-start gap-1.5 text-xs md:text-sm text-gray-500" role="status">
+                  <svg
+                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-400"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
+                    />
+                  </svg>
+                  <span>
+                    Still needed:{' '}
+                    <span className="text-gray-700">
+                      {formatMissingRequirements(missingRequiredCustomizations).join(', ')}
+                    </span>
+                  </span>
+                </p>
+              )}
+
+              {buyNowError && (
+                <div
+                  className="mt-3 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 px-4 py-3"
+                  role="alert"
+                >
+                  <svg
+                    className="mt-0.5 h-5 w-5 shrink-0 text-red-500"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
+                    />
+                  </svg>
+                  <p className="text-sm font-medium text-red-800">{buyNowError}</p>
+                </div>
+              )}
 
               {/* Installation & Measurement Guide Buttons */}
               {guideType && (
@@ -1994,7 +2149,7 @@ const ProductPage = ({
                             Limited-time saving
                           </p>
                           <h3 id="flash-sale-coupon-title" className="mt-1 text-2xl font-bold text-[#2f2f2f]">
-                            Take an extra {FLASH_SALE_DISCOUNT_PERCENT}% off
+                            Take an extra {PROMO_CODE_PERCENT}% off
                           </h3>
                         </div>
                         <button
@@ -2214,6 +2369,16 @@ const ProductPage = ({
           </div>
         </section>
       )}
+
+      {/* Mobile: keep price + Add to Cart/Buy Now visible while scrolling the configurator */}
+      <StickyBottomBar
+        price={totalPrice}
+        additionalCost={0}
+        disabled={isAddToCartDisabled || isBuyingNow}
+        isBusy={isValidating || isBuyingNow}
+        onAddToCartClick={handleAddToCart}
+        onBuyClick={handleBuyNow}
+      />
     </div>
   );
 };

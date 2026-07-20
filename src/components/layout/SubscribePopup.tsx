@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { SUBSCRIBE_POPUP_CODE, SUBSCRIBE_POPUP_PERCENT } from '@/data/promo';
+import { track } from '@/lib/track';
 
 const SHOW_DELAY_MS = 10_000;
 const SESSION_KEY = 'subscribe-popup-shown';
@@ -77,6 +78,7 @@ const SubscribePopup = () => {
 
       sessionStorage.setItem(SESSION_KEY, '1');
       setStatus('success');
+      track('newsletter_signup', { source: 'popup' });
     } catch (error) {
       setStatus('error');
       setErrorMessage(error instanceof Error ? error.message : 'Something went wrong');

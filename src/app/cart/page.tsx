@@ -1,15 +1,21 @@
 'use client';
 
-import { useCart } from '@/context/CartContext';
+import { useCart, PENDING_CHECKOUT_KEY } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { TopBar, Header, NavBar, Footer } from '@/components';
-import { formatPriceWithCurrency, createCheckout } from '@/lib/api';
-import { getTotalInches } from '@/lib/pricing';
-import { CheckoutItemRequest, PriceOption } from '@/types';
+import {
+  formatPriceWithCurrency,
+  createCheckout,
+  CheckoutRequestError,
+  CheckoutPriceMismatch,
+} from '@/lib/api';
+import { buildCheckoutItem } from '@/lib/checkout';
+import { track, getAnalyticsSessionId } from '@/lib/track';
+import { CartItem, CheckoutItemRequest, PriceOption } from '@/types';
 import CartItemEditModal from '@/components/cart/CartItemEditModal';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   HEADRAIL_OPTIONS,
@@ -56,81 +62,92 @@ export default function CartPage() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [priceMismatches, setPriceMismatches] = useState<CheckoutPriceMismatch[] | null>(null);
 
-  const handleCheckout = async () => {
+  useEffect(() => {
+    if (cart.items.length > 0) {
+      track('view_cart', { itemCount: cart.itemCount, cartValue: cart.total });
+    }
+    // Fire once per visit to the cart page, not on every cart mutation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const buildCheckoutItems = (items: CartItem[]): CheckoutItemRequest[] =>
+    items.map((item) =>
+      buildCheckoutItem(item.product.slug, item.configuration, item.quantity, item.product.price)
+    );
+
+  const startCheckout = async (items: CartItem[]) => {
     setIsCheckingOut(true);
     setCheckoutError(null);
+    setPriceMismatches(null);
 
     try {
-      // Convert cart items to checkout request format
-      const checkoutItems: CheckoutItemRequest[] = cart.items.map((item) => {
-        const config = item.configuration;
-
-        // Convert to inches (handles cm/fractions)
-        const widthInches = getTotalInches(
-          config.width,
-          config.widthFraction,
-          config.widthUnit
-        );
-        const heightInches = getTotalInches(
-          config.height,
-          config.heightFraction,
-          config.heightUnit
-        );
-
-        // Build configuration object for backend (strip non-customization fields)
-        const backendConfig: Record<string, string | undefined> = {
-          roomType: config.roomType || undefined,
-          blindName: config.blindName || undefined,
-          headrail: config.headrail || undefined,
-          headrailColour: config.headrailColour || undefined,
-          installationMethod: config.installationMethod || undefined,
-          controlOption: config.controlOption || undefined,
-          stacking: config.stacking || undefined,
-          controlSide: config.controlSide || undefined,
-          bottomChain: config.bottomChain || undefined,
-          bracketType: config.bracketType || undefined,
-          chainColor: config.chainColor || undefined,
-          wrappedCassette: config.wrappedCassette || undefined,
-          cassetteMatchingBar: config.cassetteMatchingBar || undefined,
-          motorization: config.motorization || undefined,
-          blindColor: config.blindColor || undefined,
-          frameColor: config.frameColor || undefined,
-          openingDirection: config.openingDirection || undefined,
-          bottomBar: config.bottomBar || undefined,
-          rollStyle: config.rollStyle || undefined,
-          roomDarkening: config.roomDarkening || undefined,
-          selectedVariantId: config.selectedVariantId || undefined,
-          selectedVariantTitle: config.selectedVariantTitle || undefined,
-          selectedVariantImage: config.selectedVariantImage || undefined,
-          selectedVariantOptionName: config.selectedVariantOptionName || undefined,
-          selectedVariantOptionValue: config.selectedVariantOptionValue || undefined,
-        };
-
-        return {
-          handle: item.product.slug,
-          widthInches,
-          heightInches,
-          quantity: item.quantity,
-          submittedPrice: item.product.price,
-          configuration: backendConfig,
-        };
+      track('begin_checkout', {
+        itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
+        cartValue: items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
       });
 
-      const result = await createCheckout(checkoutItems, customer?.email || undefined);
+      const result = await createCheckout(
+        buildCheckoutItems(items),
+        customer?.email || undefined,
+        getAnalyticsSessionId()
+      );
 
-      // Clear cart before redirecting
-      clearCart();
+      // Keep the cart until the order is confirmed paid (CartContext clears it
+      // once the draft order completes), so a failed redirect loses nothing.
+      localStorage.setItem(
+        PENDING_CHECKOUT_KEY,
+        JSON.stringify({ draftOrderId: result.draftOrderId, createdAt: Date.now() })
+      );
 
       // Redirect to Shopify checkout
       window.location.href = result.checkoutUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Checkout error:', error);
-      setCheckoutError(
-        error.message || 'Something went wrong. Please try again.'
-      );
+      track('checkout_error', {
+        code: error instanceof CheckoutRequestError ? error.code ?? String(error.status) : 'network',
+        message: error instanceof Error ? error.message.slice(0, 200) : 'unknown',
+      });
+
+      if (
+        error instanceof CheckoutRequestError &&
+        error.code === 'PRICE_MISMATCH' &&
+        error.details?.length
+      ) {
+        setPriceMismatches(error.details);
+      } else if (error instanceof CheckoutRequestError && error.status < 500) {
+        setCheckoutError(error.message);
+      } else {
+        setCheckoutError(
+          "We couldn't start your checkout. Please try again in a moment — your cart is saved. " +
+          'If it keeps happening, call +1 832-670-6705 or email enquiries@yournextblinds.com and ' +
+          "we'll take your order directly."
+        );
+      }
       setIsCheckingOut(false);
     }
+  };
+
+  const handleCheckout = () => startCheckout(cart.items);
+
+  // Apply the server's recalculated prices to the affected items, then retry.
+  const handleAcceptUpdatedPrices = () => {
+    if (!priceMismatches) return;
+
+    const updatedItems = cart.items.map((item, index) => {
+      const mismatch = priceMismatches.find((m) => m.index === index);
+      if (!mismatch) return item;
+      return { ...item, product: { ...item.product, price: mismatch.calculatedPrice } };
+    });
+
+    updatedItems.forEach((item, index) => {
+      if (priceMismatches.some((m) => m.index === index)) {
+        updateCartItem(item.id, item.product, item.configuration);
+      }
+    });
+
+    startCheckout(updatedItems);
   };
 
   const finalTotal = cart.total;
@@ -538,6 +555,40 @@ export default function CartPage() {
                   </div>
                 </div>
 
+                {priceMismatches && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm font-semibold text-amber-900 mb-2">
+                      Prices have been updated
+                    </p>
+                    <p className="text-xs text-amber-800 mb-3">
+                      The price of {priceMismatches.length === 1 ? 'an item' : 'some items'} in
+                      your cart changed since you added {priceMismatches.length === 1 ? 'it' : 'them'}:
+                    </p>
+                    <ul className="space-y-1 mb-3">
+                      {priceMismatches.map((mismatch) => (
+                        <li key={mismatch.index} className="text-xs text-amber-900 flex justify-between gap-2">
+                          <span className="truncate">{mismatch.title}</span>
+                          <span className="whitespace-nowrap">
+                            <span className="line-through text-amber-700">
+                              {formatPriceWithCurrency(mismatch.submittedPrice)}
+                            </span>{' '}
+                            <span className="font-semibold">
+                              {formatPriceWithCurrency(mismatch.calculatedPrice)}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      onClick={handleAcceptUpdatedPrices}
+                      disabled={isCheckingOut}
+                      className="w-full bg-amber-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors disabled:opacity-60"
+                    >
+                      Update prices &amp; continue to checkout
+                    </button>
+                  </div>
+                )}
+
                 {checkoutError && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
                     <p className="text-xs text-red-800">{checkoutError}</p>
@@ -581,7 +632,7 @@ export default function CartPage() {
                       <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-sm text-gray-600">Free delivery on every order</span>
+                      <span className="text-sm text-gray-600">5-year manufacturer warranty</span>
                     </div>
                   </div>
 

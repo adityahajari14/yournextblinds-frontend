@@ -8,20 +8,20 @@ const EXCLUDED_LABELS = new Set(['All blinds and shades', 'Roller Shades', 'Vert
 const IMAGE_MAP: Record<string, string> = {
   '/collections/light-filtering-roller-shades':      '/home/categories/light-filtering-roller-shades.webp',
   '/collections/blackout-roller-shades':             '/home/categories/blackout-roller-shades.webp',
-  '/collections/waterproof-blackout-roller-shades':  '/home/categories/Waterproof%20Blackout%20roller%20Shades.png',
+  '/collections/waterproof-blackout-roller-shades':  '/home/categories/Waterproof%20Blackout%20roller%20Shades.webp',
   '/collections/dual-zebra-shades':                  '/home/categories/dual-zebra-shades.webp',
-  '/collections/light-filtering-vertical-blinds':    '/home/categories/light%20filtering%20vertical%20blinds.png',
-  '/collections/blackout-vertical-blinds':           '/home/categories/blackout%20vertical%20blinds.png',
-  '/collections/waterproof-blackout-vertical-blinds':'/home/categories/water%20proof%20vertical%20blinds.png',
-  '/collections/motorised-roller-shades':            '/home/categories/Motorised%20roller%20shades.png',
-  '/collections/motorised-dual-zebra-shades':        '/home/categories/motorised%20zebra%20dual%20shades.png',
-  '/collections/motorised-eclipsecore':              '/home/categories/motorised%20eclipsecore.png',
-  '/product/non-driii-honeycomb-blackout-blinds?motorized=true': '/home/categories/motorised%20eclipsecore.png',
+  '/collections/light-filtering-vertical-blinds':    '/home/categories/light%20filtering%20vertical%20blinds.webp',
+  '/collections/blackout-vertical-blinds':           '/home/categories/blackout%20vertical%20blinds.webp',
+  '/collections/waterproof-blackout-vertical-blinds':'/home/categories/water%20proof%20vertical%20blinds.webp',
+  '/collections/motorised-roller-shades':            '/home/categories/Motorised%20roller%20shades.webp',
+  '/collections/motorised-dual-zebra-shades':        '/home/categories/motorised%20zebra%20dual%20shades.webp',
+  '/collections/motorised-eclipsecore':              '/home/categories/motorised%20eclipsecore.webp',
+  '/product/non-driii-honeycomb-blackout-blinds?motorized=true': '/home/categories/motorised%20eclipsecore.webp',
   '/collections/blackout-roller-shades-category':    '/home/categories/blackout-roller-shades.webp',
-  '/collections/blackout-dual-zebra-shades':         '/home/categories/Dual%20zebra%20Shades.png',
-  '/collections/blackout-vertical-blinds-category':  '/home/categories/blackout%20vertical%20blinds.png',
-  '/collections/eclipsecore-shades':                 '/home/categories/eclipse%20core%20shades.png',
-  '/product/non-driii-honeycomb-blackout-blinds':    '/home/categories/eclipse%20core%20shades.png',
+  '/collections/blackout-dual-zebra-shades':         '/home/categories/Dual%20zebra%20Shades.webp',
+  '/collections/blackout-vertical-blinds-category':  '/home/categories/blackout%20vertical%20blinds.webp',
+  '/collections/eclipsecore-shades':                 '/home/categories/eclipse%20core%20shades.webp',
+  '/product/non-driii-honeycomb-blackout-blinds':    '/home/categories/eclipse%20core%20shades.webp',
 };
 
 const categoryItems = navigationData
@@ -70,6 +70,10 @@ const CategoryGrid = () => {
                 </div>
               )}
 
+              {/* Label */}
+              <span className="px-3 py-2.5 text-sm md:text-base font-medium text-[#3a3a3a] group-hover:text-[#00473c] transition-colors">
+                {cat.label}
+              </span>
             </Link>
           ))}
         </div>

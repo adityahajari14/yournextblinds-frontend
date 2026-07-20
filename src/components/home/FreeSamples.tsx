@@ -2,9 +2,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 
 const features = [
-  { id: 1, title: 'First in your Letterbox', description: 'Samples are posted directly through your letterbox — no signature required.' },
+  { id: 1, title: 'Straight to Your Mailbox', description: 'Samples are delivered directly to your mailbox — no signature required.' },
   { id: 2, title: 'Available on Selected Products', description: 'Free samples are offered on specific fabric ranges. Look for the sample option on eligible product pages.' },
-  { id: 3, title: 'Find Your Perfect Match', description: 'See how our fabrics and colours look in your own home before placing your order.' },
+  { id: 3, title: 'Find Your Perfect Match', description: 'See how our fabrics and colors look in your own home before placing your order.' },
 ];
 
 const FreeSamples = () => {
@@ -50,7 +50,7 @@ const FreeSamples = () => {
 
           <div className="relative w-full lg:w-[720px] h-[280px] md:h-[380px] lg:h-[460px] order-1 lg:order-2">
             <Image
-              src="/home/samples.jpg"
+              src="/home/samples.webp"
               alt="Free samples"
               fill
               className="object-cover"

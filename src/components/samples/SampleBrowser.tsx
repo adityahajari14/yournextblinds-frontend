@@ -6,6 +6,7 @@ import { useSamples } from '@/context/SampleContext';
 import { useAuth } from '@/context/AuthContext';
 import { SampleCategory, SampleProduct, SampleVariantOption } from '@/types';
 import { MAX_FREE_SAMPLES } from '@/data/samples';
+import { track } from '@/lib/track';
 
 interface SampleBrowserProps {
   /** Sample-eligible products grouped by category (built server-side). */
@@ -51,6 +52,7 @@ const SampleBrowser = ({ categories }: SampleBrowserProps) => {
       // Clear the basket, then hand off to Shopify's hosted checkout — same as a
       // normal order. The $0 total means no payment is taken; the completed order
       // then shows in the customer's Shopify account.
+      track('sample_request', { sampleCount: count });
       clearSamples();
       window.location.href = json.data.checkoutUrl;
     } catch (err) {
@@ -331,7 +333,7 @@ const SampleBrowser = ({ categories }: SampleBrowserProps) => {
           )}
 
           <p className="mt-4 text-xs leading-relaxed text-gray-400">
-            Free samples are posted directly through your letterbox — no payment, no signature required.
+            Free samples are delivered straight to your mailbox — no payment, no signature required.
           </p>
         </div>
       </aside>

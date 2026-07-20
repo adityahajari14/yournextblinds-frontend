@@ -2,8 +2,10 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { TopBar, Header, NavBar, Footer } from '@/components';
 import { transformProduct, extractFilterOptions, fetchProducts } from '@/lib/api';
+import { track } from '@/lib/track';
 import { Product, ApiProduct } from '@/types';
 import CategoryHero from '@/components/collection/CategoryHero';
 import ProductGridWithFilters from '@/components/collection/ProductGridWithFilters';
@@ -43,6 +45,7 @@ function SearchContent() {
         const transformedProducts = apiProducts.map(transformProduct);
         setProducts(transformedProducts);
         setFilterOptions(extractFilterOptions(apiProducts));
+        track('search', { query, resultCount: transformedProducts.length });
       } catch (error) {
         console.error('Error searching products:', error);
         setProducts([]);
@@ -123,12 +126,12 @@ function SearchContent() {
                     </div>
                     <h3 className="text-lg font-semibold text-gray-900 mb-2">No products found</h3>
                     <p className="text-gray-600 mb-4">Try searching with different keywords or browse our collections.</p>
-                    <a
+                    <Link
                       href="/collections"
                       className="inline-block px-4 py-2 bg-[#00473c] text-white rounded-md text-sm font-medium hover:bg-[#003830]"
                     >
                       Browse All Products
-                    </a>
+                    </Link>
                   </div>
                 )}
               </div>
@@ -142,18 +145,18 @@ function SearchContent() {
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Search Products</h2>
               <p className="text-gray-600 mb-8">Enter a search term above to find the perfect blinds for your home.</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-2xl mx-auto">
-                <a href="/collections/vertical-blinds" className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00473c] transition-colors">
+                <Link href="/collections/light-filtering-vertical-blinds" className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00473c] transition-colors">
                   <p className="text-sm font-medium text-gray-900">Vertical Blinds</p>
-                </a>
-                <a href="/collections/roller-blinds" className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00473c] transition-colors">
-                  <p className="text-sm font-medium text-gray-900">Roller Blinds</p>
-                </a>
-                <a href="/collections/roman-blinds" className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00473c] transition-colors">
-                  <p className="text-sm font-medium text-gray-900">Roman Blinds</p>
-                </a>
-                <a href="/collections" className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00473c] transition-colors">
+                </Link>
+                <Link href="/collections/blackout-roller-shades" className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00473c] transition-colors">
+                  <p className="text-sm font-medium text-gray-900">Roller Shades</p>
+                </Link>
+                <Link href="/collections/dual-zebra-shades" className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00473c] transition-colors">
+                  <p className="text-sm font-medium text-gray-900">Zebra Shades</p>
+                </Link>
+                <Link href="/collections" className="p-4 bg-white rounded-lg border border-gray-200 hover:border-[#00473c] transition-colors">
                   <p className="text-sm font-medium text-gray-900">All Products</p>
-                </a>
+                </Link>
               </div>
             </div>
           </div>

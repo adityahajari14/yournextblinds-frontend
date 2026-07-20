@@ -31,11 +31,11 @@ const sections = [
   },
   {
     title: '6. Delivery',
-    content: `5.1 Timeframes: Manufacturing typically takes 3-5 working days, followed by dispatch. While we aim for swift delivery, timeframes are estimates and not guarantees.\n\n5.2 Receipt of Goods: All deliveries must be signed for where a signature is required by the courier. If the packaging appears damaged upon arrival, please sign for the item as damaged where possible and notify us immediately.\n\n5.3 Failed Delivery: Multiple unsuccessful delivery attempts may result in re-delivery charges. Items returned to us will be held for 4 weeks before disposal.`,
+    content: `5.1 Timeframes: Manufacturing typically takes 3-5 business days, followed by dispatch. While we aim for swift delivery, timeframes are estimates and not guarantees.\n\n5.2 Receipt of Goods: All deliveries must be signed for where a signature is required by the courier. If the packaging appears damaged upon arrival, please sign for the item as damaged where possible and notify us immediately.\n\n5.3 Failed Delivery: Multiple unsuccessful delivery attempts may result in re-delivery charges. Items returned to us will be held for 4 weeks before disposal.`,
   },
   {
     title: '7. Damaged or Defective Goods',
-    content: `6.1 Reporting: Any damage or manufacturing defects must be reported by email to enquiries@yournextblinds.com within 3 working days of delivery.\n\n6.2 Investigation: Do not install or fit the blind if it is damaged. We may require photographic evidence or the return of the item for inspection.\n\n6.3 Resolution: If a fault is confirmed, we will provide a like-for-like replacement. We cannot change measurements or colors during the replacement process.`,
+    content: `6.1 Reporting: Any damage or manufacturing defects must be reported by email to enquiries@yournextblinds.com within 3 business days of delivery.\n\n6.2 Investigation: Do not install or fit the blind if it is damaged. We may require photographic evidence or the return of the item for inspection.\n\n6.3 Resolution: If a fault is confirmed, we will provide a like-for-like replacement. We cannot change measurements or colors during the replacement process.`,
   },
   {
     title: '8. Fault Inspections',
@@ -158,7 +158,7 @@ export default function TermsAndConditionsPage() {
       <main>
         {/* Hero */}
         <section className="relative h-60 md:h-[300px] w-full overflow-hidden bg-linear-to-br from-[#00473c] via-[#00594a] to-[#003a31]">
-          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.jpg')] bg-cover bg-center opacity-10" />
+          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.webp')] bg-cover bg-center opacity-10" />
           <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl text-white font-bold tracking-tight">
               Terms &amp; Conditions
@@ -228,7 +228,7 @@ export default function TermsAndConditionsPage() {
                     enquiries@yournextblinds.com
                   </a>
                 </p>
-                <p>Response Time: 1-3 working days.</p>
+                <p>Response Time: 1-3 business days.</p>
                 <p className="font-medium pt-3">YOUR NEXT BLINDS LLC</p>
                 <p>8102 Fry Rd, Ste A #1010, Cypress, TX 77433, United States</p>
               </div>

@@ -110,10 +110,6 @@ const SizeSelector = ({
       const min = minWidth ?? 20;
       const max = maxWidth ?? 157;
       const placeholder = `${min}-${max}`;
-      // Debug log (remove in production)
-      if (process.env.NODE_ENV === 'development' && (minWidth !== undefined || maxWidth !== undefined)) {
-        console.log('SizeSelector - Width limits (inches):', { min, max, placeholder, minWidth, maxWidth });
-      }
       return { min, max, placeholder };
     } else {
       // cm - convert from inches if provided, otherwise use defaults
@@ -128,10 +124,6 @@ const SizeSelector = ({
       const min = minHeight ?? 20;
       const max = maxHeight ?? 118;
       const placeholder = `${min}-${max}`;
-      // Debug log (remove in production)
-      if (process.env.NODE_ENV === 'development' && (minHeight !== undefined || maxHeight !== undefined)) {
-        console.log('SizeSelector - Height limits (inches):', { min, max, placeholder, minHeight, maxHeight });
-      }
       return { min, max, placeholder };
     } else {
       // cm - convert from inches if provided, otherwise use defaults

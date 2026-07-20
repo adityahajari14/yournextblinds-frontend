@@ -52,7 +52,7 @@ const PromoBar = () => {
 
         <span className="hidden text-white/40 sm:inline">|</span>
 
-        <span className="hidden whitespace-nowrap text-xs sm:inline sm:text-sm">Whilst Stock Lasts</span>
+        <span className="hidden whitespace-nowrap text-xs sm:inline sm:text-sm">While Supplies Last</span>
 
         <span className="hidden text-white/40 sm:inline">|</span>
 

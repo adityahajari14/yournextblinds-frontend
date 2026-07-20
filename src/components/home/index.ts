@@ -1,4 +1,5 @@
 export { default as Hero } from './Hero';
+export { default as UspBar } from './UspBar';
 export { default as Categories } from './Categories';
 export { default as CategoryGrid } from './CategoryGrid';
 export { default as BestSelling } from './BestSelling';

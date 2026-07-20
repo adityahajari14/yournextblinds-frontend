@@ -3,7 +3,7 @@ import { createCheckout, CheckoutError } from '@/lib/server/order.service';
 
 export async function POST(request: Request) {
   try {
-    const { items, customerEmail, note } = await request.json();
+    const { items, customerEmail, note, analyticsSessionId } = await request.json();
 
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -12,13 +12,21 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await createCheckout({ items, customerEmail, note });
+    const result = await createCheckout({
+      items,
+      customerEmail,
+      note,
+      analyticsSessionId: typeof analyticsSessionId === 'string' ? analyticsSessionId : undefined,
+    });
 
     return NextResponse.json({ success: true, data: result }, { status: 201 });
   } catch (error: unknown) {
     if (error instanceof CheckoutError) {
       return NextResponse.json(
-        { success: false, error: { message: error.message } },
+        {
+          success: false,
+          error: { message: error.message, code: error.code, details: error.details },
+        },
         { status: error.statusCode }
       );
     }

@@ -385,34 +385,68 @@ export async function validateCartPrice(
 // Checkout API
 // ============================================
 
+export interface CheckoutPriceMismatch {
+  index: number;
+  handle: string;
+  title: string;
+  submittedPrice: number;
+  calculatedPrice: number;
+}
+
+export class CheckoutRequestError extends Error {
+  status: number;
+  code?: string;
+  details?: CheckoutPriceMismatch[];
+  constructor(message: string, status: number, code?: string, details?: CheckoutPriceMismatch[]) {
+    super(message);
+    this.name = 'CheckoutRequestError';
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+}
+
 interface CheckoutApiResponse {
   success: boolean;
   data: CheckoutResponse;
-  error?: { message: string };
+  error?: { message: string; code?: string; details?: CheckoutPriceMismatch[] };
 }
 
 /**
  * Create a Shopify checkout session via Draft Order.
  * Sends cart items to the backend for server-side price validation,
  * which creates a Shopify Draft Order and returns a checkout URL.
+ * Throws CheckoutRequestError with code/details so callers can recover
+ * (e.g. PRICE_MISMATCH carries the recalculated prices).
  */
 export async function createCheckout(
   items: CheckoutItemRequest[],
-  customerEmail?: string
+  customerEmail?: string,
+  analyticsSessionId?: string
 ): Promise<CheckoutResponse> {
-  const response = await apiFetch<CheckoutApiResponse>('/api/orders/create-checkout', {
+  const response = await fetch('/api/orders/create-checkout', {
     method: 'POST',
-    body: JSON.stringify({
-      items,
-      customerEmail,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items, customerEmail, analyticsSessionId }),
   });
 
-  if (!response.success) {
-    throw new Error((response as any).error?.message || 'Failed to create checkout');
+  let body: CheckoutApiResponse | null = null;
+  try {
+    body = await response.json();
+  } catch {
+    // Non-JSON response (e.g. proxy error page) — fall through to generic error
   }
 
-  return response.data;
+  if (!response.ok || !body?.success) {
+    throw new CheckoutRequestError(
+      body?.error?.message || 'Failed to create checkout',
+      response.status,
+      body?.error?.code,
+      body?.error?.details
+    );
+  }
+
+  return body.data;
 }
 
 // ============================================

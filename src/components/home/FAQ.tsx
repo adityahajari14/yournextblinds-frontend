@@ -23,7 +23,7 @@ const faqData = [
   {
     id: 3,
     question: 'How long will delivery take?',
-    answer: 'Standard delivery takes 5-7 business days. Express delivery options are also available for faster shipping.',
+    answer: 'Every blind is made to measure. Manufacturing typically takes 3-5 business days, and most orders arrive within 7-12 business days of purchase. Your estimated delivery date is shown on each product page.',
   },
   {
     id: 4,

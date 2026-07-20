@@ -48,6 +48,10 @@ const Hero = () => {
 
   return (
     <section className="relative aspect-[1792/2400] sm:aspect-[2752/1536] w-full overflow-hidden">
+      {/* The slide artwork carries the visible headline; this is the machine-readable one. */}
+      <h1 className="sr-only">
+        Made-to-Measure Blinds and Shades, Manufactured in Texas — Your Next Blinds
+      </h1>
       {slides.map((slide, index) => (
         <div
           key={index}

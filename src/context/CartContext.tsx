@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useRe
 import { useRouter } from 'next/navigation';
 import { Product, ProductConfiguration, Cart, CartItem, CartContextType } from '@/types';
 import { trackShopifyAddToCart } from '@/lib/shopify-analytics';
+import { track } from '@/lib/track';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -20,6 +21,17 @@ interface CartProviderProps {
 }
 
 const CART_STORAGE_KEY = 'cart';
+
+// Set when the buyer is redirected to Shopify checkout. The cart is kept until
+// the draft order is confirmed paid, so a failed/abandoned redirect never loses
+// a configured order.
+export const PENDING_CHECKOUT_KEY = 'pending_checkout';
+const PENDING_CHECKOUT_MAX_AGE_MS = 7 * 24 * 60 * 60 * 1000;
+
+interface PendingCheckout {
+  draftOrderId: string;
+  createdAt: number;
+}
 
 interface SerializableCartItem extends Omit<CartItem, 'addedAt'> {
   addedAt: string;
@@ -72,6 +84,42 @@ export const CartProvider = ({ children }: CartProviderProps) => {
       setCart({ items: localItems, total, itemCount });
       hasInitializedRef.current = true;
     });
+
+    // If the buyer was previously sent to checkout, clear the cart only once
+    // the draft order is confirmed paid; otherwise keep it so they can retry.
+    const checkPendingCheckout = async () => {
+      const raw = localStorage.getItem(PENDING_CHECKOUT_KEY);
+      if (!raw) return;
+
+      let pending: PendingCheckout;
+      try {
+        pending = JSON.parse(raw);
+      } catch {
+        localStorage.removeItem(PENDING_CHECKOUT_KEY);
+        return;
+      }
+
+      if (!pending.draftOrderId || Date.now() - pending.createdAt > PENDING_CHECKOUT_MAX_AGE_MS) {
+        localStorage.removeItem(PENDING_CHECKOUT_KEY);
+        return;
+      }
+
+      try {
+        const draftOrderId = encodeURIComponent(pending.draftOrderId);
+        const response = await fetch(`/api/orders/status/${draftOrderId}`);
+        if (!response.ok) return;
+        const body = await response.json();
+        const status = body?.data;
+        if (status && (status.status === 'completed' || status.orderId)) {
+          localStorage.removeItem(PENDING_CHECKOUT_KEY);
+          localStorage.removeItem(CART_STORAGE_KEY);
+          setCart({ items: [], total: 0, itemCount: 0 });
+        }
+      } catch {
+        // Transient failure — keep the marker and re-check on the next visit.
+      }
+    };
+    checkPendingCheckout();
   }, []);
 
   // Persist cart locally for guests and signed-in users.
@@ -97,10 +145,15 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const updatedItems = [...cart.items, newItem];
     applyCartItems(updatedItems);
     trackShopifyAddToCart(product);
+    track('add_to_cart', { handle: product.slug, price: product.price });
     router.push('/cart');
   };
 
   const removeFromCart = (itemId: string) => {
+    const removed = cart.items.find((item) => item.id === itemId);
+    if (removed) {
+      track('remove_from_cart', { handle: removed.product.slug, price: removed.product.price });
+    }
     const updatedItems = cart.items.filter((item) => item.id !== itemId);
     applyCartItems(updatedItems);
 
@@ -126,10 +179,15 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     product: Product,
     configuration: ProductConfiguration
   ) => {
-    const updatedItems = cart.items.map((item) =>
-      item.id === itemId ? { ...item, product, configuration } : item
-    );
-    applyCartItems(updatedItems);
+    // Functional update so multiple calls in one tick don't clobber each other
+    // (e.g. applying recalculated prices to several items at once).
+    setCart((prevCart) => {
+      const updatedItems = prevCart.items.map((item) =>
+        item.id === itemId ? { ...item, product, configuration } : item
+      );
+      const { total, itemCount } = calculateCartTotals(updatedItems);
+      return { items: updatedItems, total, itemCount };
+    });
   };
 
   const clearCart = () => {

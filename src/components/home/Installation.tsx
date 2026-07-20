@@ -18,7 +18,7 @@ const Installation = () => {
             </h2>
             <div className="relative w-full h-[300px] md:h-[350px] lg:hidden">
               <Image
-                src="/home/installation.jpg"
+                src="/home/installation.webp"
                 alt="Professional installation"
                 fill
                 className="object-cover"
@@ -38,7 +38,7 @@ const Installation = () => {
         
         <div className="relative w-full lg:w-[578px] h-[300px] md:h-[350px] lg:h-[488px] max-lg:hidden">
           <Image
-            src="/home/installation.jpg"
+            src="/home/installation.webp"
             alt="Professional installation"
             fill
             className="object-cover"

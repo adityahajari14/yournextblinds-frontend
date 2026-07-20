@@ -2,19 +2,19 @@
 
 // Headrail type options (used for vertical blinds)
 export const HEADRAIL_OPTIONS = [
-  // { id: 'louvres-only', name: 'Louvres/Slats Only', price: 0, image: '/products/headrail/louvresOnly.png' },
+  // { id: 'louvres-only', name: 'Louvres/Slats Only', price: 0, image: '/products/headrail/louvresOnly.webp' },
   { id: 'classic', name: 'Classic Headrail', price: 0, image: '/products/headrail/classicHeadrail.png' },
-  { id: 'platinum', name: 'Platinum Headrail', price: 0, image: '/products/headrail/platinumHeadrail.png' },
+  { id: 'platinum', name: 'Platinum Headrail', price: 0, image: '/products/headrail/platinumHeadrail.webp' },
 ];
 
 // Headrail colour options (used for vertical blinds)
 export const HEADRAIL_COLOUR_OPTIONS = [
-  { id: 'vouge-white', name: 'Vouge White', price: 12.10, image: '/products/headrail/colours/vouge-white-headrail.png' },
-  { id: 'vouge-silver', name: 'Vouge Silver', price: 14.52, image: '/products/headrail/colours/vouge-silver-headrail.png' },
-  { id: 'vouge-anthracite', name: 'Vouge Anthracite', price: 13.91, image: '/products/headrail/colours/vouge-anthracite-headrail.png' },
-  { id: 'vouge-gold', name: 'Vouge Gold', price: 14.52, image: '/products/headrail/colours/vouge-gold-headrail.png' },
-  { id: 'vouge-black', name: 'Vouge Black', price: 13.91, image: '/products/headrail/colours/vouge-black-headrail.png' },
-  { id: 'vouge-brown', name: 'Vouge Brown', price: 13.91, image: '/products/headrail/colours/vouge-brown-headrail.png' },
+  { id: 'vouge-white', name: 'Vouge White', price: 12.10, image: '/products/headrail/colours/vouge-white-headrail.webp' },
+  { id: 'vouge-silver', name: 'Vouge Silver', price: 14.52, image: '/products/headrail/colours/vouge-silver-headrail.webp' },
+  { id: 'vouge-anthracite', name: 'Vouge Anthracite', price: 13.91, image: '/products/headrail/colours/vouge-anthracite-headrail.webp' },
+  { id: 'vouge-gold', name: 'Vouge Gold', price: 14.52, image: '/products/headrail/colours/vouge-gold-headrail.webp' },
+  { id: 'vouge-black', name: 'Vouge Black', price: 13.91, image: '/products/headrail/colours/vouge-black-headrail.webp' },
+  { id: 'vouge-brown', name: 'Vouge Brown', price: 13.91, image: '/products/headrail/colours/vouge-brown-headrail.webp' },
 ];
 
 // Installation method options (used for vertical blinds)
@@ -42,21 +42,21 @@ export const CONTROL_OPTIONS = [
     name: 'Wand Control',
     description: 'Control your blinds with a simple wand mechanism.',
     price: 0,
-    image: '/products/control/wand.png',
+    image: '/products/control/wand.webp',
   },
   {
     id: 'chain-chord-right',
     name: 'Chain Chord Right',
     description: 'Chain chord control positioned on the right side.',
     price: 0,
-    image: '/products/control/cordChain.png',
+    image: '/products/control/cordChain.webp',
   },
   {
     id: 'chain-chord-left',
     name: 'Chain Chord Left',
     description: 'Chain chord control positioned on the left side.',
     price: 0,
-    image: '/products/control/cordChain.png',
+    image: '/products/control/cordChain.webp',
   },
 ];
 
@@ -67,14 +67,14 @@ export const ROLLER_INSTALLATION_OPTIONS = [
     name: 'Inside Mount',
     description: 'Blinds are mounted inside the window recess.',
     price: 0,
-    image: '/products/installation/rollerInsideMount.png',
+    image: '/products/installation/rollerInsideMount.webp',
   },
   {
     id: 'outside-mount',
     name: 'Outside Mount',
     description: 'Blinds are mounted outside the window recess on the wall or frame.',
     price: 0,
-    image: '/products/installation/rollerOutsideMount.png',
+    image: '/products/installation/rollerOutsideMount.webp',
   },
 ];
 
@@ -85,14 +85,14 @@ export const ZEBRA_INSTALLATION_OPTIONS = [
     name: 'Inside Mount',
     description: 'Shades are mounted inside the window recess.',
     price: 0,
-    image: '/products/installation/zebra-insideMount.png',
+    image: '/products/installation/zebra-insideMount.webp',
   },
   {
     id: 'outside-mount',
     name: 'Outside Mount',
     description: 'Shades are mounted outside the window recess on the wall or frame.',
     price: 0,
-    image: '/products/installation/zebra-outsideMount.png',
+    image: '/products/installation/zebra-outsideMount.webp',
   },
 ];
 
@@ -103,14 +103,14 @@ export const ROLLER_CONTROL_OPTIONS = [
     name: 'Left',
     description: 'Control chain positioned on the left side.',
     price: 0,
-    image: '/products/controlSide/left.png',
+    image: '/products/controlSide/left.webp',
   },
   {
     id: 'right',
     name: 'Right',
     description: 'Control chain positioned on the right side.',
     price: 0,
-    image: '/products/controlSide/right.png',
+    image: '/products/controlSide/right.webp',
   },
 ];
 
@@ -173,14 +173,14 @@ export const CONTROL_SIDE_OPTIONS = [
     name: 'Left',
     description: 'Controls are located on the left side of the blind.',
     price: 0,
-    image: '/products/controlSide/left.png',
+    image: '/products/controlSide/left.webp',
   },
   {
     id: 'right',
     name: 'Right',
     description: 'Controls are located on the right side of the blind.',
     price: 0,
-    image: '/products/controlSide/right.png',
+    image: '/products/controlSide/right.webp',
   },
 ];
 
@@ -190,32 +190,32 @@ export const BOTTOM_CHAIN_OPTIONS = [
     id: 'standard-white',
     name: 'Standard white weights & chains',
     price: 0,
-    image: '/products/bottomChain/standardWhite.png',
+    image: '/products/bottomChain/standardWhite.webp',
   },
   {
     id: 'pet-friendly',
     name: 'Pet Friendly',
     price: 0.50,
-    image: '/products/bottomChain/pet-friendly.png',
+    image: '/products/bottomChain/pet-friendly.webp',
     pvcOnly: true,
   },
   {
     id: 'white-chainless',
     name: 'white chainless weights (Pet Friendly)',
     price: 0.50,
-    image: '/products/bottomChain/chainless.png',
+    image: '/products/bottomChain/chainless.webp',
   },
   {
     id: 'black-weights',
     name: 'Black weights & chains',
     price: 0.75,
-    image: '/products/bottomChain/premiumBlack.png',
+    image: '/products/bottomChain/premiumBlack.webp',
   },
   {
     id: 'grey-weights',
     name: 'Grey weights & chains',
     price: 0.75,
-    image: '/products/bottomChain/premiumGrey.png',
+    image: '/products/bottomChain/premiumGrey.webp',
   },
 ];
 
@@ -287,25 +287,25 @@ export const ROLLER_CASSETTE_OPTIONS = [
     id: 'white',
     name: 'Standard White',
     price: 12.99,
-    image: '/products/cassetteBar/standard-white-cassette-roller.png',
+    image: '/products/cassetteBar/standard-white-cassette-roller.webp',
   },
   {
     id: 'grey',
     name: 'Premium Grey',
     price: 18.50,
-    image: '/products/cassetteBar/grey-cassette-roller.png',
+    image: '/products/cassetteBar/grey-cassette-roller.webp',
   },
   {
     id: 'black',
     name: 'Premium Black',
     price: 18.50,
-    image: '/products/cassetteBar/black-cassette-roller.png',
+    image: '/products/cassetteBar/black-cassette-roller.webp',
   },
   {
     id: 'matching-fabric',
     name: 'Matching Fabric Cassette',
     price: 23.99,
-    image: '/products/cassetteBar/premium-fabric-insert-cassette-roller.png',
+    image: '/products/cassetteBar/premium-fabric-insert-cassette-roller.webp',
   },
 ];
 
@@ -315,19 +315,19 @@ export const CASSETTE_MATCHING_BAR_OPTIONS = [
     id: 'white',
     name: 'White Standard',
     price: 0, // FREE
-    image: '/products/cassetteBar/zebra_shade_cassette_and_bottom_bar_white.png',
+    image: '/products/cassetteBar/zebra_shade_cassette_and_bottom_bar_white.webp',
   },
   {
     id: 'black',
     name: 'Black',
     price: 18.50, // +$18.50
-    image: '/products/cassetteBar/zebra_shade_cassette_and_bottom_bar_black.png',
+    image: '/products/cassetteBar/zebra_shade_cassette_and_bottom_bar_black.webp',
   },
   {
     id: 'grey',
     name: 'Grey',
     price: 18.50, // +$18.50
-    image: '/products/cassetteBar/zebra_shade_cassette_and_bottom_bar_grey.png',
+    image: '/products/cassetteBar/zebra_shade_cassette_and_bottom_bar_grey.webp',
   },
 ];
 
@@ -352,14 +352,14 @@ export const MOTORIZATION_OPTIONS = [
     name: '2 CH Remote',
     description: '2 channel remote control',
     price: 13.95,
-    image: '/products/motorization/2ch.png',
+    image: '/products/motorization/2ch.webp',
   },
   {
     id: '6ch-remote',
     name: '6 CH Remote',
     description: '6 channel remote control',
     price: 15.95,
-    image: '/products/motorization/6ch.png',
+    image: '/products/motorization/6ch.webp',
   },
   {
     id: '16ch-remote',
@@ -420,25 +420,25 @@ export const OPENING_DIRECTION_OPTIONS = [
     id: 'left-to-right',
     name: 'Left To Right',
     price: 0,
-    image: '/products/openingDirection/left-right-realistic.png',
+    image: '/products/openingDirection/left-right-realistic.webp',
   },
   {
     id: 'right-to-left',
     name: 'Right To Left',
     price: 0,
-    image: '/products/openingDirection/left-right-realistic.png',
+    image: '/products/openingDirection/left-right-realistic.webp',
   },
   {
     id: 'top-down',
     name: 'Top Down',
     price: 0,
-    image: '/products/openingDirection/up-down-realistic.png',
+    image: '/products/openingDirection/up-down-realistic.webp',
   },
   {
     id: 'split',
     name: 'Split',
     price: 35,
-    image: '/products/openingDirection/left-right-realistic.png',
+    image: '/products/openingDirection/left-right-realistic.webp',
   },
 ];
 
@@ -448,25 +448,25 @@ export const BOTTOM_BAR_OPTIONS = [
     id: 'basic',
     name: 'Basic',
     price: 0,
-    image: '/products/bottomBar/bottomBar.png',
+    image: '/products/bottomBar/bottomBar.webp',
   },
   {
     id: 'grey-round-bar',
     name: 'Grey Round Bar',
     price: 8.00,
-    image: '/products/bottomBar/Grey_round_bar.png',
+    image: '/products/bottomBar/Grey_round_bar.webp',
   },
   {
     id: 'white-round-bar',
     name: 'White Round Bar',
     price: 8.00,
-    image: '/products/bottomBar/White_round_bar.png',
+    image: '/products/bottomBar/White_round_bar.webp',
   },
   {
     id: 'full-fabric-cover-premium-bar',
     name: 'Full Fabric Cover Premium Bar',
     price: 15.00,
-    image: '/products/bottomBar/covered_bottom_bar_picture.png',
+    image: '/products/bottomBar/covered_bottom_bar_picture.webp',
   },
 ];
 
@@ -477,13 +477,13 @@ export const ROLL_STYLE_OPTIONS = [
     name: 'Standard Roll',
     description: 'Fabric rolls down from the back, roller tube is visible.',
     price: 0,
-    image: '/products/rollStyle/Standard_roll.png',
+    image: '/products/rollStyle/Standard_roll.webp',
   },
   {
     id: 'reverse-roll',
     name: 'Reverse Roll',
     description: 'Fabric rolls down from the front, roller tube is not visible.',
     price: 0,
-    image: '/products/rollStyle/Reverse_roll.png',
+    image: '/products/rollStyle/Reverse_roll.webp',
   },
 ];

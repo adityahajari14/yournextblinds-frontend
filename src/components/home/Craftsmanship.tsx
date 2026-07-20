@@ -6,7 +6,7 @@ const Craftsmanship = () => {
     <section className="relative w-full overflow-hidden">
       <div className="absolute inset-0">
         <Image
-          src="/home/craftsmanship-bg.jpg"
+          src="/home/craftsmanship-bg.webp"
           alt="Texas craftsmanship"
           fill
           className="object-cover"

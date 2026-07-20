@@ -11,7 +11,7 @@ const sections = [
   {
     title: 'Order Processing',
     content:
-      'All blinds are made to measure. Manufacturing typically takes 3-5 working days before dispatch. This timeframe may vary during busy periods, for large orders, or where additional checks are required.',
+      'All blinds are made to measure. Manufacturing typically takes 3-5 business days before dispatch. This timeframe may vary during busy periods, for large orders, or where additional checks are required.',
   },
   {
     title: 'Delivery Timeframes',
@@ -36,7 +36,7 @@ const sections = [
   {
     title: 'Damaged or Missing Items',
     content:
-      'Any damage, missing items, or manufacturing defects must be reported by email to enquiries@yournextblinds.com within 3 working days of delivery. Please do not install or fit a blind if it appears damaged, as we may require photographs or the return of the item for inspection.',
+      'Any damage, missing items, or manufacturing defects must be reported by email to enquiries@yournextblinds.com within 3 business days of delivery. Please do not install or fit a blind if it appears damaged, as we may require photographs or the return of the item for inspection.',
   },
   {
     title: 'Failed Delivery',
@@ -61,7 +61,7 @@ export default function ShippingPolicyPage() {
       <main>
         {/* Hero */}
         <section className="relative h-60 md:h-[300px] w-full overflow-hidden bg-linear-to-br from-[#00473c] via-[#00594a] to-[#003a31]">
-          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.jpg')] bg-cover bg-center opacity-10" />
+          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.webp')] bg-cover bg-center opacity-10" />
           <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl text-white font-bold tracking-tight">
               Shipping Policy
@@ -106,7 +106,7 @@ export default function ShippingPolicyPage() {
                 >
                   enquiries@yournextblinds.com
                 </a>
-                . Response time is 1-3 working days.
+                . Response time is 1-3 business days.
               </p>
             </div>
           </div>

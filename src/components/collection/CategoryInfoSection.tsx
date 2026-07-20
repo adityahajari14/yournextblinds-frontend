@@ -317,7 +317,7 @@ export default function CategoryInfoSection({ categorySlug, productTags }: Categ
       {/* Texas — full-width image overlay, matching Craftsmanship style */}
       <div className="relative min-h-80 md:min-h-[400px] overflow-hidden">
         <Image
-          src="/home/craftsmanship-bg.jpg"
+          src="/home/craftsmanship-bg.webp"
           alt="Proudly designed and manufactured in Texas"
           fill
           className="object-cover"

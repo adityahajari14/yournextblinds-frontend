@@ -52,13 +52,6 @@ export const navigationData: NavigationItem[] = [
     ]
   },
   {
-    label: 'Shop by',
-    submenu: [
-      { label: 'Shop by Feature' },
-      { label: 'Shop by room' },
-    ]
-  },
-  {
     label: 'About us',
     href: '/about',
   },
@@ -85,8 +78,6 @@ export const ALL_COLLECTION_SLUGS = [
   'blackout-dual-zebra-shades',
   'blackout-vertical-blinds-category',
   'eclipsecore-shades',
-  'shop-by-feature',
-  'shop-by-room',
 ];
 
 // Custom descriptions for collection hero sections
@@ -121,8 +112,6 @@ export const COLLECTION_DISPLAY_NAMES: Record<string, string> = {
   'blackout-dual-zebra-shades': 'Dual zebra shades',
   'blackout-vertical-blinds-category': 'Vertical blinds',
   'eclipsecore-shades': 'EclipseCore shades',
-  'shop-by-feature': 'Shop by Feature',
-  'shop-by-room': 'Shop by room',
 };
 
 // Mapping of custom navigation slugs to their backend collection slugs
@@ -150,10 +139,6 @@ export const NAVIGATION_SLUG_MAPPING: Record<string, string> = {
   'blackout-dual-zebra-shades': 'day-and-night-blinds', // Primary: day-and-night-blinds, Tag: blackout
   'blackout-vertical-blinds-category': 'vertical-blinds', // Primary: vertical-blinds, Tag: blackout
   'eclipsecore-shades': 'pleated-blinds', // Primary: pleated-blinds
-
-  // Shop by - map to primary category (features are tags)
-  'shop-by-feature': 'roller-blinds', // Will filter by tags (thermal, blackout, etc.)
-  'shop-by-room': 'roller-blinds', // Will filter by room tags
 };
 
 // Mapping of navigation slugs to required tags for filtering

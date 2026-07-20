@@ -422,7 +422,7 @@ const CustomizationModal = ({
               <h1 className="text-xl md:text-2xl lg:text-3xl font-medium text-[#3a3a3a] mb-2">{product.name}</h1>
               <p className="text-xs md:text-sm text-gray-500 mb-2">
                 Estimated Delivery Date: <span className="text-[#00473c] font-medium">{(() => {
-                  const fmt = (d: Date) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+                  const fmt = (d: Date) => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
                   const addDays = (d: Date, n: number) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
                   const today = new Date();
                   if (isDayNightBandHProduct(product)) {

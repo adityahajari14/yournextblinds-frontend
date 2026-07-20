@@ -13,18 +13,18 @@ interface CategoryHeroProps {
 const categoryImages: Record<string, string> = {
   'Light filtering roller Shades': '/home/categories/light-filtering-roller-shades.webp',
   'Blackout roller Shades': '/home/categories/blackout-roller-shades.webp',
-  'Waterproof Blackout roller Shades': '/home/categories/Waterproof%20Blackout%20roller%20Shades.png',
+  'Waterproof Blackout roller Shades': '/home/categories/Waterproof%20Blackout%20roller%20Shades.webp',
   'Dual zebra Shades': '/home/categories/dual-zebra-shades.webp',
-  'Light filtering Vertical blinds': '/home/categories/light%20filtering%20vertical%20blinds.png',
-  'Blackout vertical blinds': '/home/categories/blackout%20vertical%20blinds.png',
-  'Waterproof Blackout vertical blinds': '/home/categories/water%20proof%20vertical%20blinds.png',
-  'Motorised roller shades': '/home/categories/Motorised%20roller%20shades.png',
-  'Motorised Dual zebra shades': '/home/categories/motorised%20zebra%20dual%20shades.png',
-  'Motorised EclipseCore': '/home/categories/motorised%20eclipsecore.png',
+  'Light filtering Vertical blinds': '/home/categories/light%20filtering%20vertical%20blinds.webp',
+  'Blackout vertical blinds': '/home/categories/blackout%20vertical%20blinds.webp',
+  'Waterproof Blackout vertical blinds': '/home/categories/water%20proof%20vertical%20blinds.webp',
+  'Motorised roller shades': '/home/categories/Motorised%20roller%20shades.webp',
+  'Motorised Dual zebra shades': '/home/categories/motorised%20zebra%20dual%20shades.webp',
+  'Motorised EclipseCore': '/home/categories/motorised%20eclipsecore.webp',
   'Roller Shades': '/home/categories/blackout-roller-shades.webp',
-  'Dual zebra shades': '/home/categories/Dual%20zebra%20Shades.png',
-  'Vertical blinds': '/home/categories/blackout%20vertical%20blinds.png',
-  'EclipseCore shades': '/home/categories/eclipse%20core%20shades.png',
+  'Dual zebra shades': '/home/categories/Dual%20zebra%20Shades.webp',
+  'Vertical blinds': '/home/categories/blackout%20vertical%20blinds.webp',
+  'EclipseCore shades': '/home/categories/eclipse%20core%20shades.webp',
 };
 
 export default function CategoryHero({ title, description, productCount }: CategoryHeroProps) {

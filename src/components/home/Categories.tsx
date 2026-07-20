@@ -4,17 +4,17 @@ import { useRef } from 'react';
 import Image from 'next/image';
 
 const categories = [
-  { id: 1,  name: 'Light Filtering Roller Shades',    href: '/collections/light-filtering-roller-shades',    image: '/home/categories/light%20filtering%20roller%20shades.png' },
-  { id: 2,  name: 'Blackout Roller Shades',            href: '/collections/blackout-roller-shades',            image: '/home/categories/Blackout%20roller%20Shades.png' },
-  { id: 3,  name: 'Waterproof Blackout Roller Shades', href: '/collections/waterproof-blackout-roller-shades', image: '/home/categories/Waterproof%20Blackout%20roller%20Shades.png' },
+  { id: 1,  name: 'Light Filtering Roller Shades',    href: '/collections/light-filtering-roller-shades',    image: '/home/categories/light%20filtering%20roller%20shades.webp' },
+  { id: 2,  name: 'Blackout Roller Shades',            href: '/collections/blackout-roller-shades',            image: '/home/categories/Blackout%20roller%20Shades.webp' },
+  { id: 3,  name: 'Waterproof Blackout Roller Shades', href: '/collections/waterproof-blackout-roller-shades', image: '/home/categories/Waterproof%20Blackout%20roller%20Shades.webp' },
   { id: 4,  name: 'Dual Zebra Shades',                 href: '/collections/dual-zebra-shades',                 image: '/home/categories/dual-zebra-shades.webp' },
-  { id: 5,  name: 'Light Filtering Vertical Blinds',   href: '/collections/light-filtering-vertical-blinds',   image: '/home/categories/light%20filtering%20vertical%20blinds.png' },
-  { id: 6,  name: 'Blackout Vertical Blinds',          href: '/collections/blackout-vertical-blinds',          image: '/home/categories/blackout%20vertical%20blinds.png' },
-  { id: 7,  name: 'Waterproof Vertical Blinds',        href: '/collections/waterproof-blackout-vertical-blinds', image: '/home/categories/water%20proof%20vertical%20blinds.png' },
-  { id: 8,  name: 'EclipseCore Shades',                href: '/collections/eclipsecore-shades',                image: '/home/categories/eclipse%20core%20shades.png' },
-  { id: 9,  name: 'Motorised Roller Shades',           href: '/collections/motorised-roller-shades',           image: '/home/categories/Motorised%20roller%20shades.png' },
-  { id: 10, name: 'Motorised Dual Zebra Shades',       href: '/collections/motorised-dual-zebra-shades',       image: '/home/categories/motorised%20zebra%20dual%20shades.png' },
-  { id: 11, name: 'Motorised EclipseCore',             href: '/collections/motorised-eclipsecore',             image: '/home/categories/motorised%20eclipsecore.png' },
+  { id: 5,  name: 'Light Filtering Vertical Blinds',   href: '/collections/light-filtering-vertical-blinds',   image: '/home/categories/light%20filtering%20vertical%20blinds.webp' },
+  { id: 6,  name: 'Blackout Vertical Blinds',          href: '/collections/blackout-vertical-blinds',          image: '/home/categories/blackout%20vertical%20blinds.webp' },
+  { id: 7,  name: 'Waterproof Vertical Blinds',        href: '/collections/waterproof-blackout-vertical-blinds', image: '/home/categories/water%20proof%20vertical%20blinds.webp' },
+  { id: 8,  name: 'EclipseCore Shades',                href: '/collections/eclipsecore-shades',                image: '/home/categories/eclipse%20core%20shades.webp' },
+  { id: 9,  name: 'Motorised Roller Shades',           href: '/collections/motorised-roller-shades',           image: '/home/categories/Motorised%20roller%20shades.webp' },
+  { id: 10, name: 'Motorised Dual Zebra Shades',       href: '/collections/motorised-dual-zebra-shades',       image: '/home/categories/motorised%20zebra%20dual%20shades.webp' },
+  { id: 11, name: 'Motorised EclipseCore',             href: '/collections/motorised-eclipsecore',             image: '/home/categories/motorised%20eclipsecore.webp' },
 ];
 
 const Categories = () => {

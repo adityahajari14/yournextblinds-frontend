@@ -46,6 +46,9 @@ export interface CreateCheckoutRequest {
   items: CheckoutItemRequest[];
   customerEmail?: string;
   note?: string;
+  /** First-party analytics session ID, carried onto the order so a completed
+   *  purchase can be attributed back to the browser session (abandonment). */
+  analyticsSessionId?: string;
 }
 
 export interface CreateCheckoutResponse {
@@ -221,12 +224,29 @@ const PRICE_TOLERANCE = 0.50;
 // Service Functions
 // ============================================
 
+export interface PriceMismatchDetail {
+  index: number;
+  handle: string;
+  title: string;
+  submittedPrice: number;
+  calculatedPrice: number;
+}
+
 export class CheckoutError extends Error {
   statusCode: number;
-  constructor(message: string, statusCode: number = 500) {
+  code?: string;
+  details?: PriceMismatchDetail[];
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    code?: string,
+    details?: PriceMismatchDetail[]
+  ) {
     super(message);
     this.name = 'CheckoutError';
     this.statusCode = statusCode;
+    this.code = code;
+    this.details = details;
   }
 }
 
@@ -239,9 +259,10 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
 
   const lineItems: ShopifyDraftOrderLineItem[] = [];
   const responseLineItems: CreateCheckoutResponse['lineItems'] = [];
+  const priceMismatches: PriceMismatchDetail[] = [];
   let subtotal = 0;
 
-  for (const item of request.items) {
+  for (const [index, item] of request.items.entries()) {
     if (!item.handle) {
       throw new CheckoutError('Each item must have a handle', 400);
     }
@@ -277,11 +298,14 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
 
     const priceDifference = Math.abs(pricing.totalPrice - item.submittedPrice);
     if (priceDifference > PRICE_TOLERANCE) {
-      throw new CheckoutError(
-        `Price mismatch for "${productTitle}": submitted $${item.submittedPrice.toFixed(2)}, ` +
-        `calculated $${pricing.totalPrice.toFixed(2)} (diff: $${priceDifference.toFixed(2)})`,
-        422
-      );
+      priceMismatches.push({
+        index,
+        handle: item.handle,
+        title: productTitle,
+        submittedPrice: item.submittedPrice,
+        calculatedPrice: pricing.totalPrice,
+      });
+      continue;
     }
 
     const itemPrice = pricing.totalPrice;
@@ -324,6 +348,18 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
     subtotal += itemPrice * item.quantity;
   }
 
+  if (priceMismatches.length > 0) {
+    const summary = priceMismatches
+      .map((m) => `"${m.title}": submitted $${m.submittedPrice.toFixed(2)}, current $${m.calculatedPrice.toFixed(2)}`)
+      .join('; ');
+    throw new CheckoutError(
+      `Some prices have changed since they were added to the cart: ${summary}`,
+      422,
+      'PRICE_MISMATCH',
+      priceMismatches
+    );
+  }
+
   const mutation = `
     mutation DraftOrderCreate($input: DraftOrderInput!) {
       draftOrderCreate(input: $input) {
@@ -350,6 +386,11 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
           useCustomerDefaultAddress: true,
           note: request.note || '',
           ...(request.customerEmail && { email: request.customerEmail }),
+          // Analytics session ID rides along as an order custom attribute so the
+          // orders-paid webhook can attribute the purchase to the browser session.
+          ...(request.analyticsSessionId && {
+            customAttributes: [{ key: '_analytics_session', value: request.analyticsSessionId }],
+          }),
           presentmentCurrencyCode: DRAFT_ORDER_CURRENCY,
         },
       },
