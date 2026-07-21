@@ -1192,11 +1192,86 @@ export interface SessionSummary {
   purchased: boolean;
 }
 
+export interface SessionProduct {
+  handle: string;
+  name: string;
+  url: string;
+  viewed: boolean;
+  addedToCart: boolean;
+  purchased: boolean;
+  /** Latest known price for this product in the session, if any. */
+  price: number | null;
+  quantity: number | null;
+}
+
 export interface SessionDetail {
   available: boolean;
   found: boolean;
   summary: SessionSummary | null;
+  products: SessionProduct[];
   events: SessionEvent[];
+}
+
+/** Derive the distinct products a session touched, in first-seen order. */
+function deriveSessionProducts(
+  events: Array<{ event: string; params: Record<string, unknown> | null }>
+): SessionProduct[] {
+  const byHandle = new Map<string, SessionProduct>();
+
+  for (const e of events) {
+    const params = e.params ?? {};
+    const rawHandle = typeof params.handle === 'string' ? params.handle : null;
+
+    if (rawHandle && (e.event === 'view_item' || e.event === 'add_to_cart' || e.event === 'price_calculated')) {
+      const existing = byHandle.get(rawHandle) ?? {
+        handle: rawHandle,
+        name: prettifyHandle(rawHandle),
+        url: `/product/${rawHandle}`,
+        viewed: false,
+        addedToCart: false,
+        purchased: false,
+        price: null,
+        quantity: null,
+      };
+      if (e.event === 'view_item') existing.viewed = true;
+      if (e.event === 'add_to_cart') {
+        existing.addedToCart = true;
+        existing.quantity = (existing.quantity ?? 0) + 1;
+      }
+      const price = params.price ?? params.priceFrom;
+      if (typeof price === 'number') existing.price = price;
+      byHandle.set(rawHandle, existing);
+    }
+
+    // A purchase carries a line-item title (see orders-paid webhook), not a
+    // handle — match it to a product already seen in-session by slugified name.
+    if (e.event === 'purchase' && Array.isArray(params.items)) {
+      for (const item of params.items as Array<{ title?: string; quantity?: number; price?: number }>) {
+        const title = item.title;
+        if (!title) continue;
+        const key = slugify(title);
+        const match = [...byHandle.values()].find((p) => slugify(p.handle) === key || slugify(p.name) === key);
+        if (match) {
+          match.purchased = true;
+          if (item.quantity) match.quantity = item.quantity;
+          if (item.price) match.price = item.price;
+        } else {
+          byHandle.set(key, {
+            handle: key,
+            name: title,
+            url: `/product/${key}`,
+            viewed: false,
+            addedToCart: false,
+            purchased: true,
+            price: item.price ?? null,
+            quantity: item.quantity ?? null,
+          });
+        }
+      }
+    }
+  }
+
+  return [...byHandle.values()];
 }
 
 /**
@@ -1205,7 +1280,7 @@ export interface SessionDetail {
  * a session spanning a range boundary still shows completely.
  */
 export async function getSessionTimeline(sessionId: string): Promise<SessionDetail> {
-  const empty: SessionDetail = { available: false, found: false, summary: null, events: [] };
+  const empty: SessionDetail = { available: false, found: false, summary: null, products: [], events: [] };
 
   const sql = getSql();
   if (!sql) {
@@ -1287,6 +1362,7 @@ export async function getSessionTimeline(sessionId: string): Promise<SessionDeta
       available: true,
       found: true,
       summary,
+      products: deriveSessionProducts(eventRows),
       events: eventRows.map((r) => ({
         ts: r.ts,
         event: r.event,

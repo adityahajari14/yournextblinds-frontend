@@ -50,6 +50,10 @@ function formatDateTime(iso: string): string {
   });
 }
 
+function money(n: number): string {
+  return `$${n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+}
+
 function formatParamValue(value: unknown): string {
   if (value === null || value === undefined) return '—';
   if (typeof value === 'number') return value.toLocaleString('en-US');
@@ -117,7 +121,7 @@ export default async function SessionDetailPage({
     );
   }
 
-  const { summary, events } = detail;
+  const { summary, products, events } = detail;
 
   const status = summary.purchased
     ? { label: 'Purchased', tone: 'bg-green-50 text-green-700 border-green-200' }
@@ -193,6 +197,59 @@ export default async function SessionDetailPage({
           </dl>
         </div>
 
+        {/* Products */}
+        <div className="mt-4 rounded-lg border border-gray-200 bg-white p-5">
+          <h2 className="mb-4 text-base font-semibold text-[#1a1a1a]">
+            Products
+            <span className="ml-2 text-sm font-normal text-gray-400">
+              {products.length === 0 ? 'none seen' : `${products.length} in this session`}
+            </span>
+          </h2>
+
+          {products.length === 0 ? (
+            <p className="text-sm text-gray-400">
+              No product was viewed or added to cart in this session.
+            </p>
+          ) : (
+            <ul className="divide-y divide-gray-100">
+              {products.map((p) => (
+                <li key={p.handle} className="flex flex-wrap items-center justify-between gap-3 py-3 first:pt-0 last:pb-0">
+                  <div className="min-w-0">
+                    <Link
+                      href={p.url}
+                      target="_blank"
+                      className="font-medium text-[#00473c] hover:underline"
+                    >
+                      {p.name}
+                    </Link>
+                    <div className="mt-1 flex flex-wrap gap-1.5">
+                      {p.purchased && (
+                        <span className="rounded-full border border-green-200 bg-green-50 px-2 py-0.5 text-[11px] font-medium text-green-700">
+                          Purchased
+                        </span>
+                      )}
+                      {!p.purchased && p.addedToCart && (
+                        <span className="rounded-full border border-amber-200 bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700">
+                          Added to cart
+                        </span>
+                      )}
+                      {p.viewed && (
+                        <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 text-[11px] font-medium text-gray-600">
+                          Viewed
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="text-right text-sm tabular-nums text-gray-600">
+                    {p.quantity != null && <div>Qty {p.quantity}</div>}
+                    {p.price != null && <div className="font-medium text-[#1a1a1a]">{money(p.price)}</div>}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
         {/* Timeline */}
         <div className="mt-4 rounded-lg border border-gray-200 bg-white p-5">
           <h2 className="mb-4 text-base font-semibold text-[#1a1a1a]">
@@ -202,13 +259,26 @@ export default async function SessionDetailPage({
 
           <ol className="space-y-0">
             {events.map((e, i) => {
-              const paramEntries = e.params ? Object.entries(e.params) : [];
+              const rawHandle = typeof e.params?.handle === 'string' ? e.params.handle : null;
+              // The handle is shown as the product name inline; drop the raw
+              // key from the param dump below so it isn't shown twice.
+              const paramEntries = e.params
+                ? Object.entries(e.params).filter(([key]) => key !== 'handle')
+                : [];
               return (
                 <li key={i} className="relative border-l-2 border-gray-100 py-3 pl-5 last:pb-0">
                   <span className="absolute -left-[7px] top-4 h-3 w-3 rounded-full border-2 border-white bg-[#00473c]" />
                   <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
                     <span className="text-sm font-medium text-[#1a1a1a]">
                       {EVENT_LABELS[e.event] ?? e.event}
+                      {rawHandle && (
+                        <>
+                          {' — '}
+                          <Link href={`/product/${rawHandle}`} target="_blank" className="text-[#00473c] hover:underline">
+                            {products.find((p) => p.handle === rawHandle)?.name ?? rawHandle}
+                          </Link>
+                        </>
+                      )}
                     </span>
                     <span className="text-xs tabular-nums text-gray-400">{formatDateTime(e.ts)}</span>
                   </div>

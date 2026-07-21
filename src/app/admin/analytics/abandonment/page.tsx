@@ -129,9 +129,6 @@ export default async function AbandonmentPage({
     );
   }
 
-  const cartRecoveryRate = 1 - data.cart.rate;
-  const checkoutRecoveryRate = 1 - data.checkout.rate;
-
   return (
     <div className="min-h-screen bg-[#f6f6f4]">
       <div className="mx-auto max-w-[1180px] px-4 py-6 md:px-8 md:py-8">
@@ -167,7 +164,7 @@ export default async function AbandonmentPage({
 
         {/* Cart abandonment metrics */}
         <h2 className="mb-3 text-base font-semibold text-[#1a1a1a]">Cart abandonment</h2>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <MetricCard
             label="Abandoned carts"
             value={data.cart.abandoned.value}
@@ -176,13 +173,12 @@ export default async function AbandonmentPage({
             compact
           />
           <MetricCard label="Abandonment rate" value={data.cart.rate} deltaPct={null} format="percent" compact />
-          <MetricCard label="Recovery rate" value={cartRecoveryRate} deltaPct={null} format="percent" compact />
           <MetricCard label="Value left in carts" value={data.cart.lostValue} deltaPct={null} format="currency" compact />
         </div>
 
         {/* Checkout abandonment metrics */}
         <h2 className="mb-3 mt-6 text-base font-semibold text-[#1a1a1a]">Checkout abandonment</h2>
-        <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
           <MetricCard
             label="Abandoned checkouts"
             value={data.checkout.abandoned.value}
@@ -191,7 +187,6 @@ export default async function AbandonmentPage({
             compact
           />
           <MetricCard label="Abandonment rate" value={data.checkout.rate} deltaPct={null} format="percent" compact />
-          <MetricCard label="Recovery rate" value={checkoutRecoveryRate} deltaPct={null} format="percent" compact />
           <MetricCard label="Value left at checkout" value={data.checkout.lostValue} deltaPct={null} format="currency" compact />
         </div>
 

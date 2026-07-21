@@ -1037,14 +1037,16 @@ const ProductPage = ({
 
   return (
     <div className="bg-white pb-28 lg:pb-0">
-      {/* Desktop-only: on mobile these fixed badges compete with the sticky
-          checkout bar and obstruct content for the whole scroll depth of the
-          page. Mobile already surfaces the same offer inline near the price
-          and in the sticky bar, so the floating badges are hidden below lg. */}
+      {/* Fixed tab, vertically centered on the right edge, on every breakpoint.
+          top-1/2 is safe on mobile (unlike an earlier top-20 offset) because
+          it centers in the viewport instead of anchoring near the variable-
+          height title/rating/price block at the top of the page. The
+          bottom-left Flash Sale countdown stays desktop-only: it would sit
+          under the mobile sticky checkout bar. */}
       <button
         type="button"
         onClick={() => setIsFlashSaleCouponOpen(true)}
-        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-[#0f5f52] bg-[#00473c] px-2.5 py-3 text-white shadow-lg transition-colors hover:bg-[#003830] max-lg:hidden lg:px-3 lg:py-4"
+        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-[#0f5f52] bg-[#00473c] px-2.5 py-3 text-white shadow-lg transition-colors hover:bg-[#003830] lg:px-3 lg:py-4"
         aria-label={`Open ${PROMO_CODE_PERCENT} percent off coupon`}
       >
         <span
