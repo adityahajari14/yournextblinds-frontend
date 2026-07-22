@@ -135,11 +135,11 @@ const SizeSelector = ({
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h3 className="text-base font-medium text-[#3a3a3a]">Choose Your Size</h3>
 
         {/* Unit Toggle */}
-        <div className="flex bg-gray-100 p-1 rounded-lg">
+        <div className="flex self-start bg-gray-100 p-1 rounded-lg sm:self-auto">
           <button
             onClick={() => onUnitChange('inches')}
             className={`px-3 py-1 text-xs font-medium rounded-md transition-all ${unit === 'inches' ? 'bg-white text-[#00473c] shadow-sm' : 'text-gray-500 hover:text-gray-700'

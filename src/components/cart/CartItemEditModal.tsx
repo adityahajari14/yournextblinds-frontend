@@ -50,6 +50,9 @@ interface CartItemEditModalProps {
   onSave: (itemId: string, product: Product, configuration: ProductConfiguration) => void;
 }
 
+const EMPTY_MISSING_FIELD_KEYS = new Set<string>();
+const NOOP_REGISTER_FIELD_REF = () => {};
+
 const getBottomBarPricing = () =>
   BOTTOM_BAR_OPTIONS.map(option => ({
     category: 'bottom-bar',
@@ -317,7 +320,14 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
       heightInches < limits.minHeight ||
       heightInches > limits.maxHeight;
 
-    return isOutOfRange ? [...missing, isBandHProduct ? 'valid Band H size' : 'valid Roller Band F size'] : missing;
+    return isOutOfRange
+      ? [
+          ...missing,
+          isBandHProduct
+            ? { key: 'bandHSize', label: 'valid Band H size' }
+            : { key: 'rollerBandFSize', label: 'valid Roller Band F size' },
+        ]
+      : missing;
   }, [isBandHProduct, isRollerBandF, normalizedConfig, requiredVisibility]);
 
   const selectedCustomizations = useMemo(() => configToCustomizations({
@@ -412,7 +422,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
 
   const handleSave = async () => {
     if (missingCustomizations.length > 0) {
-      setError(`Please select ${missingCustomizations.join(', ')}.`);
+      setError(`Please select ${missingCustomizations.map((item) => item.label).join(', ')}.`);
       return;
     }
 
@@ -550,6 +560,8 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                   config={config}
                   updateConfig={updateConfig}
                   isMotorizationSelected={selectedOptionalCards.motorization}
+                  missingFieldKeys={EMPTY_MISSING_FIELD_KEYS}
+                  registerFieldRef={NOOP_REGISTER_FIELD_REF}
                   onMotorizationSelectedChange={(selected) =>
                     setSelectedOptionalCards((prev) => ({
                       ...prev,
@@ -572,6 +584,8 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                   config={config}
                   updateConfig={updateConfig}
                   isMotorizationSelected={selectedOptionalCards.motorization}
+                  missingFieldKeys={EMPTY_MISSING_FIELD_KEYS}
+                  registerFieldRef={NOOP_REGISTER_FIELD_REF}
                   onMotorizationSelectedChange={(selected) =>
                     setSelectedOptionalCards((prev) => ({
                       ...prev,

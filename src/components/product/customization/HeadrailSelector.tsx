@@ -22,7 +22,7 @@ const HeadrailSelector = ({ options, selectedHeadrail, onHeadrailChange }: Headr
           <button
             key={option.id}
             onClick={() => onHeadrailChange(option.id)}
-            className={`relative border-2 rounded-lg p-4 transition-all hover:border-[#00473c] ${selectedHeadrail === option.id
+            className={`relative flex flex-row items-center gap-3 border-2 rounded-lg p-3 text-left transition-all hover:border-[#00473c] md:block md:p-4 md:text-center ${selectedHeadrail === option.id
               ? 'border-[#00473c] bg-[#f6fffd]'
               : 'border-gray-300 bg-white'
               }`}
@@ -33,14 +33,14 @@ const HeadrailSelector = ({ options, selectedHeadrail, onHeadrailChange }: Headr
                 src={option.image}
                 alt={option.name}
                 fill
-                sizes="(min-width: 768px) 220px, 100vw"
-                containerClassName="relative h-[140px] w-full mb-3 bg-gray-50 rounded overflow-hidden"
-                imageClassName="object-contain p-2"
+                sizes="(min-width: 768px) 220px, 25vw"
+                containerClassName="relative h-16 w-16 shrink-0 bg-gray-50 rounded overflow-hidden md:h-[140px] md:w-full md:mb-3"
+                imageClassName="object-contain p-1 md:p-2"
               />
             )}
 
             {/* Option Name */}
-            <p className="text-sm font-medium text-[#3a3a3a] text-center">
+            <p className="min-w-0 text-sm font-medium text-[#3a3a3a] md:text-center">
               {option.name}
             </p>
 

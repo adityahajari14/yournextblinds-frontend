@@ -17,7 +17,6 @@ import { buildCheckoutItem } from '@/lib/checkout';
 import StickyBottomBar from './StickyBottomBar';
 import { PRODUCT_GUIDES } from '@/data/guides';
 import { PROMO_CODE, PROMO_CODE_PERCENT, FLASH_SALE_DISCOUNT_PERCENT } from '@/data/promo';
-import CountdownTimer from '@/components/common/CountdownTimer';
 import { trackShopifyProductView } from '@/lib/shopify-analytics';
 import { track, getAnalyticsSessionId } from '@/lib/track';
 import {
@@ -50,6 +49,7 @@ import {
   DayNightBandHSelector,
   RollerBandFSelector,
   RollerBandFRoomDarkeningSelector,
+  RequiredFieldWrapper,
 } from './customization';
 import {
   HEADRAIL_OPTIONS,
@@ -169,15 +169,7 @@ const BAND_H_INSTALLATION_GUIDE_LANGUAGES: Array<{
 ];
 
 const FLASH_SALE_COUPON_CODE = PROMO_CODE;
-
-// Turn the internal missing-requirement labels into a readable sentence
-// fragment, e.g. "width and height, a control option and a headrail".
-function formatMissingRequirements(labels: string[]): string[] {
-  return labels.map((label) => {
-    if (label.startsWith('valid ')) return 'A size within the available range';
-    return label.charAt(0).toUpperCase() + label.slice(1);
-  });
-}
+const EMPTY_MISSING_FIELD_KEYS = new Set<string>();
 
 function getVariantDisplayOption(variant: ProductVariant) {
   const colorOption =
@@ -260,6 +252,36 @@ const ProductPage = ({
   // Collapsible sections state
   const [isMeasureOpen, setIsMeasureOpen] = useState(true);
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(true);
+
+  // Required-option validation UX: buttons stay clickable even when options are
+  // missing; on click we reveal red "Please select" markers and scroll to the
+  // first missing field instead of just disabling the buttons.
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
+  const fieldRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+  const registerFieldRef = (key: string, el: HTMLDivElement | null) => {
+    if (el) {
+      fieldRefs.current.set(key, el);
+    } else {
+      fieldRefs.current.delete(key);
+    }
+  };
+
+  // Desktop: show the sticky checkout bar except while the inline Add to
+  // Cart/Buy Now buttons are themselves on screen, so we never show two
+  // identical button rows at once. Mobile always shows it regardless, since
+  // the inline buttons are far above the fold there anyway.
+  const [isInlineCtaVisible, setIsInlineCtaVisible] = useState(false);
+  useEffect(() => {
+    const target = document.getElementById('add-to-cart-cta');
+    if (!target) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsInlineCtaVisible(entry.isIntersecting)
+    );
+    observer.observe(target);
+
+    return () => observer.disconnect();
+  }, []);
 
   // Selected optional customization cards (multi-select)
   const [selectedOptionalCards, setSelectedOptionalCards] = useState<{
@@ -692,6 +714,10 @@ const ProductPage = ({
       requiredCustomizationVisibility
     );
 
+    if (bandHColorVariants.length > 0 && !config.selectedVariantId) {
+      missingCustomizations.push({ key: 'colorVariant', label: 'color' });
+    }
+
     const isBandProduct = isBandHProduct || isRollerBandF;
     if (!isBandProduct || cartConfiguration.width <= 0 || cartConfiguration.height <= 0) {
       return missingCustomizations;
@@ -718,11 +744,61 @@ const ProductPage = ({
       heightInches > limits.maxHeight;
 
     return isOutOfRange
-      ? [...missingCustomizations, isBandHProduct ? 'valid Band H size' : 'valid Roller Band F size']
+      ? [
+          ...missingCustomizations,
+          {
+            key: 'size',
+            label: isBandHProduct ? 'valid Band H size' : 'valid Roller Band F size',
+          },
+        ]
       : missingCustomizations;
-  }, [cartConfiguration, isBandHProduct, isRollerBandF, requiredCustomizationVisibility, sizeRanges]);
+  }, [
+    bandHColorVariants,
+    cartConfiguration,
+    config.selectedVariantId,
+    isBandHProduct,
+    isRollerBandF,
+    requiredCustomizationVisibility,
+    sizeRanges,
+  ]);
 
-  const isAddToCartDisabled = isValidating || missingRequiredCustomizations.length > 0;
+  const missingFieldKeys = useMemo(
+    () => new Set(missingRequiredCustomizations.map((item) => item.key)),
+    [missingRequiredCustomizations]
+  );
+
+  const resolveFieldRef = (key: string): HTMLDivElement | null => {
+    // The color-variant selector renders two instances (mobile + desktop, toggled
+    // via CSS display), each registered under its own key — pick whichever is
+    // actually visible in the current viewport.
+    if (key === 'colorVariant') {
+      const mobile = fieldRefs.current.get('colorVariant-mobile') ?? null;
+      const desktop = fieldRefs.current.get('colorVariant-desktop') ?? null;
+      if (mobile && mobile.offsetParent !== null) return mobile;
+      if (desktop && desktop.offsetParent !== null) return desktop;
+      return mobile ?? desktop;
+    }
+    return fieldRefs.current.get(key) ?? null;
+  };
+
+  const scrollToFirstMissingField = () => {
+    const firstKey = missingRequiredCustomizations[0]?.key;
+
+    setIsMeasureOpen(true);
+    setIsCustomizeOpen(true);
+
+    // Wait a tick for collapsed sections to re-render/mount before looking up the ref.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        const target = firstKey ? resolveFieldRef(firstKey) : null;
+        if (target) {
+          target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        } else {
+          document.getElementById('add-to-cart-cta')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      });
+    });
+  };
 
   const openBandHInstallationGuide = (language: BandHInstallationGuideLanguage) => {
     if (!selectedBandHGuideMethod) return;
@@ -811,6 +887,8 @@ const ProductPage = ({
   // Calculate dynamic size ranges from price band
   const handleAddToCart = async () => {
     if (missingRequiredCustomizations.length > 0) {
+      setShowValidationErrors(true);
+      scrollToFirstMissingField();
       return;
     }
 
@@ -874,7 +952,8 @@ const ProductPage = ({
   // straight to payment. The cart is not touched.
   const handleBuyNow = async () => {
     if (missingRequiredCustomizations.length > 0) {
-      document.getElementById('add-to-cart-cta')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      setShowValidationErrors(true);
+      scrollToFirstMissingField();
       return;
     }
     if (isBuyingNow || isValidating) return;
@@ -936,11 +1015,17 @@ const ProductPage = ({
     }
   };
 
-  const renderBandHColorSelector = (className: string) => {
+  const renderBandHColorSelector = (className: string, refKey: string) => {
     if ((!isBandHProduct && !isRollerBandF) || bandHColorVariants.length === 0) return null;
 
     return (
-      <div className={className}>
+      <RequiredFieldWrapper
+        fieldKey={refKey}
+        label="color"
+        error={showValidationErrors && missingFieldKeys.has('colorVariant')}
+        registerFieldRef={registerFieldRef}
+        className={className}
+      >
         <div className="mb-5 flex items-center justify-between gap-3">
           <h3 className="min-w-0 text-lg font-semibold text-[#1f1f1f] sm:text-xl">
             Color - {selectedBandHVariantOption?.value ?? 'Select Color'}
@@ -1031,7 +1116,7 @@ const ProductPage = ({
             );
           })}
         </div>
-      </div>
+      </RequiredFieldWrapper>
     );
   };
 
@@ -1056,21 +1141,6 @@ const ProductPage = ({
           Extra {PROMO_CODE_PERCENT}% off
         </span>
       </button>
-
-      <div className="fixed bottom-5 left-5 z-40 hidden w-28 overflow-hidden rounded-md border border-[#c8ded9] bg-white text-center text-[#00473c] shadow-lg lg:block">
-        <div className="border-b border-[#dcebe7] bg-[#f6fffd] px-2 py-1.5">
-          <span className="block text-[10px] font-semibold uppercase tracking-wide text-[#4d6b65]">
-            Flash Sale
-          </span>
-        </div>
-        <div className="px-2 py-2">
-          <span className="block text-xl font-black leading-none lg:text-2xl">{FLASH_SALE_DISCOUNT_PERCENT}%</span>
-          <span className="mt-0.5 block text-[11px] font-bold uppercase tracking-wide">Off</span>
-          <span className="mt-1.5 block rounded bg-[#e8f5f2] px-1 py-1 text-[9px] font-bold uppercase tracking-wide">
-            <CountdownTimer variant="inline" />
-          </span>
-        </div>
-      </div>
 
       {/* Breadcrumb */}
       <div className="px-4 md:px-6 lg:px-20 py-3 md:py-4">
@@ -1145,7 +1215,7 @@ const ProductPage = ({
                 <StarRating rating={product.rating} />
               </div>
 
-              {renderBandHColorSelector('mb-4 lg:hidden')}
+              {renderBandHColorSelector('mb-4 lg:hidden', 'colorVariant-mobile')}
 
               {/* Shipping Info Box */}
               <div className="flex items-center border border-gray-200 rounded-lg mb-4 md:mb-6 px-3 md:px-4 py-2 md:py-3">
@@ -1192,7 +1262,7 @@ const ProductPage = ({
                 </div>
               </div>
 
-              {renderBandHColorSelector('hidden lg:block mb-4 md:mb-6')}
+              {renderBandHColorSelector('hidden lg:block mb-4 md:mb-6', 'colorVariant-desktop')}
 
               {/* Customization Sections */}
               <div className="space-y-4">
@@ -1226,34 +1296,48 @@ const ProductPage = ({
                   </button>
 
                   {isMeasureOpen && (
-                    <div className="p-4 md:p-6 space-y-6">
+                    <div className="p-4 md:p-6 space-y-5 md:space-y-6">
                       {/* Size Selector */}
                       {product.features.hasSize && (
-                        <SizeSelector
-                          width={config.width}
-                          widthFraction={config.widthFraction}
-                          height={config.height}
-                          heightFraction={config.heightFraction}
-                          unit={config.widthUnit}
-                          onWidthChange={(value) => setConfig({ ...config, width: value })}
-                          onWidthFractionChange={(value) => setConfig({ ...config, widthFraction: value })}
-                          onHeightChange={(value) => setConfig({ ...config, height: value })}
-                          onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
-                          onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
-                          minWidth={sizeRanges?.minWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : undefined)}
-                          maxWidth={sizeRanges?.maxWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : undefined)}
-                          minHeight={sizeRanges?.minHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : undefined)}
-                          maxHeight={sizeRanges?.maxHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : undefined)}
-                        />
+                        <RequiredFieldWrapper
+                          fieldKey="size"
+                          label="width and height"
+                          error={showValidationErrors && missingFieldKeys.has('size')}
+                          registerFieldRef={registerFieldRef}
+                        >
+                          <SizeSelector
+                            width={config.width}
+                            widthFraction={config.widthFraction}
+                            height={config.height}
+                            heightFraction={config.heightFraction}
+                            unit={config.widthUnit}
+                            onWidthChange={(value) => setConfig({ ...config, width: value })}
+                            onWidthFractionChange={(value) => setConfig({ ...config, widthFraction: value })}
+                            onHeightChange={(value) => setConfig({ ...config, height: value })}
+                            onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
+                            onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
+                            minWidth={sizeRanges?.minWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : undefined)}
+                            maxWidth={sizeRanges?.maxWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : undefined)}
+                            minHeight={sizeRanges?.minHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : undefined)}
+                            maxHeight={sizeRanges?.maxHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : undefined)}
+                          />
+                        </RequiredFieldWrapper>
                       )}
 
                       {/* Installation Method Selector */}
                       {product.features.hasInstallationMethod && visibleOptions.showInstallationMethod && (
-                        <InstallationMethodSelector
-                          options={installationOptions}
-                          selectedMethod={config.installationMethod}
-                          onMethodChange={(methodId) => setConfig({ ...config, installationMethod: methodId })}
-                        />
+                        <RequiredFieldWrapper
+                          fieldKey="installationMethod"
+                          label="installation method"
+                          error={showValidationErrors && missingFieldKeys.has('installationMethod')}
+                          registerFieldRef={registerFieldRef}
+                        >
+                          <InstallationMethodSelector
+                            options={installationOptions}
+                            selectedMethod={config.installationMethod}
+                            onMethodChange={(methodId) => setConfig({ ...config, installationMethod: methodId })}
+                          />
+                        </RequiredFieldWrapper>
                       )}
 
 
@@ -1269,11 +1353,18 @@ const ProductPage = ({
 
                       {/* Roll Style Selector */}
                       {product.features.hasRollStyle && visibleOptions.showRollStyle && (
-                        <RollStyleSelector
-                          options={ROLL_STYLE_OPTIONS}
-                          selectedRollStyle={config.rollStyle}
-                          onRollStyleChange={(styleId) => setConfig({ ...config, rollStyle: styleId })}
-                        />
+                        <RequiredFieldWrapper
+                          fieldKey="rollStyle"
+                          label="roll style"
+                          error={showValidationErrors && missingFieldKeys.has('rollStyle')}
+                          registerFieldRef={registerFieldRef}
+                        >
+                          <RollStyleSelector
+                            options={ROLL_STYLE_OPTIONS}
+                            selectedRollStyle={config.rollStyle}
+                            onRollStyleChange={(styleId) => setConfig({ ...config, rollStyle: styleId })}
+                          />
+                        </RequiredFieldWrapper>
                       )}
                     </div>
                   )}
@@ -1301,7 +1392,7 @@ const ProductPage = ({
                   </button>
 
                   {isCustomizeOpen && (
-                    <div className="p-4 md:p-6 space-y-6 divide-y divide-gray-100">
+                    <div className="p-4 md:p-6 space-y-5 md:space-y-6 divide-y divide-gray-100">
                       {isBandHProduct ? (
                         <DayNightBandHSelector
                           config={config}
@@ -1316,6 +1407,8 @@ const ProductPage = ({
                               bottomBar: false,
                             }))
                           }
+                          missingFieldKeys={showValidationErrors ? missingFieldKeys : EMPTY_MISSING_FIELD_KEYS}
+                          registerFieldRef={registerFieldRef}
                         />
                       ) : isRollerBandF ? (
                         <RollerBandFSelector
@@ -1331,79 +1424,123 @@ const ProductPage = ({
                               bottomBar: false,
                             }))
                           }
+                          missingFieldKeys={showValidationErrors ? missingFieldKeys : EMPTY_MISSING_FIELD_KEYS}
+                          registerFieldRef={registerFieldRef}
                         />
                       ) : (
                         <>
                       {/* Headrail Selector */}
                       {product.features.hasHeadrail && (
-                        <div className="pt-0 first:pt-0 pb-6">
+                        <RequiredFieldWrapper
+                          fieldKey="headrail"
+                          label="headrail"
+                          error={showValidationErrors && missingFieldKeys.has('headrail')}
+                          registerFieldRef={registerFieldRef}
+                          className="pt-0 first:pt-0 pb-5 md:pb-6"
+                        >
                           <HeadrailSelector
                             options={HEADRAIL_OPTIONS}
                             selectedHeadrail={config.headrail}
                             onHeadrailChange={(headrailId) => setConfig({ ...config, headrail: headrailId })}
                           />
-                        </div>
+                        </RequiredFieldWrapper>
                       )}
 
                       {/* Headrail Colour Selector */}
                       {product.features.hasHeadrailColour && visibleOptions.showHeadrailColour && (
-                        <div className="pt-6">
+                        <RequiredFieldWrapper
+                          fieldKey="headrailColour"
+                          label="headrail colour"
+                          error={showValidationErrors && missingFieldKeys.has('headrailColour')}
+                          registerFieldRef={registerFieldRef}
+                          className="pt-5 md:pt-6"
+                        >
                           <HeadrailColourSelector
                             options={HEADRAIL_COLOUR_OPTIONS}
                             selectedColour={config.headrailColour}
                             onColourChange={(colourId) => setConfig({ ...config, headrailColour: colourId })}
                           />
-                        </div>
+                        </RequiredFieldWrapper>
                       )}
 
                       {/* Control Option Selector */}
                       {product.features.hasControlOption && visibleOptions.showControlOption && (
-                        <div className="pt-6">
+                        <RequiredFieldWrapper
+                          fieldKey="controlOption"
+                          label="control option"
+                          error={showValidationErrors && missingFieldKeys.has('controlOption')}
+                          registerFieldRef={registerFieldRef}
+                          className="pt-5 md:pt-6"
+                        >
                           <ControlOptionSelector
                             options={controlOptions}
                             selectedOption={config.controlOption}
                             onOptionChange={(optionId) => setConfig({ ...config, controlOption: optionId })}
                           />
-                        </div>
+                        </RequiredFieldWrapper>
                       )}
 
                       {/* Stacking Selector */}
                       {product.features.hasStacking && visibleOptions.showStacking && (
-                        <div className="pt-6">
+                        <RequiredFieldWrapper
+                          fieldKey="stacking"
+                          label="stacking option"
+                          error={showValidationErrors && missingFieldKeys.has('stacking')}
+                          registerFieldRef={registerFieldRef}
+                          className="pt-5 md:pt-6"
+                        >
                           <StackingSelector
                             options={stackingOptions}
                             selectedStacking={config.stacking}
                             onStackingChange={(stackingId) => setConfig({ ...config, stacking: stackingId })}
                           />
-                        </div>
+                        </RequiredFieldWrapper>
                       )}
 
 
                       {/* Bottom Chain Selector */}
                       {product.features.hasBottomChain && visibleOptions.showBottomChain && (
-                        <div className="pt-6">
+                        <RequiredFieldWrapper
+                          fieldKey="bottomChain"
+                          label="bottom chain"
+                          error={showValidationErrors && missingFieldKeys.has('bottomChain')}
+                          registerFieldRef={registerFieldRef}
+                          className="pt-5 md:pt-6"
+                        >
                           <BottomChainSelector
                             options={BOTTOM_CHAIN_OPTIONS.filter(opt => !('pvcOnly' in opt) || product.features.hasPvcFabric)}
                             selectedChain={config.bottomChain}
                             onChainChange={(chainId) => setConfig({ ...config, bottomChain: chainId })}
                           />
-                        </div>
+                        </RequiredFieldWrapper>
                       )}
 
                       {/* Bracket Type Selector */}
                       {product.features.hasBracketType && visibleOptions.showBracketType && (
-                        <div className="pt-6">
+                        <RequiredFieldWrapper
+                          fieldKey="bracketType"
+                          label="bracket type"
+                          error={showValidationErrors && missingFieldKeys.has('bracketType')}
+                          registerFieldRef={registerFieldRef}
+                          className="pt-5 md:pt-6"
+                        >
                           <BracketTypeSelector
                             options={BRACKET_TYPE_OPTIONS}
                             selectedBracket={config.bracketType}
                             onBracketChange={(bracketId) => setConfig({ ...config, bracketType: bracketId })}
                           />
-                        </div>
+                        </RequiredFieldWrapper>
                       )}
 
                       {/* Blind Color Selector */}
                       {product.features.hasBlindColor && visibleOptions.showBlindColor && (
-                        <div className="pt-6">
+                        <RequiredFieldWrapper
+                          fieldKey="blindColor"
+                          label="blind colour"
+                          error={showValidationErrors && missingFieldKeys.has('blindColor')}
+                          registerFieldRef={registerFieldRef}
+                          className="pt-5 md:pt-6"
+                        >
                           <h3 className="text-sm font-medium text-[#3a3a3a] mb-3">Blind Color</h3>
                           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                             {BLIND_COLOR_OPTIONS.map((option) => (
@@ -1425,12 +1562,18 @@ const ProductPage = ({
                               </button>
                             ))}
                           </div>
-                        </div>
+                        </RequiredFieldWrapper>
                       )}
 
                       {/* Frame Color Selector */}
                       {product.features.hasFrameColor && visibleOptions.showFrameColor && (
-                        <div className="pt-6">
+                        <RequiredFieldWrapper
+                          fieldKey="frameColor"
+                          label="frame colour"
+                          error={showValidationErrors && missingFieldKeys.has('frameColor')}
+                          registerFieldRef={registerFieldRef}
+                          className="pt-5 md:pt-6"
+                        >
                           <h3 className="text-sm font-medium text-[#3a3a3a] mb-3">Frame Color</h3>
                           <div className="grid grid-cols-3 md:grid-cols-6 gap-3">
                             {FRAME_COLOR_OPTIONS.map((option) => (
@@ -1452,12 +1595,18 @@ const ProductPage = ({
                               </button>
                             ))}
                           </div>
-                        </div>
+                        </RequiredFieldWrapper>
                       )}
 
                       {/* Opening Direction Selector */}
                       {product.features.hasOpeningDirection && visibleOptions.showOpeningDirection && (
-                        <div className="pt-6">
+                        <RequiredFieldWrapper
+                          fieldKey="openingDirection"
+                          label="opening direction"
+                          error={showValidationErrors && missingFieldKeys.has('openingDirection')}
+                          registerFieldRef={registerFieldRef}
+                          className="pt-5 md:pt-6"
+                        >
                           <SimpleDropdown
                             label="Opening Direction"
                             options={OPENING_DIRECTION_OPTIONS}
@@ -1466,7 +1615,7 @@ const ProductPage = ({
                             placeholder="Select opening direction"
                             onInfoClick={() => setIsOpeningDirectionGuideOpen(true)}
                           />
-                        </div>
+                        </RequiredFieldWrapper>
                       )}
 
                       {isOpeningDirectionGuideOpen && (
@@ -1474,7 +1623,7 @@ const ProductPage = ({
                       )}
 
                       {/* Optional Customization Cards Row */}
-                      <div className="pt-6 pb-6 border-b border-gray-200">
+                      <div className="pt-5 pb-5 border-b border-gray-200 md:pt-6 md:pb-6">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
 
                           {/* Bottom Bar Card - Only for products with hasBottomBar */}
@@ -1528,20 +1677,25 @@ const ProductPage = ({
 
                               {/* Dropdowns inside the card */}
                               {selectedOptionalCards.bottomBar && (
-                                <div
-                                  className="mt-4 space-y-3 pt-3 border-t border-gray-200/50"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <SimpleDropdown
-                                    label="Select Bottom Bar"
-                                    options={BOTTOM_BAR_OPTIONS}
-                                    selectedValue={config.bottomBar}
-                                    onChange={(optionId) => setConfig({ ...config, bottomBar: optionId })}
-                                    placeholder="Select bottom bar style"
-                                    portal
-                                    menuMinWidth={360}
-                                    portalPlacement="bottom"
-                                  />
+                                <div onClick={(e) => e.stopPropagation()}>
+                                  <RequiredFieldWrapper
+                                    fieldKey="bottomBar"
+                                    label="bottom bar"
+                                    error={showValidationErrors && missingFieldKeys.has('bottomBar')}
+                                    registerFieldRef={registerFieldRef}
+                                    className="mt-4 space-y-3 pt-3 border-t border-gray-200/50"
+                                  >
+                                    <SimpleDropdown
+                                      label="Select Bottom Bar"
+                                      options={BOTTOM_BAR_OPTIONS}
+                                      selectedValue={config.bottomBar}
+                                      onChange={(optionId) => setConfig({ ...config, bottomBar: optionId })}
+                                      placeholder="Select bottom bar style"
+                                      portal
+                                      menuMinWidth={360}
+                                      portalPlacement="bottom"
+                                    />
+                                  </RequiredFieldWrapper>
                                 </div>
                               )}
                             </div>
@@ -1606,26 +1760,40 @@ const ProductPage = ({
                                   className="mt-4 space-y-3 pt-3 border-t border-gray-200/50"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  <SimpleDropdown
-                                    label="Select Location"
-                                    options={CONTROL_SIDE_OPTIONS}
-                                    selectedValue={config.controlSide}
-                                    onChange={(sideId) => setConfig({ ...config, controlSide: sideId })}
-                                    placeholder="Select location"
-                                    portal
-                                    menuMinWidth={320}
-                                    portalPlacement="bottom"
-                                  />
-                                  <SimpleDropdown
-                                    label="Chain Color"
-                                    options={CHAIN_COLOR_OPTIONS}
-                                    selectedValue={config.chainColor}
-                                    onChange={(colorId) => setConfig({ ...config, chainColor: colorId })}
-                                    placeholder="Select chain color"
-                                    portal
-                                    menuMinWidth={320}
-                                    portalPlacement="bottom"
-                                  />
+                                  <RequiredFieldWrapper
+                                    fieldKey="controlSide"
+                                    label="control location"
+                                    error={showValidationErrors && missingFieldKeys.has('controlSide')}
+                                    registerFieldRef={registerFieldRef}
+                                  >
+                                    <SimpleDropdown
+                                      label="Select Location"
+                                      options={CONTROL_SIDE_OPTIONS}
+                                      selectedValue={config.controlSide}
+                                      onChange={(sideId) => setConfig({ ...config, controlSide: sideId })}
+                                      placeholder="Select location"
+                                      portal
+                                      menuMinWidth={320}
+                                      portalPlacement="bottom"
+                                    />
+                                  </RequiredFieldWrapper>
+                                  <RequiredFieldWrapper
+                                    fieldKey="chainColor"
+                                    label="chain colour"
+                                    error={showValidationErrors && missingFieldKeys.has('chainColor')}
+                                    registerFieldRef={registerFieldRef}
+                                  >
+                                    <SimpleDropdown
+                                      label="Chain Color"
+                                      options={CHAIN_COLOR_OPTIONS}
+                                      selectedValue={config.chainColor}
+                                      onChange={(colorId) => setConfig({ ...config, chainColor: colorId })}
+                                      placeholder="Select chain color"
+                                      portal
+                                      menuMinWidth={320}
+                                      portalPlacement="bottom"
+                                    />
+                                  </RequiredFieldWrapper>
                                 </div>
                               )}
                             </div>
@@ -1693,40 +1861,61 @@ const ProductPage = ({
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {product.features.hasWrappedCassette && (
-                                    <SimpleDropdown
-                                      label="Cassette Color"
-                                      options={WRAPPED_CASSETTE_OPTIONS}
-                                      selectedValue={config.wrappedCassette}
-                                      onChange={(optionId) => setConfig({ ...config, wrappedCassette: optionId })}
-                                      placeholder="Select cassette color"
-                                      portal
-                                      menuMinWidth={360}
-                                      portalPlacement="bottom"
-                                    />
+                                    <RequiredFieldWrapper
+                                      fieldKey="wrappedCassette"
+                                      label="cassette option"
+                                      error={showValidationErrors && missingFieldKeys.has('wrappedCassette')}
+                                      registerFieldRef={registerFieldRef}
+                                    >
+                                      <SimpleDropdown
+                                        label="Cassette Color"
+                                        options={WRAPPED_CASSETTE_OPTIONS}
+                                        selectedValue={config.wrappedCassette}
+                                        onChange={(optionId) => setConfig({ ...config, wrappedCassette: optionId })}
+                                        placeholder="Select cassette color"
+                                        portal
+                                        menuMinWidth={360}
+                                        portalPlacement="bottom"
+                                      />
+                                    </RequiredFieldWrapper>
                                   )}
                                   {product.features.hasCassetteMatchingBar && (
-                                    <SimpleDropdown
-                                      label="Cassette and Bottom Matching Bar"
-                                      options={CASSETTE_MATCHING_BAR_OPTIONS}
-                                      selectedValue={config.cassetteMatchingBar}
-                                      onChange={(optionId) => setConfig({ ...config, cassetteMatchingBar: optionId })}
-                                      placeholder="Select cassette and bottom bar"
-                                      portal
-                                      menuMinWidth={360}
-                                      portalPlacement="bottom"
-                                    />
+                                    <RequiredFieldWrapper
+                                      fieldKey="cassetteMatchingBar"
+                                      label="cassette and bottom bar"
+                                      error={showValidationErrors && missingFieldKeys.has('cassetteMatchingBar')}
+                                      registerFieldRef={registerFieldRef}
+                                    >
+                                      <SimpleDropdown
+                                        label="Cassette and Bottom Matching Bar"
+                                        options={CASSETTE_MATCHING_BAR_OPTIONS}
+                                        selectedValue={config.cassetteMatchingBar}
+                                        onChange={(optionId) => setConfig({ ...config, cassetteMatchingBar: optionId })}
+                                        placeholder="Select cassette and bottom bar"
+                                        portal
+                                        menuMinWidth={360}
+                                        portalPlacement="bottom"
+                                      />
+                                    </RequiredFieldWrapper>
                                   )}
                                   {product.features.hasRollerCassette && (
-                                    <SimpleDropdown
-                                      label="Cassette and Bottom Matching Bar"
-                                      options={ROLLER_CASSETTE_OPTIONS}
-                                      selectedValue={config.cassetteMatchingBar}
-                                      onChange={(optionId) => setConfig({ ...config, cassetteMatchingBar: optionId })}
-                                      placeholder="Select cassette color"
-                                      portal
-                                      menuMinWidth={360}
-                                      portalPlacement="bottom"
-                                    />
+                                    <RequiredFieldWrapper
+                                      fieldKey="cassetteMatchingBar"
+                                      label="cassette and bottom bar"
+                                      error={showValidationErrors && missingFieldKeys.has('cassetteMatchingBar')}
+                                      registerFieldRef={registerFieldRef}
+                                    >
+                                      <SimpleDropdown
+                                        label="Cassette and Bottom Matching Bar"
+                                        options={ROLLER_CASSETTE_OPTIONS}
+                                        selectedValue={config.cassetteMatchingBar}
+                                        onChange={(optionId) => setConfig({ ...config, cassetteMatchingBar: optionId })}
+                                        placeholder="Select cassette color"
+                                        portal
+                                        menuMinWidth={360}
+                                        portalPlacement="bottom"
+                                      />
+                                    </RequiredFieldWrapper>
                                   )}
                                 </div>
                               )}
@@ -1800,16 +1989,23 @@ const ProductPage = ({
                                   className="mt-4 pt-3 border-t border-gray-200/50"
                                   onClick={(e) => e.stopPropagation()}
                                 >
-                                  <SimpleDropdown
-                                    label="Motorization Option"
-                                    options={activeMotorizationOptions}
-                                    selectedValue={config.motorization}
-                                    onChange={(optionId) => setConfig({ ...config, motorization: optionId })}
-                                    placeholder="Select motorization"
-                                    portal
-                                    menuMinWidth={360}
-                                    portalPlacement="bottom"
-                                  />
+                                  <RequiredFieldWrapper
+                                    fieldKey="motorization"
+                                    label="motorization option"
+                                    error={showValidationErrors && missingFieldKeys.has('motorization')}
+                                    registerFieldRef={registerFieldRef}
+                                  >
+                                    <SimpleDropdown
+                                      label="Motorization Option"
+                                      options={activeMotorizationOptions}
+                                      selectedValue={config.motorization}
+                                      onChange={(optionId) => setConfig({ ...config, motorization: optionId })}
+                                      placeholder="Select motorization"
+                                      portal
+                                      menuMinWidth={360}
+                                      portalPlacement="bottom"
+                                    />
+                                  </RequiredFieldWrapper>
                                 </div>
                               )}
                             </div>
@@ -1827,8 +2023,8 @@ const ProductPage = ({
               <div id="add-to-cart-cta" className="flex flex-col sm:flex-row gap-3 mt-4 md:mt-6">
                 <button
                   onClick={handleAddToCart}
-                  disabled={isAddToCartDisabled || isBuyingNow}
-                  className={`flex-1 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors ${isAddToCartDisabled || isBuyingNow
+                  disabled={isValidating || isBuyingNow}
+                  className={`flex-1 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors ${isValidating || isBuyingNow
                     ? 'bg-gray-400 text-white cursor-not-allowed'
                     : 'bg-[#00473c] text-white hover:bg-[#003830]'
                     }`}
@@ -1837,8 +2033,8 @@ const ProductPage = ({
                 </button>
                 <button
                   onClick={handleBuyNow}
-                  disabled={isAddToCartDisabled || isBuyingNow}
-                  className={`flex-1 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors border ${isAddToCartDisabled || isBuyingNow
+                  disabled={isValidating || isBuyingNow}
+                  className={`flex-1 py-2.5 md:py-3 px-4 md:px-6 rounded-lg text-sm md:text-base font-medium transition-colors border ${isValidating || isBuyingNow
                     ? 'border-gray-300 text-gray-400 cursor-not-allowed'
                     : 'border-[#00473c] text-[#00473c] hover:bg-[#f0fdf9]'
                     }`}
@@ -1846,32 +2042,6 @@ const ProductPage = ({
                   {isBuyingNow ? 'Preparing Checkout...' : 'Buy Now'}
                 </button>
               </div>
-
-              {/* Why the buttons are disabled — spell it out instead of a dead grey button */}
-              {!isValidating && missingRequiredCustomizations.length > 0 && (
-                <p className="mt-2.5 flex items-start gap-1.5 text-xs md:text-sm text-gray-500" role="status">
-                  <svg
-                    className="mt-0.5 h-3.5 w-3.5 shrink-0 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z"
-                    />
-                  </svg>
-                  <span>
-                    Still needed:{' '}
-                    <span className="text-gray-700">
-                      {formatMissingRequirements(missingRequiredCustomizations).join(', ')}
-                    </span>
-                  </span>
-                </p>
-              )}
 
               {buyNowError && (
                 <div
@@ -2372,14 +2542,19 @@ const ProductPage = ({
         </section>
       )}
 
-      {/* Mobile: keep price + Add to Cart/Buy Now visible while scrolling the configurator */}
+      {/* Keep price + Add to Cart/Buy Now visible while scrolling the configurator.
+          Always shown on mobile; on desktop it hides only while the inline
+          CTA is itself on screen, so the two never show at once. */}
       <StickyBottomBar
         price={totalPrice}
         additionalCost={0}
-        disabled={isAddToCartDisabled || isBuyingNow}
+        compareAtPrice={flashSaleCompareAtPrice}
+        currency={product.currency}
+        disabled={isValidating || isBuyingNow}
         isBusy={isValidating || isBuyingNow}
         onAddToCartClick={handleAddToCart}
         onBuyClick={handleBuyNow}
+        showOnDesktop={!isInlineCtaVisible}
       />
     </div>
   );

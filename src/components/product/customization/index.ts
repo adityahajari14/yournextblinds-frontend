@@ -21,3 +21,4 @@ export { default as DayNightBandHSelector } from './DayNightBandHSelector';
 export { default as RollerBandFSelector } from './RollerBandFSelector';
 export { default as RollerBandFRoomDarkeningSelector } from './RollerBandFRoomDarkeningSelector';
 export { default as OpeningDirectionGuideModal } from './OpeningDirectionGuideModal';
+export { default as RequiredFieldWrapper } from './RequiredFieldWrapper';
