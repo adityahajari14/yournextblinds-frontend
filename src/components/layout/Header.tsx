@@ -1,16 +1,20 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useSamples } from '@/context/SampleContext';
 import { navigationData } from '@/data/navigation';
+import SearchPopup from './SearchPopup';
 
 const Header = () => {
   const { cart } = useCart();
   const { count: sampleCount } = useSamples();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
+    <>
     <div className="bg-white backdrop-blur-sm px-3 md:px-4 lg:px-12 py-2.5 md:py-3 flex items-center justify-between gap-3 md:gap-4">
       {/* Logo */}
       <Link href="/" className="flex gap-1.5 md:gap-2 items-center shrink-0">
@@ -109,13 +113,18 @@ const Header = () => {
 
       {/* Action Icons */}
       <div className="flex gap-3 md:gap-4 items-center shrink-0">
-        <Link href="/search" aria-label="Search" className="group relative flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity">
+        <button
+          type="button"
+          onClick={() => setIsSearchOpen(true)}
+          aria-label="Search"
+          className="group relative flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity"
+        >
           <Image src="/icons/search.svg" alt="Search" width={24} height={24} className="w-6 h-6 md:w-[22px] md:h-[22px]" />
           <span className="md:hidden text-[11px] font-medium leading-none text-black">Search</span>
           <span className="hidden md:block pointer-events-none absolute top-full right-1/2 translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#00473c] px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity z-10">
             Search
           </span>
-        </Link>
+        </button>
         <Link href="/account" aria-label="Account" className="group relative flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity">
           <Image src="/icons/profile.svg" alt="Profile" width={24} height={24} className="w-6 h-6 md:w-[22px] md:h-[22px]" />
           <span className="md:hidden text-[11px] font-medium leading-none text-black">Account</span>
@@ -167,6 +176,8 @@ const Header = () => {
         </Link>
       </div>
     </div>
+    <SearchPopup open={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
   );
 };
 

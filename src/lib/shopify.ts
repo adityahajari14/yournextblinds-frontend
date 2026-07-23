@@ -421,6 +421,25 @@ export async function fetchAllShopifyProducts(
 }
 
 /**
+ * Fetch a single page of up to `first` products matching a search query,
+ * with no cursor pagination — for lightweight, live-typing search previews
+ * where only the top few results matter (unlike fetchAllShopifyProducts,
+ * which loops through the entire matching catalog).
+ */
+export async function fetchShopifyProductsPage(
+  searchQuery: string,
+  first: number
+): Promise<StorefrontProduct[]> {
+  const data = await storefrontFetch<StorefrontProductsResponse>(
+    PRODUCTS_QUERY,
+    { first, query: searchQuery },
+    { revalidate: false }
+  );
+
+  return data.products.edges.map((edge) => edge.node);
+}
+
+/**
  * Fetch a single product by its handle (slug) from Shopify.
  */
 export async function fetchShopifyProductByHandle(
@@ -535,6 +554,25 @@ export async function fetchShopifyProductsMerged(
 ): Promise<ApiProduct[]> {
   const [sfProducts, minimumPrices] = await Promise.all([
     fetchAllShopifyProducts(searchQuery),
+    getMinimumPrices(),
+  ]);
+
+  return sfProducts.map((sfProduct) =>
+    mapStorefrontProduct(sfProduct, minimumPrices)
+  );
+}
+
+/**
+ * Lightweight counterpart to fetchShopifyProductsMerged for live-typing
+ * search previews — fetches only the top `first` matches in one request
+ * instead of paginating through the whole result set.
+ */
+export async function fetchShopifyProductsPageMerged(
+  searchQuery: string,
+  first: number
+): Promise<ApiProduct[]> {
+  const [sfProducts, minimumPrices] = await Promise.all([
+    fetchShopifyProductsPage(searchQuery, first),
     getMinimumPrices(),
   ]);
 

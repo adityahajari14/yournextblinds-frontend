@@ -28,11 +28,18 @@ interface ProductCardProps {
   className?: string;
   preselectedMotorization?: boolean;
   collectionContext?: CollectionContext;
+  // 'grid': full-width cards (collection/category/search grids) — on mobile
+  // (where the grid is a single column) this switches to an Amazon-style
+  // image-left/details-right row instead of the stacked layout.
+  // 'carousel' (default): fixed-width cards in a horizontal scroller (e.g.
+  // home page Best Selling) — always keeps the stacked image-on-top layout,
+  // since a narrow fixed-width card has no room for a horizontal split.
+  layout?: 'grid' | 'carousel';
 }
 
 const ROLLER_BAND_F_TAG_CLIENT = 'roller-band-f';
 
-export default function ProductCard({ product, className = '', preselectedMotorization = false, collectionContext }: ProductCardProps) {
+export default function ProductCard({ product, className = '', preselectedMotorization = false, collectionContext, layout = 'carousel' }: ProductCardProps) {
   const router = useRouter();
   const imageUrl = product.image || product.images?.[0] || '';
   const currency = product.currency || 'USD';
@@ -64,13 +71,23 @@ export default function ProductCard({ product, className = '', preselectedMotori
     router.push(buildUrl(`/product/${product.slug}?customize=true${motorizedParam}`, contextParam));
   };
 
+  const isGridLayout = layout === 'grid';
+
   return (
     <Link
       href={buildUrl(`/product/${product.slug}${preselectedMotorization ? '?motorized=true' : ''}`, contextParam)}
-      className={`flex flex-col group w-full h-full ${className}`}
+      className={`group w-full h-full ${
+        isGridLayout ? 'flex flex-row gap-3 sm:flex-col sm:gap-0' : 'flex flex-col'
+      } ${className}`}
     >
       {/* Image */}
-      <div className="relative h-[220px] md:h-[250px] lg:h-[291px] overflow-hidden shrink-0">
+      <div
+        className={`relative overflow-hidden shrink-0 ${
+          isGridLayout
+            ? 'w-30 min-h-30 self-center rounded-lg sm:h-[250px] sm:min-h-0 sm:w-auto sm:self-auto sm:rounded-none lg:h-[291px]'
+            : 'h-[220px] md:h-[250px] lg:h-[291px]'
+        }`}
+      >
         <Image
           src={imageUrl}
           alt={displayName}
@@ -80,7 +97,13 @@ export default function ProductCard({ product, className = '', preselectedMotori
       </div>
 
       {/* Info */}
-      <div className="bg-white pt-3 md:pt-4 pb-1 flex items-end justify-between gap-2 flex-1">
+      <div
+        className={`bg-white flex-1 min-w-0 flex gap-2 ${
+          isGridLayout
+            ? 'flex-col justify-center sm:flex-row sm:items-end sm:justify-between sm:pt-3 sm:pb-1 md:pt-4'
+            : 'items-end justify-between pt-3 pb-1 md:pt-4'
+        }`}
+      >
         <div className="flex flex-col gap-1.5 md:gap-2 flex-1 min-w-0">
           <div className="flex flex-col gap-0.5">
             <h3 className="text-base md:text-lg font-normal text-black capitalize line-clamp-2">
@@ -100,10 +123,12 @@ export default function ProductCard({ product, className = '', preselectedMotori
             </span>
           </div>
         </div>
-        
-        <button 
+
+        <button
           onClick={handleAddToCart}
-          className="border border-black bg-white px-2.5 py-2.5 text-base text-black hover:bg-black hover:text-white transition-colors shrink-0"
+          className={`border border-black bg-white px-2.5 py-2.5 text-base text-black hover:bg-black hover:text-white transition-colors shrink-0 ${
+            isGridLayout ? 'mt-1 w-fit self-start sm:mt-0 sm:w-auto sm:self-auto' : ''
+          }`}
         >
           Add to Cart
         </button>
