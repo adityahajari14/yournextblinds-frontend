@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation';
 import { TopBar, Header, NavBar, Footer, FlashSale, FAQ } from '@/components';
-import { fetchCategories, fetchProductsByCategory, transformProduct, extractFilterOptions } from '@/lib/api';
+import { fetchCategories, fetchProductsByCategory, transformProduct, extractFilterOptions, isRealBuildPhase } from '@/lib/api';
 import { Product, ApiProduct } from '@/types';
 import CategoryHero from '@/components/collection/CategoryHero';
 import ProductGridWithFilters from '@/components/collection/ProductGridWithFilters';
@@ -120,9 +120,15 @@ export default async function CollectionPage({ params }: PageProps) {
       apiProducts = await fetchProductsByCategory(backendSlug, requiredTags, requiredCategories);
       products = apiProducts.map(transformProduct);
     } catch (error) {
-      // Silently fail during build - backend may be unavailable
       if (process.env.NODE_ENV === 'development') {
         console.error('Error fetching products:', error);
+      }
+      // During the actual build compile, tolerate the failure and render an
+      // empty page (ISR will regenerate it later). During runtime ISR, rethrow
+      // so Next.js aborts and retries instead of caching a broken/empty page
+      // (or one with $0 prices) for the whole revalidate window.
+      if (!isRealBuildPhase()) {
+        throw error;
       }
     }
   }

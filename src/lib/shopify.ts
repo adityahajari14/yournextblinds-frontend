@@ -481,10 +481,24 @@ export async function fetchShopifyCollections(): Promise<
 
 /**
  * Fetch minimum prices (handle → price) from our backend pricing engine.
- * Cached for 60 seconds to avoid repeated calls.
+ *
+ * Two caches with different jobs:
+ *  - `cachedMinimumPrices` / `pricesCacheTime`: a short-lived TTL cache to
+ *    avoid recomputing on every request.
+ *  - `lastGoodMinimumPrices`: the last NON-EMPTY successful result, kept
+ *    indefinitely. If a refresh fails or returns empty, we fall back to this
+ *    instead of `{}` — otherwise every product maps to `price: 0` and, on an
+ *    ISR page, that $0 gets baked into the static output for the whole
+ *    revalidate window. Serving slightly-stale-but-correct prices is far
+ *    safer than serving (and caching) $0.
+ *
+ * If we have neither fresh nor last-good data, we THROW rather than return an
+ * empty map — a thrown error aborts the page render so Next.js retries the
+ * static generation instead of persisting a $0 snapshot.
  */
 let cachedMinimumPrices: Record<string, number> | null = null;
 let pricesCacheTime = 0;
+let lastGoodMinimumPrices: Record<string, number> | null = null;
 const PRICES_CACHE_TTL = 60_000; // 60 seconds
 
 function getApiBaseUrl(): string {
@@ -493,6 +507,15 @@ function getApiBaseUrl(): string {
   if (vercelUrl) return `https://${vercelUrl}`;
   const port = process.env.PORT || '3000';
   return `http://localhost:${port}`;
+}
+
+function acceptMinimumPrices(prices: Record<string, number>): Record<string, number> {
+  cachedMinimumPrices = prices;
+  pricesCacheTime = Date.now();
+  if (Object.keys(prices).length > 0) {
+    lastGoodMinimumPrices = prices;
+  }
+  return prices;
 }
 
 async function getMinimumPrices(): Promise<Record<string, number>> {
@@ -508,22 +531,25 @@ async function getMinimumPrices(): Promise<Record<string, number>> {
   if (isServerSide) {
     try {
       const pricingService = await import('@/lib/server/pricing.service');
-      cachedMinimumPrices = await pricingService.getMinimumPricesByHandle();
-      if (Object.keys(cachedMinimumPrices).length === 0) {
+      const prices = await pricingService.getMinimumPricesByHandle();
+      if (Object.keys(prices).length === 0) {
         console.warn(
           '[Pricing] getMinimumPricesByHandle returned no prices. ' +
           'Check that: (1) pricing data is present in src/data/pricing/pricing-data.json, ' +
           '(2) SHOPIFY_ADMIN_ACCESS_TOKEN is set, and ' +
           '(3) the custom.price_band_name metafield is set on Shopify products.'
         );
+        // Empty result — prefer last-good over caching/serving an all-$0 map.
+        if (lastGoodMinimumPrices) return lastGoodMinimumPrices;
+        throw new Error('No minimum prices available and no last-good cache to fall back to');
       }
-      pricesCacheTime = now;
-      return cachedMinimumPrices;
+      return acceptMinimumPrices(prices);
     } catch (err) {
       console.error('[Pricing] Failed to fetch minimum prices from pricing data:', err);
-      cachedMinimumPrices = {};
-      pricesCacheTime = now;
-      return cachedMinimumPrices;
+      if (lastGoodMinimumPrices) return lastGoodMinimumPrices;
+      // Nothing usable — rethrow so the caller/page render fails instead of
+      // baking a $0 snapshot into the ISR cache.
+      throw err instanceof Error ? err : new Error(String(err));
     }
   }
 
@@ -536,13 +562,12 @@ async function getMinimumPrices(): Promise<Record<string, number>> {
   const response = await fetch(`${base}/api/pricing/minimum-prices`, fetchOptions);
 
   if (!response.ok) {
+    if (lastGoodMinimumPrices) return lastGoodMinimumPrices;
     throw new Error(`Failed to fetch minimum prices: ${response.status}`);
   }
 
   const json = await response.json();
-  cachedMinimumPrices = json.data;
-  pricesCacheTime = now;
-  return cachedMinimumPrices!;
+  return acceptMinimumPrices(json.data ?? {});
 }
 
 /**

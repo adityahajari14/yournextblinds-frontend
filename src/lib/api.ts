@@ -43,6 +43,17 @@ function getApiBaseUrl(): string {
   return `http://localhost:${port}`;
 }
 
+/**
+ * True only during the actual `next build` compile phase — NOT during runtime
+ * ISR regeneration on the server. This matters because empty/fallback data is
+ * acceptable at build time (the page will regenerate later), but during runtime
+ * ISR a data failure must throw so Next.js aborts and retries rather than
+ * caching a broken (empty / $0-priced) page for the whole revalidate window.
+ */
+export function isRealBuildPhase(): boolean {
+  return process.env.NEXT_PHASE === 'phase-production-build';
+}
+
 // ============================================
 // API Fetch Helpers
 // ============================================
@@ -197,8 +208,10 @@ export async function fetchProducts(params?: FetchProductsParams): Promise<ApiPr
     };
   } catch (error: any) {
     console.warn('Shopify products unavailable:', error.message);
-    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
-    if (isBuildTime) {
+    // Only swallow into an empty result during the actual build compile — never
+    // during runtime ISR regeneration, where returning [] (or $0 prices) would
+    // get cached as a broken page. There we rethrow so Next.js retries instead.
+    if (isRealBuildPhase()) {
       return {
         success: true,
         data: [],
@@ -282,8 +295,9 @@ export async function fetchProductsByCategory(
       return true;
     });
   } catch (error: any) {
-    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
-    if (isBuildTime) return [];
+    // Build compile: tolerate empty (page regenerates via ISR later).
+    // Runtime ISR: rethrow so a pricing/data failure doesn't cache a broken page.
+    if (isRealBuildPhase()) return [];
     throw error;
   }
 }
