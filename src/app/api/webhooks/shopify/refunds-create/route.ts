@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { verifyShopifyWebhook } from '@/lib/server/shopify-webhook';
-import { recordServerEvent } from '@/lib/server/analytics.service';
 
 export async function POST(request: Request) {
   try {
@@ -17,11 +16,6 @@ export async function POST(request: Request) {
 
     const amount = Number(refund.transactions?.[0]?.amount) || 0;
     console.log(`Webhook: Refund created for Shopify order ${refund.order_id} (amount: ${amount})`);
-
-    await recordServerEvent('refund', {
-      orderId: String(refund.order_id),
-      value: amount,
-    });
 
     return NextResponse.json({ success: true });
   } catch (error: unknown) {

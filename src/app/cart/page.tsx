@@ -10,7 +10,7 @@ import {
   CheckoutPriceMismatch,
 } from '@/lib/api';
 import { buildCheckoutItem } from '@/lib/checkout';
-import { track, getAnalyticsSessionId } from '@/lib/track';
+import { trackStoreCartView, trackStoreCheckoutInitiated, getStoreSessionContext } from '@/lib/store-events';
 import { CartItem, CheckoutItemRequest, PriceOption } from '@/types';
 import CartItemEditModal from '@/components/cart/CartItemEditModal';
 import Image from 'next/image';
@@ -66,7 +66,7 @@ export default function CartPage() {
 
   useEffect(() => {
     if (cart.items.length > 0) {
-      track('view_cart', { itemCount: cart.itemCount, cartValue: cart.total });
+      trackStoreCartView(cart.items, cart.total);
     }
     // Fire once per visit to the cart page, not on every cart mutation.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,15 +83,15 @@ export default function CartPage() {
     setPriceMismatches(null);
 
     try {
-      track('begin_checkout', {
-        itemCount: items.reduce((sum, item) => sum + item.quantity, 0),
-        cartValue: items.reduce((sum, item) => sum + item.product.price * item.quantity, 0),
-      });
+      const cartValue = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+      trackStoreCheckoutInitiated(items, cartValue);
+      const storeSession = getStoreSessionContext();
 
       const result = await createCheckout(
         buildCheckoutItems(items),
         customer?.email || undefined,
-        getAnalyticsSessionId()
+        storeSession?.sessionId,
+        storeSession
       );
 
       // Keep the cart until the order is confirmed paid (CartContext clears it
@@ -105,10 +105,6 @@ export default function CartPage() {
       window.location.href = result.checkoutUrl;
     } catch (error: unknown) {
       console.error('Checkout error:', error);
-      track('checkout_error', {
-        code: error instanceof CheckoutRequestError ? error.code ?? String(error.status) : 'network',
-        message: error instanceof Error ? error.message.slice(0, 200) : 'unknown',
-      });
 
       if (
         error instanceof CheckoutRequestError &&

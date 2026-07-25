@@ -18,7 +18,7 @@ import StickyBottomBar from './StickyBottomBar';
 import { PRODUCT_GUIDES } from '@/data/guides';
 import { PROMO_CODE, PROMO_CODE_PERCENT, FLASH_SALE_DISCOUNT_PERCENT } from '@/data/promo';
 import { trackShopifyProductView } from '@/lib/shopify-analytics';
-import { track, getAnalyticsSessionId } from '@/lib/track';
+import { trackStoreProductView, trackStoreCheckoutInitiated, getStoreSessionContext } from '@/lib/store-events';
 import {
   calculateTotalPrice,
   configToCustomizations,
@@ -206,7 +206,7 @@ const ProductPage = ({
 
   useEffect(() => {
     trackShopifyProductView(product);
-    track('view_item', { handle: product.slug, priceFrom: product.price });
+    trackStoreProductView(product);
   }, [product]);
 
   const [config, setConfig] = useState<ProductConfiguration>({
@@ -862,18 +862,6 @@ const ProductPage = ({
     return widthInches > 93 ? 100 : 0;
   }, [isRollerBandF, config.width, config.widthFraction, config.widthUnit]);
 
-  // Track settled price calculations (debounced so per-keystroke recalcs don't spam)
-  useEffect(() => {
-    if (!priceCalculation) return;
-    const timer = setTimeout(() => {
-      track('price_calculated', {
-        handle: product.slug,
-        price: priceCalculation.totalPrice + oversizeSurcharge,
-      });
-    }, 800);
-    return () => clearTimeout(timer);
-  }, [priceCalculation, oversizeSurcharge, product.slug]);
-
   // Get display price - use new pricing system if available, otherwise fallback
   const totalPrice = useMemo(() => {
     if (priceCalculation) {
@@ -1004,22 +992,22 @@ const ProductPage = ({
         // checkout API re-validates anyway.
       }
 
-      track('buy_now_click', { handle: product.slug, price });
-      track('begin_checkout', { itemCount: 1, cartValue: price, source: 'buy_now' });
+      const storeSession = getStoreSessionContext();
+      trackStoreCheckoutInitiated(
+        [{ id: 'buy-now', product, configuration: cartConfiguration, quantity: 1, addedAt: new Date() }],
+        price
+      );
 
       const result = await createCheckout(
         [buildCheckoutItem(product.slug, cartConfiguration, 1, price)],
         undefined,
-        getAnalyticsSessionId()
+        storeSession?.sessionId,
+        storeSession
       );
 
       window.location.href = result.checkoutUrl;
     } catch (error) {
       console.error('Buy Now failed:', error);
-      track('checkout_error', {
-        code: 'buy_now',
-        message: error instanceof Error ? error.message.slice(0, 200) : 'unknown',
-      });
       setBuyNowError(
         "We couldn't start your checkout. Please try again, or add the blind to your cart — " +
         'or call +1 832-670-6705 and we’ll take your order directly.'

@@ -22,6 +22,7 @@ import {
   HIDDEN_TEST_PRODUCT_TAG,
 } from '@/data/dayNightBandH';
 import { ROLLER_BAND_F_TAG } from '@/data/rollerBandF';
+import type { StoreSessionContext } from '@/lib/store-events';
 
 const SERVER_API_CACHE_REVALIDATE_SECONDS =
   Number(process.env.SERVER_API_CACHE_REVALIDATE_SECONDS || 3_600);
@@ -436,12 +437,13 @@ interface CheckoutApiResponse {
 export async function createCheckout(
   items: CheckoutItemRequest[],
   customerEmail?: string,
-  analyticsSessionId?: string
+  analyticsSessionId?: string,
+  storeSession?: StoreSessionContext | null
 ): Promise<CheckoutResponse> {
   const response = await fetch('/api/orders/create-checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items, customerEmail, analyticsSessionId }),
+    body: JSON.stringify({ items, customerEmail, analyticsSessionId, storeSession }),
   });
 
   let body: CheckoutApiResponse | null = null;

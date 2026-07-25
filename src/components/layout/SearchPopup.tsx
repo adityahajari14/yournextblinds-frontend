@@ -5,7 +5,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { formatPrice, formatPriceWithCurrency } from '@/lib/api';
-import { track } from '@/lib/track';
 import type { SearchSuggestion } from '@/app/api/search/suggestions/route';
 
 const DEBOUNCE_MS = 250;
@@ -88,7 +87,6 @@ const SearchPopup = ({ open, onClose }: SearchPopupProps) => {
   const goToResultsPage = (searchQuery: string) => {
     const trimmed = searchQuery.trim();
     if (!trimmed) return;
-    track('search', { query: trimmed, source: 'header_popup' });
     onClose();
     router.push(`/search?q=${encodeURIComponent(trimmed)}`);
   };

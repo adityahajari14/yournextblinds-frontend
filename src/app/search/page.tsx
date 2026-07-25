@@ -5,7 +5,6 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { TopBar, Header, NavBar, Footer } from '@/components';
 import { transformProduct, extractFilterOptions, fetchProducts } from '@/lib/api';
-import { track } from '@/lib/track';
 import { Product, ApiProduct } from '@/types';
 import CategoryHero from '@/components/collection/CategoryHero';
 import ProductGridWithFilters from '@/components/collection/ProductGridWithFilters';
@@ -45,7 +44,6 @@ function SearchContent() {
         const transformedProducts = apiProducts.map(transformProduct);
         setProducts(transformedProducts);
         setFilterOptions(extractFilterOptions(apiProducts));
-        track('search', { query, resultCount: transformedProducts.length });
       } catch (error) {
         console.error('Error searching products:', error);
         setProducts([]);

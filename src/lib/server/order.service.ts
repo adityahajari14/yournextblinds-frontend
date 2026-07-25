@@ -1,6 +1,7 @@
 import { calculateProductPrice, type PricingRequest } from './pricing.service';
 import { getAdminApiUrl, getAdminHeaders, validateShopifyConfig } from './shopify-admin';
 import { getCachedProduct } from './product-cache';
+import { recordCheckoutStarted, type AbandonedCheckoutItem } from './abandoned-checkout.service';
 
 // ============================================
 // Types
@@ -49,6 +50,18 @@ export interface CreateCheckoutRequest {
   /** First-party analytics session ID, carried onto the order so a completed
    *  purchase can be attributed back to the browser session (abandonment). */
   analyticsSessionId?: string;
+  /** Session/attribution context from the storefront tracker, recorded onto
+   *  the abandoned-checkout row so an unrecovered checkout can be attributed. */
+  storeSession?: {
+    sessionId: string;
+    utmSource: string | null;
+    utmMedium: string | null;
+    utmCampaign: string | null;
+    referrer: string | null;
+    deviceType: string;
+    userAgent: string;
+    sessionDurationSeconds: number;
+  } | null;
 }
 
 export interface CreateCheckoutResponse {
@@ -433,6 +446,36 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
   const draftOrder = draftOrderCreate?.draftOrder;
   if (!draftOrder || !draftOrder.invoiceUrl) {
     throw new CheckoutError('Failed to create Shopify draft order: no invoice URL returned', 500);
+  }
+
+  try {
+    const abandonedItems: AbandonedCheckoutItem[] = request.items.map((item, index) => ({
+      handle: item.handle,
+      title: responseLineItems[index]?.title || item.handle,
+      quantity: item.quantity,
+      calculatedPrice: responseLineItems[index]?.calculatedPrice ?? item.submittedPrice,
+      widthInches: item.widthInches,
+      heightInches: item.heightInches,
+      configuration: item.configuration,
+    }));
+
+    await recordCheckoutStarted({
+      customerEmail: request.customerEmail,
+      sessionId: request.storeSession?.sessionId ?? request.analyticsSessionId,
+      draftOrderId: draftOrder.id.toString(),
+      checkoutUrl: draftOrder.invoiceUrl,
+      subtotal,
+      items: abandonedItems,
+      utmSource: request.storeSession?.utmSource,
+      utmMedium: request.storeSession?.utmMedium,
+      utmCampaign: request.storeSession?.utmCampaign,
+      referrer: request.storeSession?.referrer,
+      deviceType: request.storeSession?.deviceType,
+      userAgent: request.storeSession?.userAgent,
+      sessionDurationSeconds: request.storeSession?.sessionDurationSeconds,
+    });
+  } catch (error) {
+    console.error('[AbandonedCheckout] Failed to record checkout started:', error);
   }
 
   return {

@@ -4,7 +4,7 @@ import React, { createContext, useContext, useState, useEffect, ReactNode, useRe
 import { useRouter } from 'next/navigation';
 import { Product, ProductConfiguration, Cart, CartItem, CartContextType } from '@/types';
 import { trackShopifyAddToCart } from '@/lib/shopify-analytics';
-import { track } from '@/lib/track';
+import { trackStoreAddToCart } from '@/lib/store-events';
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
@@ -145,15 +145,11 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     const updatedItems = [...cart.items, newItem];
     applyCartItems(updatedItems);
     trackShopifyAddToCart(product);
-    track('add_to_cart', { handle: product.slug, price: product.price });
+    trackStoreAddToCart(product, configuration);
     router.push('/cart');
   };
 
   const removeFromCart = (itemId: string) => {
-    const removed = cart.items.find((item) => item.id === itemId);
-    if (removed) {
-      track('remove_from_cart', { handle: removed.product.slug, price: removed.product.price });
-    }
     const updatedItems = cart.items.filter((item) => item.id !== itemId);
     applyCartItems(updatedItems);
 
