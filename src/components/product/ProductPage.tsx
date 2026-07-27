@@ -1235,7 +1235,7 @@ const ProductPage = ({
                       if (isBandHProduct) {
                         return `${fmt(addDays(today, 5))} - ${fmt(addDays(today, 7))}`;
                       }
-                      return fmt(addDays(today, 12));
+                      return `${fmt(addDays(today, 8))} - ${fmt(addDays(today, 12))}`;
                     })()}
                   </div>
                 </div>

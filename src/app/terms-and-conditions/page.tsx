@@ -19,7 +19,7 @@ const sections = [
   },
   {
     title: '3. Product Specifications & Accuracy',
-    content: `2.1 Images: All images on our website are for illustrative purposes only. While we strive for accuracy, colors and textures may appear differently depending on your screen settings and lighting. We strongly recommend ordering samples before placing a final order.\n\n2.2 Handcrafted Goods: As our blinds are handcrafted, minor variations may occur.\n\n2.3 Manufacturing Tolerance: Please note a machine tolerance of +/- 4mm, or up to +/- 6mm depending on fabric type, on all blinds. If a product falls within this tolerance, it is not deemed faulty.\n\n2.4 Day & Night Blinds: Large Day & Night blinds over 1800mm wide may exhibit a slight wave effect due to size and fabric weight restrictions.`,
+    content: `2.1 Images: All images on our website are for illustrative purposes only. While we strive for accuracy, colors and textures may appear differently depending on your screen settings and lighting. We strongly recommend ordering samples before placing a final order.\n\n2.2 Handcrafted Goods: As our blinds are handcrafted, minor variations may occur.\n\n2.3 Manufacturing Tolerance: Please note a machine tolerance of +/- 4mm, or up to +/- 6mm depending on fabric type, on all blinds. If a product falls within this tolerance, it is not deemed faulty.\n\n2.4 Day & Night Blinds: Large Day & Night blinds over 1800mm wide may exhibit a slight wave effect due to size and fabric weight restrictions.\n\n2.5 Product images are for illustration purposes only. Actual fabric colours and shades may vary slightly due to screen settings, lighting and photography.`,
   },
   {
     title: '4. Measurements & Custom Orders',

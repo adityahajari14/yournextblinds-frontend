@@ -360,7 +360,7 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasRollerCassette: false,
 };
 
-export const DEFAULT_ESTIMATED_DELIVERY = '7-12 business days';
+export const DEFAULT_ESTIMATED_DELIVERY = '8-12 business days';
 export const DEFAULT_RATING = 5;
 export const DEFAULT_REVIEW_COUNT = 0;
 

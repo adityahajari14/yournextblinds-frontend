@@ -428,7 +428,7 @@ const CustomizationModal = ({
                   if (isDayNightBandHProduct(product)) {
                     return `${fmt(addDays(today, 5))} - ${fmt(addDays(today, 7))}`;
                   }
-                  return fmt(addDays(today, 12));
+                  return `${fmt(addDays(today, 8))} - ${fmt(addDays(today, 12))}`;
                 })()}</span>
               </p>
               <div className="flex items-center gap-1 mb-4 md:mb-6">
