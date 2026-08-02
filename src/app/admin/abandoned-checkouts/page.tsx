@@ -93,6 +93,8 @@ const EVENT_LABELS: Record<StorefrontEventRecord['eventType'], { label: string; 
   add_to_cart: { label: 'Add to cart', tone: 'success' },
   cart_view: { label: 'Cart view', tone: 'default' },
   checkout_initiated: { label: 'Checkout initiated', tone: 'attention' },
+  chat_opened: { label: 'Chat opened', tone: 'default' },
+  chat_message: { label: 'Chat message', tone: 'info' },
 };
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {

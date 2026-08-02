@@ -5,6 +5,8 @@ export const STOREFRONT_EVENT_TYPES = [
   'add_to_cart',
   'cart_view',
   'checkout_initiated',
+  'chat_opened',
+  'chat_message',
 ] as const;
 
 export type StorefrontEventType = (typeof STOREFRONT_EVENT_TYPES)[number];
