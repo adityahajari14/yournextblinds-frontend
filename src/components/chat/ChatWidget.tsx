@@ -429,8 +429,21 @@ export default function ChatWidget() {
           </svg>
         </span>
         <span className={`absolute transition-all duration-200 ${open ? 'opacity-0 rotate-90' : 'opacity-100 rotate-0'}`}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+          {/* "AI" wordmark, bold and filled — a real typeface weight rather than
+              thin hairline strokes, so it reads clearly at badge size. */}
+          <svg width="30" height="30" viewBox="0 0 30 30">
+            <text
+              x="15"
+              y="20"
+              textAnchor="middle"
+              fill="currentColor"
+              fontSize="15"
+              fontWeight="800"
+              fontFamily="var(--font-display), Arial, Helvetica, sans-serif"
+              letterSpacing="0.5"
+            >
+              AI
+            </text>
           </svg>
         </span>
         {unread && !open && (
