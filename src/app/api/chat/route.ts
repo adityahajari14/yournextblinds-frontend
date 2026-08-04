@@ -164,6 +164,7 @@ export async function POST(request: Request) {
     const provider = getChatProvider();
     let reply = '';
     let toolCallCount = 0;
+    let leadCaptured = false;
 
     // Tool loop: the model may chain search -> price before answering. Capped so
     // a confused model can't spin through the request budget.
@@ -194,6 +195,14 @@ export async function POST(request: Request) {
           toolCallCount += 1;
           const output = await executeTool(call.name, call.args, ledger);
           collectCards(call.name, output, cards);
+          if (
+            call.name === 'capture_lead' &&
+            output !== null &&
+            typeof output === 'object' &&
+            (output as { saved?: boolean }).saved === true
+          ) {
+            leadCaptured = true;
+          }
           return { id: call.id, name: call.name, result: output };
         })
       );
@@ -240,6 +249,7 @@ export async function POST(request: Request) {
       outcome: 'answered',
       toolCalls: toolCallCount,
       blockedPrices: sanitized.blockedPrices.length,
+      leadCaptured,
       model: provider.model,
     });
 

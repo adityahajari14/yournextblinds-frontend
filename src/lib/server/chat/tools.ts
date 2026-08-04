@@ -2,6 +2,7 @@ import { createHmac } from 'crypto';
 import { fetchShopifyProductByHandleMerged } from '@/lib/shopify';
 import { calculateProductPrice, extractFabricCode } from '@/lib/server/pricing.service';
 import { searchCatalog, parseQuery } from './search';
+import { captureChatSubscriber, ChatSubscriberError } from './subscribers';
 import type { ChatToolSchema } from './provider';
 
 // ============================================
@@ -110,6 +111,26 @@ export const TOOL_SCHEMAS: ChatToolSchema[] = [
         },
       },
       required: ['handle', 'width_inches', 'height_inches'],
+      additionalProperties: false,
+    },
+  },
+  {
+    name: 'capture_lead',
+    description:
+      "Save a shopper's email (and name, if given) so we can send them offers and updates. ONLY call this after the shopper has clearly agreed — either they volunteered their email unprompted, or they said yes to your offer to send deals/offers by email. Never call this from an email-shaped string alone if the shopper hasn't agreed to be contacted; a shopper mentioning an email in passing is not consent. Call at most once per conversation — if it fails or the shopper declines, do not ask again.",
+    parameters: {
+      type: 'object',
+      properties: {
+        email: {
+          type: 'string',
+          description: "The shopper's email address, exactly as they gave it.",
+        },
+        name: {
+          type: 'string',
+          description: 'The first name the shopper gave, if any. Omit if not given.',
+        },
+      },
+      required: ['email'],
       additionalProperties: false,
     },
   },
@@ -264,11 +285,38 @@ async function getPrice(args: Record<string, unknown>, ledger: PriceLedger) {
   }
 }
 
+function isPlausibleEmail(value: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value);
+}
+
+async function captureLead(args: Record<string, unknown>) {
+  const email = String(args.email ?? '').trim();
+  const name = args.name ? String(args.name).trim() : undefined;
+
+  if (!email || !isPlausibleEmail(email)) {
+    return { error: 'That email doesn\'t look valid. Ask the shopper to double-check it.' };
+  }
+
+  try {
+    const result = await captureChatSubscriber({ email, name });
+    return {
+      saved: true,
+      email: result.email,
+      already_subscribed: result.alreadySubscribed,
+    };
+  } catch (error) {
+    const message = error instanceof ChatSubscriberError ? error.message : 'Could not save that right now.';
+    // Never let the model claim it saved the email when it didn't — same rule
+    // as pricing: only report success that actually happened.
+    return { error: `${message} Apologize briefly and continue the conversation without retrying.` };
+  }
+}
+
 // ============================================
 // Dispatch
 // ============================================
 
-export type ToolName = 'search_products' | 'get_product_details' | 'get_price';
+export type ToolName = 'search_products' | 'get_product_details' | 'get_price' | 'capture_lead';
 
 export async function executeTool(
   name: string,
@@ -283,6 +331,8 @@ export async function executeTool(
         return await getProductDetails(args, ledger);
       case 'get_price':
         return await getPrice(args, ledger);
+      case 'capture_lead':
+        return await captureLead(args);
       default:
         return { error: `Unknown tool: ${name}` };
     }

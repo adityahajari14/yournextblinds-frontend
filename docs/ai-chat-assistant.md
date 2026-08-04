@@ -65,7 +65,9 @@ ChatWidget (client)  →  POST /api/chat  →  guard → Gemini ⇄ tools → gu
 - `src/lib/server/chat/provider.ts` — provider-neutral interface
 - `src/lib/server/chat/gemini.ts` — Gemini transport (the only provider-aware file)
 - `src/lib/server/chat/search.ts` — query parsing + relevance ranking
-- `src/lib/server/chat/tools.ts` — the three storefront tools
+- `src/lib/server/chat/tools.ts` — the four storefront tools (search, product
+  details, price, lead capture)
+- `src/lib/server/chat/subscribers.ts` — Shopify customer upsert for captured leads
 - `src/lib/server/chat/knowledge.ts` — brand facts + system prompt
 - `src/lib/server/chat/guard.ts` — abuse screening, price guard, rate limiting
 - `src/app/api/chat/route.ts` — tool loop
@@ -242,11 +244,54 @@ before real traffic.**
   after launch, and have a paid-tier or provider-switch plan ready if it fires
   during real traffic.
 
+## Lead capture (`capture_lead` tool, `subscribers.ts`)
+
+Nova can capture a shopper's name and email during conversation and add them
+as a Shopify customer with marketing consent — the same customer record every
+other marketing flow uses, not a separate database. Two soft asks per
+conversation, both skippable and non-blocking:
+
+1. **Name, once, after the first answer.** "By the way, who am I chatting
+   with?" — never before answering the shopper's actual question. If ignored
+   or answered with something that isn't a name, Nova drops it silently and
+   never asks again in that conversation.
+2. **Email, once, framed as offers — never as delivering a quote.** Offered at
+   a natural moment (after a price, or when the shopper seems to be wrapping
+   up): "Want me to let you know about deals and offers by email?" Deliberately
+   *not* "I'll email you this quote" — the price is already visible in the
+   chat, so that framing would be a false pretext for the ask. A decline is
+   final; no follow-up, no "are you sure?"
+
+Both rules live in `SYSTEM_PROMPT`'s `# GETTING TO KNOW THE SHOPPER` section in
+`knowledge.ts` — this is prompt behavior, not code-enforced, the same category
+as tone and scope. `capture_lead` itself is only ever called after the shopper
+clearly agrees; a shopper mentioning an email in passing is not treated as
+consent.
+
+`src/lib/server/chat/subscribers.ts` (`captureChatSubscriber`) mirrors
+`newsletter.service.ts`'s Shopify Admin GraphQL upsert (lookup by email →
+create or update → set marketing consent), tagged `chat-assistant` instead of
+`newsletter-popup` so these are distinguishable in Shopify. Same trust rule as
+pricing: the tool only returns `{saved: true}` on a real Shopify success, and
+the prompt is told never to claim it saved an email it didn't actually save.
+Verified end-to-end against the live store — a real customer was created with
+the correct tag and `SUBSCRIBED` marketing state, then deleted as test cleanup.
+
+**Known constraint, not introduced by this feature:** this store's Shopify app
+is not approved for direct PII field reads (`email`, `firstName`) on the
+`Customer` object — confirmed via a direct Admin API query, which returned
+`ACCESS_DENIED` for those two fields specifically. This doesn't block
+`capture_lead` (the lookup only needs `id`/`tags`/`emailMarketingConsent`, and
+the create/update mutations write successfully), but if a future feature needs
+to *read back* a customer's email or name from the Admin API, that will need
+approval on Shopify's PII access flow first (Shopify, Advanced, or Plus plan).
+
 ## Analytics
 
 Emits `chat_opened` and `chat_message` through the existing events service, so
 they appear in `/admin/analytics`. `chat_message` meta carries `outcome`,
-`reason` (for refusals), `toolCalls`, `blockedPrices`, and `model`.
+`reason` (for refusals), `toolCalls`, `blockedPrices`, `leadCaptured`, and
+`model`.
 
 ## Known limits
 
