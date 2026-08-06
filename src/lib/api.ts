@@ -22,6 +22,7 @@ import {
   HIDDEN_TEST_PRODUCT_TAG,
 } from '@/data/dayNightBandH';
 import { ROLLER_BAND_F_TAG } from '@/data/rollerBandF';
+import type { CuratedCollection, CuratedClause, CuratedRule } from '@/data/curatedCollections';
 import type { StoreSessionContext } from '@/lib/store-events';
 
 const SERVER_API_CACHE_REVALIDATE_SECONDS =
@@ -301,6 +302,73 @@ export async function fetchProductsByCategory(
     if (isRealBuildPhase()) return [];
     throw error;
   }
+}
+
+/**
+ * How many products must carry a curated collection's `tagSlug` before the tag
+ * is treated as deliberate merchandising and allowed to replace the code rules.
+ */
+const MIN_TAGGED_PRODUCTS_TO_OVERRIDE = 5;
+
+/**
+ * Fetch products for a curated collection (window type / feature / room).
+ *
+ * Hybrid selection: if the definition names a `tagSlug` and any product in the
+ * catalog carries it, that tag alone decides membership — so tagging products
+ * in Shopify later transparently takes over from the hand-written rules.
+ * Otherwise the `include` rules are applied, then `exclude` is subtracted.
+ */
+export async function fetchProductsForCuratedCollection(
+  collection: CuratedCollection
+): Promise<ApiProduct[]> {
+  try {
+    const response = await fetchProducts({ limit: 500 });
+    const catalog = response.data;
+
+    // Hybrid switch — real Shopify tags win over the code rules once they exist.
+    // The threshold guards against a stray tag on one or two products (the
+    // catalog has several such leftovers) silently reducing a whole landing
+    // page to a near-empty grid.
+    if (collection.tagSlug) {
+      const tagged = catalog.filter((product) =>
+        product.tags.some((tag) => tag.slug === collection.tagSlug)
+      );
+      if (tagged.length >= MIN_TAGGED_PRODUCTS_TO_OVERRIDE) return tagged;
+    }
+
+    const included = catalog.filter((product) => matchesCuratedRule(product, collection.include));
+    if (!collection.exclude) return included;
+
+    return included.filter((product) => !matchesCuratedRule(product, collection.exclude!));
+  } catch (error: any) {
+    // Build compile: tolerate empty (page regenerates via ISR later).
+    // Runtime ISR: rethrow so a pricing/data failure doesn't cache a broken page.
+    if (isRealBuildPhase()) return [];
+    throw error;
+  }
+}
+
+/** A product matches the rule if it is listed explicitly or satisfies any clause. */
+function matchesCuratedRule(product: ApiProduct, rule: CuratedRule): boolean {
+  if (rule.productSlugs?.includes(product.slug)) return true;
+  return (rule.anyOf ?? []).some((clause) => matchesCuratedClause(product, clause));
+}
+
+/** Every condition present on the clause must hold. */
+function matchesCuratedClause(product: ApiProduct, clause: CuratedClause): boolean {
+  const categorySlugs = product.categories.map((category) => category.slug);
+  const tagSlugs = product.tags.map((tag) => tag.slug);
+
+  if (clause.categories && !clause.categories.some((slug) => categorySlugs.includes(slug))) {
+    return false;
+  }
+  if (clause.tagsAny && !clause.tagsAny.some((tag) => tagSlugs.includes(tag))) {
+    return false;
+  }
+  if (clause.tagsAll && !clause.tagsAll.every((tag) => tagSlugs.includes(tag))) {
+    return false;
+  }
+  return true;
 }
 
 // ============================================

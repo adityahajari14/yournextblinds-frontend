@@ -24,8 +24,11 @@ const IMAGE_MAP: Record<string, string> = {
   '/product/non-driii-honeycomb-blackout-blinds':    '/home/categories/eclipse%20core%20shades.webp',
 };
 
+// Only the product-family menus become homepage cards. The situational menus
+// (window type / feature / room) opt out via `showInHomeGrid` so their 22 links
+// don't flood this grid.
 const categoryItems = navigationData
-  .filter((item) => item.submenu)
+  .filter((item) => item.showInHomeGrid && item.submenu)
   .flatMap((item) =>
     (item.submenu ?? [])
       .filter((sub) => sub.href && !EXCLUDED_LABELS.has(sub.label))

@@ -1,11 +1,12 @@
 import { notFound } from 'next/navigation';
 import { TopBar, Header, NavBar, Footer, FlashSale, FAQ } from '@/components';
-import { fetchCategories, fetchProductsByCategory, transformProduct, extractFilterOptions, isRealBuildPhase } from '@/lib/api';
+import { fetchCategories, fetchProductsByCategory, fetchProductsForCuratedCollection, transformProduct, extractFilterOptions, isRealBuildPhase } from '@/lib/api';
 import { Product, ApiProduct } from '@/types';
 import CategoryHero from '@/components/collection/CategoryHero';
 import ProductGridWithFilters from '@/components/collection/ProductGridWithFilters';
 import ComingSoon from '@/components/collection/ComingSoon';
 import { ALL_COLLECTION_SLUGS, COLLECTION_DISPLAY_NAMES, COLLECTION_DESCRIPTIONS, NAVIGATION_SLUG_MAPPING, NAVIGATION_TAG_FILTERS, NAVIGATION_CATEGORY_FILTERS } from '@/data/navigation';
+import { CURATED_COLLECTION_SLUGS, getCuratedCollection } from '@/data/curatedCollections';
 import type { CollectionContext } from '@/components/product/ProductCard';
 
 interface PageProps {
@@ -17,7 +18,7 @@ export const revalidate = 3_600;
 // Generate static params from all possible collection slugs
 export async function generateStaticParams() {
   // Combine backend categories with frontend-defined slugs
-  const slugs = new Set(ALL_COLLECTION_SLUGS);
+  const slugs = new Set([...ALL_COLLECTION_SLUGS, ...CURATED_COLLECTION_SLUGS]);
 
   try {
     const categories = await fetchCategories();
@@ -35,6 +36,16 @@ export async function generateStaticParams() {
 // Generate metadata for SEO
 export async function generateMetadata({ params }: PageProps) {
   const { category } = await params;
+
+  // Curated collections own their copy and take precedence over the backend
+  // category of the same handle (e.g. the empty `no-drill-blinds` collection).
+  const curated = getCuratedCollection(category);
+  if (curated) {
+    return {
+      title: `${curated.title} | Your Next Blinds`,
+      description: curated.description,
+    };
+  }
 
   // Try to get name from backend categories first
   try {
@@ -76,6 +87,12 @@ export default async function CollectionPage({ params }: PageProps) {
     return mappedSlug;
   };
 
+  // Curated collections (window type / feature / room) select products across
+  // several Shopify collections at once, so they bypass the single-category
+  // lookup below entirely — including where a same-named but empty backend
+  // collection exists (`no-drill-blinds`).
+  const curated = getCuratedCollection(categorySlug);
+
   // Validate the slug exists in our defined collections
   const isValidSlug = ALL_COLLECTION_SLUGS.includes(categorySlug);
 
@@ -95,15 +112,16 @@ export default async function CollectionPage({ params }: PageProps) {
   const backendCategory = backendCategories.find((c) => c.slug === backendSlug);
 
   // If slug is not in our defined list AND not in backend, show 404
-  if (!isValidSlug && !backendCategory) {
+  if (!curated && !isValidSlug && !backendCategory) {
     notFound();
   }
 
   // Get display name (use custom name from COLLECTION_DISPLAY_NAMES if available)
-  const categoryName = COLLECTION_DISPLAY_NAMES[categorySlug] || backendCategory?.name ||
+  const categoryName = curated?.title || COLLECTION_DISPLAY_NAMES[categorySlug] || backendCategory?.name ||
     categorySlug.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 
-  const categoryDescription = COLLECTION_DESCRIPTIONS[categorySlug]
+  const categoryDescription = curated?.description
+    ?? COLLECTION_DESCRIPTIONS[categorySlug]
     ?? backendCategory?.description
     ?? `Explore our beautiful collection of ${categoryName.toLowerCase()} for your home.`;
 
@@ -111,7 +129,19 @@ export default async function CollectionPage({ params }: PageProps) {
   let apiProducts: ApiProduct[] = [];
   let products: Product[] = [];
 
-  if (backendCategory) {
+  if (curated) {
+    try {
+      apiProducts = await fetchProductsForCuratedCollection(curated);
+      products = apiProducts.map(transformProduct);
+    } catch (error) {
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error fetching curated collection products:', error);
+      }
+      if (!isRealBuildPhase()) {
+        throw error;
+      }
+    }
+  } else if (backendCategory) {
     try {
       // Get required tags and categories for this navigation slug
       const requiredTags = NAVIGATION_TAG_FILTERS[categorySlug];
@@ -137,7 +167,12 @@ export default async function CollectionPage({ params }: PageProps) {
   const filterOptions = extractFilterOptions(apiProducts);
 
   // Check if we should show coming soon (no backend category or no products)
-  const showComingSoon = !backendCategory || products.length === 0;
+  const showComingSoon = (!curated && !backendCategory) || products.length === 0;
+
+  // Window-type and feature collections span several product families, so no
+  // single photo represents them — they omit `heroImage` and `null` renders a
+  // text-only hero. `undefined` keeps the existing title-lookup fallback.
+  const heroImage = curated ? (curated.heroImage ?? null) : undefined;
 
   // Pre-select motorization when browsing motorised collections
   const preselectedMotorization =
@@ -164,6 +199,7 @@ export default async function CollectionPage({ params }: PageProps) {
           title={categoryName}
           description={categoryDescription}
           productCount={products.length}
+          image={heroImage}
         />
 
         <div className="px-4 md:px-6 lg:px-20 py-8 md:py-12">

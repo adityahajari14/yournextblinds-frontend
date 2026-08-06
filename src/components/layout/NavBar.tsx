@@ -5,10 +5,22 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { navigationData, NavigationItem, NavigationLink } from '@/data/navigation';
 
+/**
+ * Flatten every dropdown shape into a plain link list. The desktop header
+ * renders mega-menu columns and room image cards, but on mobile they all
+ * collapse into the same accordion.
+ */
+const flattenNavLinks = (item: NavigationItem): NavigationLink[] => [
+  ...(item.submenu ?? []),
+  ...(item.megaMenu?.columns.flatMap((column) => column.links) ?? []),
+  ...(item.roomMenu?.map((room) => ({ label: room.name, href: room.href, icon: room.image })) ?? []),
+];
+
 // Mobile Menu Item Component with Accordion
 const MobileMenuItem = ({ item, onClose }: { item: NavigationItem; onClose: () => void }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const hasSubmenu = item.submenu && item.submenu.length > 0;
+  const links = flattenNavLinks(item);
+  const hasSubmenu = links.length > 0;
 
   if (!hasSubmenu) {
     return (
@@ -46,10 +58,10 @@ const MobileMenuItem = ({ item, onClose }: { item: NavigationItem; onClose: () =
         />
       </button>
 
-      {isOpen && item.submenu && (
+      {isOpen && (
         <div className="pb-3 pl-4">
           <ul className="space-y-2">
-            {item.submenu.map((link: NavigationLink, linkIndex: number) => (
+            {links.map((link: NavigationLink, linkIndex: number) => (
               <li key={linkIndex}>
                 {link.href ? (
                   <Link

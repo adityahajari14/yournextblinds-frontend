@@ -1,7 +1,7 @@
 import type { MetadataRoute } from 'next';
 import { getSiteUrl } from '@/lib/site';
 import { fetchProducts } from '@/lib/api';
-import { ALL_COLLECTION_SLUGS } from '@/data/navigation';
+import { SITEMAP_COLLECTION_SLUGS } from '@/data/navigation';
 
 export const revalidate = 3600;
 
@@ -30,7 +30,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: route === '' ? 1 : 0.6,
   }));
 
-  for (const slug of ALL_COLLECTION_SLUGS) {
+  for (const slug of SITEMAP_COLLECTION_SLUGS) {
     entries.push({
       url: `${base}/collections/${slug}`,
       lastModified: now,

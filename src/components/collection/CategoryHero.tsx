@@ -4,6 +4,15 @@ interface CategoryHeroProps {
   title: string;
   description: string;
   productCount: number;
+  /**
+   * Explicit hero image, bypassing the title lookup below. Curated collections
+   * (src/data/curatedCollections.ts) pass their own so they don't depend on
+   * their title matching a key in `categoryImages`.
+   *
+   * `null` means "this collection has no hero image" and renders a text-only
+   * hero — distinct from `undefined`, which falls back to the title lookup.
+   */
+  image?: string | null;
 }
 
 // Category images mapping. Keys are the display titles from COLLECTION_DISPLAY_NAMES
@@ -27,8 +36,8 @@ const categoryImages: Record<string, string> = {
   'EclipseCore shades': '/home/categories/eclipse%20core%20shades.webp',
 };
 
-export default function CategoryHero({ title, description, productCount }: CategoryHeroProps) {
-  const image = categoryImages[title] || '/home/products/blinds.jpeg';
+export default function CategoryHero({ title, description, productCount, image: imageOverride }: CategoryHeroProps) {
+  const image = imageOverride === null ? null : (imageOverride || categoryImages[title] || '/home/products/blinds.jpeg');
   const isComingSoon = productCount === 0;
 
   return (
@@ -37,9 +46,9 @@ export default function CategoryHero({ title, description, productCount }: Categ
       <div className="absolute bottom-0 left-0 w-64 h-64 md:w-96 md:h-96 bg-[#00473c]/3 rounded-full blur-3xl" />
       
       <div className="max-w-[1400px] mx-auto relative">
-        <div className="grid lg:grid-cols-2 min-h-[350px] sm:min-h-[400px] md:min-h-[450px] lg:min-h-[500px]">
+        <div className={`grid min-h-[350px] sm:min-h-[400px] md:min-h-[450px] ${image ? 'lg:grid-cols-2 lg:min-h-[500px]' : 'lg:min-h-[360px]'}`}>
           <div className="flex items-center px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 py-8 sm:py-10 md:py-12 lg:py-16">
-            <div className="max-w-xl space-y-4 sm:space-y-5 md:space-y-6">
+            <div className={`space-y-4 sm:space-y-5 md:space-y-6 ${image ? 'max-w-xl' : 'max-w-3xl'}`}>
               <div className="inline-block">
                 {isComingSoon ? (
                   <span className="text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-widest text-amber-600 font-semibold bg-amber-50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
@@ -80,15 +89,17 @@ export default function CategoryHero({ title, description, productCount }: Categ
             </div>
           </div>
 
-          <div className="relative h-[250px] sm:h-[300px] md:h-[400px] lg:h-full">
-            <Image
-              src={image}
-              alt={title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
+          {image && (
+            <div className="relative h-[250px] sm:h-[300px] md:h-[400px] lg:h-full">
+              <Image
+                src={image}
+                alt={title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
         </div>
       </div>
     </section>

@@ -8,6 +8,8 @@ import { useSamples } from '@/context/SampleContext';
 import { navigationData } from '@/data/navigation';
 import SearchPopup from './SearchPopup';
 
+const DEFAULT_NAV_ICON = '/nav-icons/vertical-blinds.webp';
+
 const Header = () => {
   const { cart } = useCart();
   const { count: sampleCount } = useSamples();
@@ -26,12 +28,12 @@ const Header = () => {
 
       {/* Desktop Navigation (inline, single row) */}
       <nav className="hidden lg:block flex-1">
-        <ul className="flex gap-6 items-center justify-center">
+        <ul className="flex gap-3 xl:gap-5 items-center justify-center">
           {navigationData.map((item, index) => (
             <li key={index} className="group static">
-              {item.submenu ? (
+              {item.submenu || item.megaMenu || item.roomMenu ? (
                 <>
-                  <div className="flex items-center gap-1.5 text-sm font-semibold text-black hover:text-[#00473c] transition-colors cursor-pointer">
+                  <div className="flex items-center gap-1.5 text-[13px] xl:text-sm font-semibold text-black hover:text-[#00473c] transition-colors cursor-pointer whitespace-nowrap">
                     <span>{item.label}</span>
                     <Image
                       src="/icons/CaretDown.svg"
@@ -45,38 +47,13 @@ const Header = () => {
                   {/* Dropdown Menu */}
                   <div className="absolute left-0 right-0 top-full opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
                     <div className="bg-white border-t-2 border-[#00473c] shadow-xl p-8">
-                      <div className="max-w-4xl mx-auto">
-                        <ul className="space-y-3">
-                          {item.submenu.map((link, linkIndex) => {
-                            let icon = '/nav-icons/vertical-blinds.webp';
-
-                            if (item.label === 'Blinds') {
-                              if (link.label.includes('Light filtering Vertical')) icon = '/nav-icons/vertical-blinds.webp';
-                              else if (link.label.includes('Blackout vertical')) icon = '/nav-icons/blackout-blinds.svg';
-                              else if (link.label.includes('All blinds')) icon = '/nav-icons/roller-blinds.webp';
-                            } else if (item.label === 'Shades') {
-                              if (link.label.includes('Light filtering roller')) icon = '/nav-icons/roller-blinds.webp';
-                              else if (link.label.includes('Blackout roller')) icon = '/nav-icons/blackout-blinds.svg';
-                              else if (link.label.includes('Waterproof')) icon = '/nav-icons/waterproof-blinds.svg';
-                              else if (link.label.includes('Dual zebra')) icon = '/nav-icons/day-night-blinds.webp';
-                              else if (link.label.includes('All blinds')) icon = '/nav-icons/roller-blinds.webp';
-                            } else if (item.label === 'Motorization') {
-                              if (link.label.includes('roller')) icon = '/nav-icons/roller-blinds.webp';
-                              else if (link.label.includes('Dual')) icon = '/nav-icons/day-night-blinds.webp';
-                              else if (link.label.includes('EclipseCore')) icon = '/nav-icons/blackout-blinds.svg';
-                            } else if (item.label === 'Blackout') {
-                              if (link.label.includes('Roller')) icon = '/nav-icons/blackout-blinds.svg';
-                              else if (link.label.includes('Dual')) icon = '/nav-icons/day-night-blinds.webp';
-                              else if (link.label.includes('Vertical')) icon = '/nav-icons/vertical-blinds.webp';
-                              else if (link.label.includes('EclipseCore')) icon = '/nav-icons/blackout-blinds.svg';
-                            } else if (item.label === 'Shop by') {
-                              if (link.label.includes('Feature')) icon = '/nav-icons/thermal-blinds.svg';
-                              else if (link.label.includes('room')) icon = '/nav-icons/rooms-livingroom.webp';
-                            }
-
-                            return (
+                      {/* Single-column list */}
+                      {item.submenu && (
+                        <div className="max-w-4xl mx-auto">
+                          <ul className="space-y-3">
+                            {item.submenu.map((link, linkIndex) => (
                               <li key={linkIndex} className="flex items-start gap-2">
-                                <Image src={icon} alt="" width={20} height={20} className="opacity-70 mt-0.5 shrink-0" />
+                                <Image src={link.icon ?? DEFAULT_NAV_ICON} alt="" width={20} height={20} className="opacity-70 mt-0.5 shrink-0" />
                                 {link.href ? (
                                   <Link href={link.href} className="text-[15px] text-gray-700 hover:text-[#00473c] transition-colors">
                                     {link.label}
@@ -87,22 +64,78 @@ const Header = () => {
                                   </span>
                                 )}
                               </li>
-                            );
-                          })}
-                        </ul>
-                      </div>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+
+                      {/* Multi-column mega menu */}
+                      {item.megaMenu && (
+                        <div className="max-w-4xl mx-auto">
+                          <div
+                            className="grid gap-x-8 gap-y-3"
+                            style={{ gridTemplateColumns: `repeat(${item.megaMenu.columns.length}, minmax(0, 1fr))` }}
+                          >
+                            {item.megaMenu.columns.map((column, columnIndex) => (
+                              <ul key={columnIndex} className="space-y-3">
+                                {column.title && (
+                                  <li className="text-xs font-semibold uppercase tracking-wider text-[#00473c]">
+                                    {column.title}
+                                  </li>
+                                )}
+                                {column.links.map((link, linkIndex) => (
+                                  <li key={linkIndex} className="flex items-start gap-2">
+                                    <Image src={link.icon ?? DEFAULT_NAV_ICON} alt="" width={20} height={20} className="opacity-70 mt-0.5 shrink-0" />
+                                    {link.href ? (
+                                      <Link href={link.href} className="text-[15px] text-gray-700 hover:text-[#00473c] transition-colors">
+                                        {link.label}
+                                      </Link>
+                                    ) : (
+                                      <span className="text-[15px] text-gray-700">{link.label}</span>
+                                    )}
+                                  </li>
+                                ))}
+                              </ul>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Image-card grid */}
+                      {item.roomMenu && (
+                        <div className="max-w-5xl mx-auto">
+                          <h3 className="text-lg font-semibold text-[#3a3a3a] mb-6">Rooms</h3>
+                          <div className="grid grid-cols-4 gap-x-6 gap-y-6">
+                            {item.roomMenu.map((room, roomIndex) => (
+                              <Link key={roomIndex} href={room.href} className="group/room text-center">
+                                <div className="relative w-full aspect-4/3 overflow-hidden rounded-sm">
+                                  <Image
+                                    src={room.image}
+                                    alt={room.name}
+                                    fill
+                                    className="object-cover transition-transform duration-300 group-hover/room:scale-105"
+                                  />
+                                </div>
+                                <span className="mt-2 block text-[15px] text-gray-700 group-hover/room:text-[#00473c] transition-colors">
+                                  {room.name}
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </>
               ) : item.href ? (
                 <Link
                   href={item.href}
-                  className="flex items-center gap-1.5 text-sm font-semibold text-black hover:text-[#00473c] transition-colors"
+                  className="flex items-center gap-1.5 text-[13px] xl:text-sm font-semibold text-black hover:text-[#00473c] transition-colors whitespace-nowrap"
                 >
                   <span>{item.label}</span>
                 </Link>
               ) : (
-                <div className="flex items-center gap-1.5 text-sm font-semibold text-black">
+                <div className="flex items-center gap-1.5 text-[13px] xl:text-sm font-semibold text-black whitespace-nowrap">
                   <span>{item.label}</span>
                 </div>
               )}
