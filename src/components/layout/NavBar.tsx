@@ -91,7 +91,7 @@ const NavBar = () => {
   return (
     <>
       {/* Mobile Navigation (desktop nav now lives inline in the Header) */}
-      <nav className="lg:hidden bg-white border-t border-[#eaeaea] px-4 py-3 relative">
+      <nav className="lg:hidden bg-white border-t border-[#eaeaea] px-3 sm:px-4 py-2.5 sm:py-3 relative">
         <div className="flex items-center justify-between">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
