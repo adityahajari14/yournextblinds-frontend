@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 interface PaginationProps {
   page: number;
@@ -11,6 +11,7 @@ interface PaginationProps {
 
 export default function Pagination({ page, pageSize, total, pageParam }: PaginationProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 
@@ -19,7 +20,7 @@ export default function Pagination({ page, pageSize, total, pageParam }: Paginat
   const goTo = (nextPage: number) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(pageParam, String(nextPage));
-    router.push(`/admin/abandoned-checkouts?${params.toString()}`);
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   const rangeStart = (page - 1) * pageSize + 1;

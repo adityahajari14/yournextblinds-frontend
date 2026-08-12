@@ -14,6 +14,7 @@ export type StorefrontEventType = (typeof STOREFRONT_EVENT_TYPES)[number];
 export interface StorefrontEventInput {
   eventType: StorefrontEventType;
   sessionId: string;
+  visitorId?: string | null;
   productHandle?: string | null;
   productTitle?: string | null;
   quantity?: number | null;
@@ -114,12 +115,13 @@ export async function recordStorefrontEvent(input: StorefrontEventInput): Promis
 
   await db.query(
     `INSERT INTO storefront_events
-      (event_type, session_id, product_handle, product_title, quantity, value, configuration, meta,
+      (event_type, session_id, visitor_id, product_handle, product_title, quantity, value, configuration, meta,
        utm_source, utm_medium, utm_campaign, referrer, device_type, user_agent, session_duration_seconds)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16)`,
     [
       input.eventType,
       input.sessionId,
+      input.visitorId || null,
       input.productHandle || null,
       input.productTitle || null,
       input.quantity ?? null,

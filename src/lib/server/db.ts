@@ -79,6 +79,53 @@ export function ensureSchema(): Promise<void> {
       await db.query(`ALTER TABLE storefront_events ADD COLUMN IF NOT EXISTS device_type TEXT`);
       await db.query(`ALTER TABLE storefront_events ADD COLUMN IF NOT EXISTS user_agent TEXT`);
       await db.query(`ALTER TABLE storefront_events ADD COLUMN IF NOT EXISTS session_duration_seconds INT`);
+      await db.query(`ALTER TABLE storefront_events ADD COLUMN IF NOT EXISTS visitor_id TEXT`);
+
+      // listRecentEvents filters on session_id, and the engagement dashboard
+      // joins sessions to their cart/checkout outcome on it.
+      await db.query(
+        `CREATE INDEX IF NOT EXISTS idx_storefront_events_session
+           ON storefront_events (session_id, created_at DESC)`
+      );
+
+      // Engagement / time-on-site. One row per page view, upserted by the
+      // client's heartbeat — so the table grows with page views, not with how
+      // long people stay. engaged_seconds only counts time the tab was visible
+      // and the visitor wasn't idle; active_seconds is wall clock on the page.
+      await db.query(
+        `CREATE TABLE IF NOT EXISTS page_views (
+          id BIGSERIAL PRIMARY KEY,
+          page_view_id TEXT NOT NULL UNIQUE,
+          session_id TEXT NOT NULL,
+          visitor_id TEXT,
+          created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+          path TEXT NOT NULL,
+          page_title TEXT,
+          page_type TEXT,
+          referrer TEXT,
+          utm_source TEXT,
+          utm_medium TEXT,
+          utm_campaign TEXT,
+          device_type TEXT,
+          engaged_seconds INT NOT NULL DEFAULT 0,
+          active_seconds INT NOT NULL DEFAULT 0,
+          max_scroll_percent INT,
+          is_exit BOOLEAN NOT NULL DEFAULT false
+        )`
+      );
+      await db.query(
+        `CREATE INDEX IF NOT EXISTS idx_page_views_created_at
+           ON page_views (created_at DESC)`
+      );
+      await db.query(
+        `CREATE INDEX IF NOT EXISTS idx_page_views_session
+           ON page_views (session_id, created_at)`
+      );
+      await db.query(
+        `CREATE INDEX IF NOT EXISTS idx_page_views_path
+           ON page_views (path, created_at DESC)`
+      );
 
       // Cart-level abandonment: a session that added to cart / viewed cart but never
       // reached checkout. Upserted per session_id and refreshed on every cart event;

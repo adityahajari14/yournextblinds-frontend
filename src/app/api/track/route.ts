@@ -5,32 +5,14 @@ import {
   type StorefrontEventType,
 } from '@/lib/server/events.service';
 import { markAbandonedCartCheckoutStarted, upsertAbandonedCart } from '@/lib/server/abandoned-cart.service';
-
-const MAX_TEXT_LENGTH = 200;
-const MAX_USER_AGENT_LENGTH = 500;
-const MAX_JSON_BYTES = 4_000;
-const DEVICE_TYPES = new Set(['desktop', 'mobile', 'tablet']);
-
-function clampText(value: unknown, maxLength = MAX_TEXT_LENGTH): string | null {
-  if (typeof value !== 'string') return null;
-  const trimmed = value.trim();
-  return trimmed ? trimmed.slice(0, maxLength) : null;
-}
-
-function clampNumber(value: unknown): number | null {
-  return typeof value === 'number' && Number.isFinite(value) && value >= 0 ? value : null;
-}
-
-function clampJson(value: unknown): Record<string, unknown> | null {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
-  const serialized = JSON.stringify(value);
-  return serialized.length <= MAX_JSON_BYTES ? (value as Record<string, unknown>) : null;
-}
-
-function clampDeviceType(value: unknown): string | null {
-  const text = clampText(value);
-  return text && DEVICE_TYPES.has(text) ? text : null;
-}
+import {
+  clampDeviceType,
+  clampJson,
+  clampNumber,
+  clampText,
+  MAX_REFERRER_LENGTH,
+  MAX_USER_AGENT_LENGTH,
+} from '@/lib/server/track-validation';
 
 export async function POST(request: Request) {
   try {
@@ -46,9 +28,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false }, { status: 400 });
     }
 
+    // Session ids roll over after 30 minutes of inactivity, so the durable
+    // per-browser identity is the visitor id. Older clients still in the wild
+    // send only sessionId, which stays stable for them.
+    const visitorId = clampText(body?.visitorId) ?? sessionId;
+
     const eventInput = {
       eventType: eventType as StorefrontEventType,
       sessionId,
+      visitorId,
       productHandle: clampText(body?.productHandle),
       productTitle: clampText(body?.productTitle),
       quantity: clampNumber(body?.quantity),
@@ -58,7 +46,7 @@ export async function POST(request: Request) {
       utmSource: clampText(body?.utmSource),
       utmMedium: clampText(body?.utmMedium),
       utmCampaign: clampText(body?.utmCampaign),
-      referrer: clampText(body?.referrer, 500),
+      referrer: clampText(body?.referrer, MAX_REFERRER_LENGTH),
       deviceType: clampDeviceType(body?.deviceType),
       userAgent: clampText(body?.userAgent, MAX_USER_AGENT_LENGTH),
       sessionDurationSeconds: clampNumber(body?.sessionDurationSeconds),
@@ -70,8 +58,11 @@ export async function POST(request: Request) {
       const meta = eventInput.meta as { items?: unknown } | null;
       const items = Array.isArray(meta?.items) ? meta!.items : null;
       if (items) {
+        // Keyed on the visitor, not the session: a shopper who leaves and comes
+        // back an hour later gets a new session id but should still update the
+        // one cart row rather than creating a duplicate.
         await upsertAbandonedCart({
-          sessionId,
+          sessionId: visitorId,
           subtotal: eventInput.value ?? 0,
           items,
           utmSource: eventInput.utmSource,
@@ -86,7 +77,7 @@ export async function POST(request: Request) {
     }
 
     if (eventType === 'checkout_initiated') {
-      await markAbandonedCartCheckoutStarted(sessionId);
+      await markAbandonedCartCheckoutStarted(visitorId);
     }
 
     return NextResponse.json({ success: true });

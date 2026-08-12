@@ -3,8 +3,19 @@ import { redirect } from 'next/navigation';
 import { isAdminAuthenticated } from '@/lib/server/admin-auth';
 import LogoutButton from './LogoutButton';
 import FilterBar from './FilterBar';
-import Pagination from './Pagination';
-import ExportButton from './ExportButton';
+import Pagination from '@/components/admin/Pagination';
+import ExportButton from '@/components/admin/ExportButton';
+import {
+  AdminNav,
+  Badge,
+  StatCard,
+  BarRow,
+  formatDateTime,
+  formatDuration,
+  money,
+  number,
+  type Tone,
+} from '@/components/admin/ui';
 import { CartItemCard, CheckoutItemCard } from './ItemDetails';
 import {
   listAbandonedCheckouts,
@@ -29,24 +40,6 @@ const PAGE_SIZE = 20;
 
 type TypeTab = (typeof TYPE_TABS)[number];
 
-const money = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' });
-const number = new Intl.NumberFormat('en-US');
-
-function formatDateTime(value: string): string {
-  const date = new Date(value);
-  return `${date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} at ${date
-    .toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
-    .toLowerCase()}`;
-}
-
-function formatDuration(seconds: number | null): string | null {
-  if (seconds === null) return null;
-  if (seconds < 60) return `${seconds}s`;
-  const minutes = Math.floor(seconds / 60);
-  if (minutes < 60) return `${minutes}m`;
-  return `${Math.floor(minutes / 60)}h ${minutes % 60}m`;
-}
-
 function formatConfiguration(config: Record<string, unknown> | undefined | null): string {
   if (!config) return '';
   return Object.entries(config)
@@ -61,21 +54,6 @@ function formatConfiguration(config: Record<string, unknown> | undefined | null)
     .join(' · ');
 }
 
-function Badge({ tone, children }: { tone: 'success' | 'critical' | 'attention' | 'info' | 'default'; children: React.ReactNode }) {
-  const tones: Record<string, string> = {
-    success: 'bg-[#cdfee1] text-[#0c5132]',
-    critical: 'bg-[#fed1cf] text-[#8e1f0b]',
-    attention: 'bg-[#ffd6a4] text-[#5e4200]',
-    info: 'bg-[#eaf4ff] text-[#00527c]',
-    default: 'bg-[#e3e3e3] text-[#303030]',
-  };
-  return (
-    <span className={`inline-flex items-center rounded-lg px-2 py-0.5 text-xs font-medium ${tones[tone]}`}>
-      {children}
-    </span>
-  );
-}
-
 function checkoutStatusBadge(status: AbandonedCheckoutRecord['status']) {
   if (status === 'converted') return <Badge tone="success">Converted</Badge>;
   if (status === 'abandoned') return <Badge tone="critical">Abandoned</Badge>;
@@ -88,7 +66,7 @@ function cartStatusBadge(status: AbandonedCartRecord['status']) {
   return <Badge tone="info">Active</Badge>;
 }
 
-const EVENT_LABELS: Record<StorefrontEventRecord['eventType'], { label: string; tone: 'success' | 'critical' | 'attention' | 'info' | 'default' }> = {
+const EVENT_LABELS: Record<StorefrontEventRecord['eventType'], { label: string; tone: Tone }> = {
   product_view: { label: 'Product view', tone: 'info' },
   add_to_cart: { label: 'Add to cart', tone: 'success' },
   cart_view: { label: 'Cart view', tone: 'default' },
@@ -96,32 +74,6 @@ const EVENT_LABELS: Record<StorefrontEventRecord['eventType'], { label: string; 
   chat_opened: { label: 'Chat opened', tone: 'default' },
   chat_message: { label: 'Chat message', tone: 'info' },
 };
-
-function StatCard({ label, value, sub }: { label: string; value: string; sub?: string }) {
-  return (
-    <div className="bg-white rounded-xl border border-[#e3e3e3] shadow-[0_1px_0_rgba(0,0,0,0.05)] px-4 py-3.5 flex flex-col gap-1">
-      <span className="text-[13px] font-medium text-[#616161] underline decoration-dotted decoration-[#c9c9c9] underline-offset-4 w-fit">
-        {label}
-      </span>
-      <span className="text-[20px] font-semibold text-[#202223] leading-7">{value}</span>
-      {sub && <span className="text-xs text-[#6d7175]">{sub}</span>}
-    </div>
-  );
-}
-
-function FunnelRow({ label, count, maxCount, rate }: { label: string; count: number; maxCount: number; rate: string | null }) {
-  const width = maxCount > 0 ? Math.max((count / maxCount) * 100, count > 0 ? 2 : 0) : 0;
-  return (
-    <div className="flex items-center gap-4">
-      <span className="w-40 shrink-0 text-[13px] text-[#303030]">{label}</span>
-      <div className="flex-1 h-6 bg-[#f1f1f1] rounded overflow-hidden">
-        <div className="h-full bg-[#0b6bcb] rounded" style={{ width: `${width}%` }} />
-      </div>
-      <span className="w-16 shrink-0 text-right text-[13px] font-semibold text-[#202223]">{number.format(count)}</span>
-      <span className="w-16 shrink-0 text-right text-xs text-[#6d7175]">{rate ?? '—'}</span>
-    </div>
-  );
-}
 
 function AttributionLine({
   record,
@@ -285,7 +237,10 @@ export default async function AbandonedCheckoutsPage({
               Custom storefront tracking — events Shopify&apos;s native analytics can&apos;t see for this store
             </p>
           </div>
-          <LogoutButton />
+          <div className="flex items-center gap-2">
+            <AdminNav current="store" />
+            <LogoutButton />
+          </div>
         </div>
 
         {/* Stat cards */}
@@ -310,10 +265,10 @@ export default async function AbandonedCheckoutsPage({
             <h2 className="text-[13px] font-semibold text-[#202223]">Conversion funnel</h2>
           </div>
           <div className="px-4 py-4 flex flex-col gap-3">
-            <FunnelRow label="Product views" count={stats.productViews} maxCount={funnelMax} rate="100%" />
-            <FunnelRow label="Added to cart" count={stats.addToCarts} maxCount={funnelMax} rate={pctOf(stats.addToCarts, stats.productViews)} />
-            <FunnelRow label="Checkout initiated" count={stats.checkoutsInitiated} maxCount={funnelMax} rate={pctOf(stats.checkoutsInitiated, stats.productViews)} />
-            <FunnelRow label="Converted" count={stats.checkoutsConverted} maxCount={funnelMax} rate={pctOf(stats.checkoutsConverted, stats.productViews)} />
+            <BarRow label="Product views" count={stats.productViews} maxCount={funnelMax} rate="100%" />
+            <BarRow label="Added to cart" count={stats.addToCarts} maxCount={funnelMax} rate={pctOf(stats.addToCarts, stats.productViews)} />
+            <BarRow label="Checkout initiated" count={stats.checkoutsInitiated} maxCount={funnelMax} rate={pctOf(stats.checkoutsInitiated, stats.productViews)} />
+            <BarRow label="Converted" count={stats.checkoutsConverted} maxCount={funnelMax} rate={pctOf(stats.checkoutsConverted, stats.productViews)} />
           </div>
         </div>
 
@@ -354,7 +309,11 @@ export default async function AbandonedCheckoutsPage({
               </div>
             </div>
             <div className="pb-3">
-              <ExportButton type={type} status={tab} />
+              <ExportButton
+                endpoint="/api/admin/export"
+                filename={type}
+                params={{ type, status: tab === 'all' ? undefined : tab }}
+              />
             </div>
           </div>
 

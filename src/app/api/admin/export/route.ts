@@ -2,24 +2,7 @@ import { NextResponse } from 'next/server';
 import { isAdminAuthenticated } from '@/lib/server/admin-auth';
 import { listAbandonedCheckouts, type CheckoutFilters } from '@/lib/server/abandoned-checkout.service';
 import { listAbandonedCarts, type CartFilters } from '@/lib/server/abandoned-cart.service';
-
-const EXPORT_ROW_LIMIT = 5_000;
-
-function csvEscape(value: unknown): string {
-  const text = value === null || value === undefined ? '' : String(value);
-  if (/[",\n]/.test(text)) {
-    return `"${text.replace(/"/g, '""')}"`;
-  }
-  return text;
-}
-
-function toCsv(headers: string[], rows: unknown[][]): string {
-  const lines = [headers.map(csvEscape).join(',')];
-  for (const row of rows) {
-    lines.push(row.map(csvEscape).join(','));
-  }
-  return lines.join('\n');
-}
+import { csvResponse, EXPORT_ROW_LIMIT, toCsv } from '@/lib/server/csv';
 
 function parseSharedFilters(searchParams: URLSearchParams): {
   days?: number;
@@ -71,12 +54,7 @@ export async function GET(request: Request) {
       ])
     );
 
-    return new NextResponse(csv, {
-      headers: {
-        'Content-Type': 'text/csv; charset=utf-8',
-        'Content-Disposition': `attachment; filename="abandoned-carts-${Date.now()}.csv"`,
-      },
-    });
+    return csvResponse(csv, 'abandoned-carts');
   }
 
   const filters: CheckoutFilters = { ...shared, status: status as CheckoutFilters['status'] };
@@ -99,10 +77,5 @@ export async function GET(request: Request) {
     ])
   );
 
-  return new NextResponse(csv, {
-    headers: {
-      'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="abandoned-checkouts-${Date.now()}.csv"`,
-    },
-  });
+  return csvResponse(csv, 'abandoned-checkouts');
 }

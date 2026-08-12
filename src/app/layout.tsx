@@ -8,6 +8,7 @@ import { SampleProvider } from '@/context/SampleContext';
 import { AuthProvider } from '@/context/AuthContext';
 import { StorefrontPromoBar, StorefrontSubscribePopup } from '@/components/layout/StorefrontChrome';
 import ShopifyAnalytics from '@/components/analytics/ShopifyAnalytics';
+import EngagementTracker from '@/components/analytics/EngagementTracker';
 import ChatWidget from '@/components/chat/ChatWidget';
 
 const inter = Inter({
@@ -77,6 +78,7 @@ export default function RootLayout({
         />
         <Suspense fallback={null}>
           <ShopifyAnalytics />
+          <EngagementTracker />
         </Suspense>
         <AuthProvider>
           <CartProvider>
