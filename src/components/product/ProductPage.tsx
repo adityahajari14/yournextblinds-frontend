@@ -49,6 +49,8 @@ import {
   DayNightBandHSelector,
   RollerBandFSelector,
   RollerBandFRoomDarkeningSelector,
+  HoneycombCellularSelector,
+  ReviewSelectionsPanel,
   RequiredFieldWrapper,
 } from './customization';
 import {
@@ -88,6 +90,13 @@ import {
   supportsRollerBandFWrappedCassette,
   rollerBandFShowsRollOption,
 } from '@/data/rollerBandF';
+import {
+  HONEYCOMB_CELLULAR_CONTROL_OPTIONS,
+  HONEYCOMB_CELLULAR_MOTORIZATION_OPTIONS,
+  HONEYCOMB_CELLULAR_SIZE_LIMITS,
+  HONEYCOMB_CELLULAR_COMPARE_AT_PRICE,
+  isHoneycombCellularProduct,
+} from '@/data/honeycombCellular';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 import { CONTINUOUS_CHAIN_CARD, CONTINUOUS_CHAIN_CARD_ROLLER, CONTINUOUS_CHAIN_CARD_ZEBRA, CASSETTE_CARD, CASSETTE_CARD_ROLLER, CASSETTE_CARD_ZEBRA, MOTORIZATION_CARD, BOTTOM_BAR_CARD } from '@/data/optionalCustomizations';
 import Image from 'next/image';
@@ -194,6 +203,7 @@ const ProductPage = ({
   const searchParams = useSearchParams();
   const isBandHProduct = useMemo(() => isDayNightBandHProduct(product), [product]);
   const isRollerBandF = useMemo(() => isRollerBandFProduct(product), [product]);
+  const isHoneycombCellular = useMemo(() => isHoneycombCellularProduct(product), [product]);
 
   // Context set by the collection page the user navigated from — affects name prefix and room darkening
   const collectionContext = searchParams.get('collectionContext') as 'light-filtering' | 'blackout' | null;
@@ -303,11 +313,15 @@ const ProductPage = ({
     ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS[0]?.id ?? null
     : isRollerBandF
     ? ROLLER_BAND_F_MOTORIZATION_OPTIONS[0]?.id ?? null
+    : isHoneycombCellular
+    ? HONEYCOMB_CELLULAR_MOTORIZATION_OPTIONS[0]?.id ?? null
     : MOTORIZATION_OPTIONS.find((option) => option.id !== 'none')?.id ?? null;
   const activeMotorizationOptions = isBandHProduct
     ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS
     : isRollerBandF
     ? ROLLER_BAND_F_MOTORIZATION_OPTIONS
+    : isHoneycombCellular
+    ? HONEYCOMB_CELLULAR_MOTORIZATION_OPTIONS
     : MOTORIZATION_OPTIONS.filter((option) => option.id !== 'none');
   const canUseMotorization = product.features.hasMotorization || preselectMotorization;
   const isMotorizationActive =
@@ -454,8 +468,8 @@ const ProductPage = ({
   }, [product.category]);
 
   const bandHColorVariants = useMemo(
-    () => (isBandHProduct || isRollerBandF) ? (product.variants ?? []).filter((variant) => variant.image) : [],
-    [isBandHProduct, isRollerBandF, product.variants]
+    () => (isBandHProduct || isRollerBandF || isHoneycombCellular) ? (product.variants ?? []).filter((variant) => variant.image) : [],
+    [isBandHProduct, isRollerBandF, isHoneycombCellular, product.variants]
   );
   const selectedBandHVariant = useMemo(
     () => (config.selectedVariantId
@@ -550,6 +564,26 @@ const ProductPage = ({
       };
     }
 
+    if (isHoneycombCellular) {
+      return {
+        showSize: true,
+        showHeadrail: false,
+        showHeadrailColour: false,
+        showInstallationMethod: true,
+        showControlOption: !isMotorizationActive,
+        showStacking: false,
+        showControlSide: config.controlOption === 'hc-continuous-chain' && !isMotorizationActive,
+        showBottomChain: false,
+        showBracketType: false,
+        showMotorization: isMotorizationActive,
+        showBlindColor: false,
+        showFrameColor: false,
+        showOpeningDirection: false,
+        showBottomBar: false,
+        showRollStyle: false,
+      };
+    }
+
     // For roller blinds and day/night blinds - use product.features settings
     if (isRollerOrDayNight) {
       return {
@@ -606,7 +640,7 @@ const ProductPage = ({
       showBottomBar: product.features.hasBottomBar,
       showRollStyle: product.features.hasRollStyle,
     };
-  }, [config.controlOption, config.headrail, isBandHProduct, isRollerBandF, isMotorizationActive, isRollerOrDayNight, product.features]);
+  }, [config.controlOption, config.headrail, isBandHProduct, isRollerBandF, isHoneycombCellular, isMotorizationActive, isRollerOrDayNight, product.features]);
 
   // Build list of selected customizations for pricing
   const selectedCustomizations = useMemo(() => {
@@ -661,6 +695,16 @@ const ProductPage = ({
       };
     }
 
+    if (isHoneycombCellular) {
+      return {
+        ...visibleOptions,
+        showWrappedCassette: false,
+        showChainColor: false,
+        showCassetteMatchingBar: false,
+        showMotorization: isMotorizationActive,
+      };
+    }
+
     const requiresManualChain =
       product.features.hasChainColor &&
       !isMotorizationActive;
@@ -682,6 +726,7 @@ const ProductPage = ({
     config.headrail,
     isBandHProduct,
     isRollerBandF,
+    isHoneycombCellular,
     isMotorizationActive,
     product.features.hasCassetteMatchingBar,
     product.features.hasChainColor,
@@ -721,7 +766,7 @@ const ProductPage = ({
       missingCustomizations.push({ key: 'colorVariant', label: 'color' });
     }
 
-    const isBandProduct = isBandHProduct || isRollerBandF;
+    const isBandProduct = isBandHProduct || isRollerBandF || isHoneycombCellular;
     if (!isBandProduct || cartConfiguration.width <= 0 || cartConfiguration.height <= 0) {
       return missingCustomizations;
     }
@@ -738,7 +783,11 @@ const ProductPage = ({
     );
     // Use variant-specific sizeRanges (includes per-color maxWidthInches cap) when available,
     // fall back to static product-type limits.
-    const staticLimits = isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS : ROLLER_BAND_F_SIZE_LIMITS;
+    const staticLimits = isBandHProduct
+      ? DAY_NIGHT_BAND_H_SIZE_LIMITS
+      : isRollerBandF
+      ? ROLLER_BAND_F_SIZE_LIMITS
+      : HONEYCOMB_CELLULAR_SIZE_LIMITS;
     const limits = sizeRanges ?? staticLimits;
     const isOutOfRange =
       widthInches < limits.minWidth ||
@@ -751,7 +800,11 @@ const ProductPage = ({
           ...missingCustomizations,
           {
             key: 'size',
-            label: isBandHProduct ? 'valid Band H size' : 'valid Roller Band F size',
+            label: isBandHProduct
+              ? 'valid Band H size'
+              : isRollerBandF
+              ? 'valid Roller Band F size'
+              : 'valid size',
           },
         ]
       : missingCustomizations;
@@ -761,6 +814,7 @@ const ProductPage = ({
     config.selectedVariantId,
     isBandHProduct,
     isRollerBandF,
+    isHoneycombCellular,
     requiredCustomizationVisibility,
     sizeRanges,
   ]);
@@ -885,6 +939,23 @@ const ProductPage = ({
     ? product.price + blackoutSurcharge
     : totalPrice;
   const flashSaleCompareAtPrice = displayedPrice / (1 - FLASH_SALE_DISCOUNT_PERCENT / 100);
+  // Honeycomb Cellular uses a flat, product-specific compare-at price rather than the
+  // sitewide 50%-off formula (which doesn't produce $50 -> $150).
+  const compareAtPrice = isHoneycombCellular ? HONEYCOMB_CELLULAR_COMPARE_AT_PRICE : flashSaleCompareAtPrice;
+
+  const honeycombControlOptionName = (() => {
+    if (isMotorizationActive) {
+      const remoteName = HONEYCOMB_CELLULAR_MOTORIZATION_OPTIONS.find((o) => o.id === config.motorization)?.name;
+      return `Motorization – ${remoteName ?? 'Select remote'}`;
+    }
+    const optionName = HONEYCOMB_CELLULAR_CONTROL_OPTIONS.find((o) => o.id === config.controlOption)?.name;
+    if (!optionName) return null;
+    if (config.controlOption === 'hc-continuous-chain' && config.controlSide) {
+      const sideName = CONTROL_SIDE_OPTIONS.find((o) => o.id === config.controlSide)?.name;
+      return sideName ? `${optionName} – ${sideName}` : optionName;
+    }
+    return optionName;
+  })();
 
   // Calculate dynamic size ranges from price band
   const handleAddToCart = async () => {
@@ -1018,7 +1089,7 @@ const ProductPage = ({
   };
 
   const renderBandHColorSelector = (className: string, refKey: string) => {
-    if ((!isBandHProduct && !isRollerBandF) || bandHColorVariants.length === 0) return null;
+    if ((!isBandHProduct && !isRollerBandF && !isHoneycombCellular) || bandHColorVariants.length === 0) return null;
 
     return (
       <RequiredFieldWrapper
@@ -1172,7 +1243,7 @@ const ProductPage = ({
                 <div className="flex flex-col items-start">
                   <div className="flex flex-wrap items-baseline gap-2">
                     <span className="text-sm font-medium text-gray-400 line-through">
-                      {formatPriceWithCurrency(formatPrice(flashSaleCompareAtPrice), product.currency)}
+                      {formatPriceWithCurrency(formatPrice(compareAtPrice), product.currency)}
                     </span>
                     <span className="text-2xl font-bold text-[#3a3a3a]">
                       {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
@@ -1247,7 +1318,7 @@ const ProductPage = ({
                 <div className="flex flex-col items-center lg:items-start">
                   <div className="flex flex-wrap items-baseline justify-center gap-2 mb-3 md:mb-4 lg:justify-start">
                     <span className="text-sm font-medium text-gray-400 line-through">
-                      {formatPriceWithCurrency(formatPrice(flashSaleCompareAtPrice), product.currency)}
+                      {formatPriceWithCurrency(formatPrice(compareAtPrice), product.currency)}
                     </span>
                     <span className="text-xl md:text-2xl font-bold text-[#3a3a3a]">
                       {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
@@ -1318,10 +1389,10 @@ const ProductPage = ({
                             onHeightChange={(value) => setConfig({ ...config, height: value })}
                             onHeightFractionChange={(value) => setConfig({ ...config, heightFraction: value })}
                             onUnitChange={(unit) => setConfig({ ...config, widthUnit: unit, heightUnit: unit })}
-                            minWidth={sizeRanges?.minWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : undefined)}
-                            maxWidth={sizeRanges?.maxWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : undefined)}
-                            minHeight={sizeRanges?.minHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : undefined)}
-                            maxHeight={sizeRanges?.maxHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : undefined)}
+                            minWidth={sizeRanges?.minWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : isHoneycombCellular ? HONEYCOMB_CELLULAR_SIZE_LIMITS.minWidth : undefined)}
+                            maxWidth={sizeRanges?.maxWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : isHoneycombCellular ? HONEYCOMB_CELLULAR_SIZE_LIMITS.maxWidth : undefined)}
+                            minHeight={sizeRanges?.minHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : isHoneycombCellular ? HONEYCOMB_CELLULAR_SIZE_LIMITS.minHeight : undefined)}
+                            maxHeight={sizeRanges?.maxHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : isHoneycombCellular ? HONEYCOMB_CELLULAR_SIZE_LIMITS.maxHeight : undefined)}
                           />
                         </RequiredFieldWrapper>
                       )}
@@ -1414,6 +1485,23 @@ const ProductPage = ({
                         />
                       ) : isRollerBandF ? (
                         <RollerBandFSelector
+                          config={config}
+                          updateConfig={(updates) => setConfig((prev) => ({ ...prev, ...updates }))}
+                          isMotorizationSelected={selectedOptionalCards.motorization}
+                          onMotorizationSelectedChange={(selected) =>
+                            setSelectedOptionalCards((prev) => ({
+                              ...prev,
+                              motorization: selected,
+                              continuousChain: false,
+                              cassette: false,
+                              bottomBar: false,
+                            }))
+                          }
+                          missingFieldKeys={showValidationErrors ? missingFieldKeys : EMPTY_MISSING_FIELD_KEYS}
+                          registerFieldRef={registerFieldRef}
+                        />
+                      ) : isHoneycombCellular ? (
+                        <HoneycombCellularSelector
                           config={config}
                           updateConfig={(updates) => setConfig((prev) => ({ ...prev, ...updates }))}
                           isMotorizationSelected={selectedOptionalCards.motorization}
@@ -2064,6 +2152,32 @@ const ProductPage = ({
                 </div>
               </div>
 
+              {isHoneycombCellular ? (
+                <div id="add-to-cart-cta" className="mt-4 md:mt-6">
+                  <ReviewSelectionsPanel
+                    colorName={selectedBandHVariantOption?.value ?? null}
+                    colorImage={selectedBandHVariant?.image ?? null}
+                    measurementsLabel={
+                      config.width > 0 && config.height > 0
+                        ? `${getTotalInches(config.width, config.widthFraction, config.widthUnit).toFixed(2).replace(/\.00$/, '')}"w x ${getTotalInches(config.height, config.heightFraction, config.heightUnit).toFixed(2).replace(/\.00$/, '')}"h`
+                        : null
+                    }
+                    installationMethodName={installationOptions.find((o) => o.id === config.installationMethod)?.name ?? null}
+                    controlOptionName={honeycombControlOptionName}
+                    price={totalPrice}
+                    compareAtPrice={compareAtPrice}
+                    currency={product.currency}
+                    quantity={quantity}
+                    onQuantityChange={setQuantity}
+                    onAddToCart={handleAddToCart}
+                    onBuyNow={handleBuyNow}
+                    isAddingToCart={isValidating}
+                    isBuyingNow={isBuyingNow}
+                    buyNowError={buyNowError}
+                  />
+                </div>
+              ) : (
+                <>
               {/* Quantity Selector */}
               <div className="flex items-center gap-3 mt-4 md:mt-6">
                 <span className="text-sm text-gray-600">Quantity:</span>
@@ -2141,6 +2255,8 @@ const ProductPage = ({
                   </svg>
                   <p className="text-sm font-medium text-red-800">{buyNowError}</p>
                 </div>
+              )}
+                </>
               )}
 
               {/* Installation & Measurement Guide Buttons */}
@@ -2625,7 +2741,7 @@ const ProductPage = ({
       <StickyBottomBar
         price={totalPrice}
         additionalCost={0}
-        compareAtPrice={flashSaleCompareAtPrice}
+        compareAtPrice={compareAtPrice}
         currency={product.currency}
         disabled={isValidating || isBuyingNow}
         isBusy={isValidating || isBuyingNow}

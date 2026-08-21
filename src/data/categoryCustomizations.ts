@@ -273,6 +273,31 @@ export const CATEGORY_CUSTOMIZATIONS: Record<string, ProductFeatures> = {
         hasRollerCassette: false,
     },
 
+    // Honeycomb Cellular Shades (hidden, direct-link-only product; bespoke selector
+    // handles color/control/motorization, so only size + installation method are flagged here)
+    'honeycomb-cellular-shades': {
+        hasSize: true,
+        hasHeadrail: false,
+        hasHeadrailColour: false,
+        hasInstallationMethod: true,
+        hasControlOption: false,
+        hasStacking: false,
+        hasControlSide: false,
+        hasBottomChain: false,
+        hasBracketType: false,
+        hasChainColor: false,
+        hasWrappedCassette: false,
+        hasCassetteMatchingBar: false,
+        hasMotorization: true,
+        hasBlindColor: false,
+        hasFrameColor: false,
+        hasOpeningDirection: false,
+        hasBottomBar: false,
+        hasRollStyle: false,
+        hasPvcFabric: false,
+        hasRollerCassette: false,
+    },
+
     // Default fallback for uncategorized products
     'default': {
         hasSize: true,
@@ -311,6 +336,7 @@ const PRIMARY_CATEGORIES = [
     'wooden-blinds',
     'skylight-blinds',
     'eclipsecore-shades',
+    'honeycomb-cellular-shades',
 ];
 
 /**

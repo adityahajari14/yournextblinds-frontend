@@ -1,14 +1,14 @@
 {
   "generatedAt": "2026-07-02T07:35:06.193Z",
   "source": "manual+phase1-multi-table (Roller Band F G1-4, Dayandnight Band H G1-2)",
-  "checksum": "989e5d893c9f677ad1d79ad1cc5a8570bd67996ba50c456134747d49baa808c5",
+  "checksum": "8016529fbf182759353f3c716309fea0aa29f7f40343d0d69566d2e8a02135a4",
   "counts": {
-    "priceBands": 26,
+    "priceBands": 27,
     "widthBands": 58,
     "heightBands": 43,
-    "priceCells": 5105,
-    "customizationOptions": 86,
-    "customizationPricings": 170
+    "priceCells": 5261,
+    "customizationOptions": 90,
+    "customizationPricings": 174
   },
   "priceBandNames": [
     "Dayandnight - Band A",
@@ -36,7 +36,8 @@
     "Roller - Band F - Group 3",
     "Roller - Band F - Group 4",
     "Dayandnight - Band H - Group 1",
-    "Dayandnight - Band H - Group 2"
+    "Dayandnight - Band H - Group 2",
+    "Honeycomb Cellular - Band 1"
   ],
   "validation": {
     "errors": [],

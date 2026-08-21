@@ -132,6 +132,11 @@
       "id": "price-band-dn-h-g2",
       "name": "Dayandnight - Band H - Group 2",
       "description": "Dayandnight Band H pricing — Price Group 2"
+    },
+    {
+      "id": "price-band-honeycomb-cellular-1",
+      "name": "Honeycomb Cellular - Band 1",
+      "description": "Flat placeholder pricing for Honeycomb Cellular Shades — replace with the real per-size table when provided."
     }
   ],
   "widthBands": [
@@ -36479,6 +36484,1098 @@
       "widthBandId": "wb-in-96",
       "heightBandId": "hb-in-94",
       "price": 604.47
+    },
+    {
+      "id": "price-cell-hc1-24x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-24x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpck0000mo7ksif5mfvo",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-32x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmlddwpsg0002mo7kgof0e4v8",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-36x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-36",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-42x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-42",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-48x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-48",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-54x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-54",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-60x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul11r0005xs7kj6rhpmgp",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-66x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-66",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-72x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-72",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-78x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-78",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-84x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-84",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-90x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "cmkzul1200008xs7k90julw85",
+      "heightBandId": "hb-in-108",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x36",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-36",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x42",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-42",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x48",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-48",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x54",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-54",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x60",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "cmkzul1v7000jxs7kcwyraxjr",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x66",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-66",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x72",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-72",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x78",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-78",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x84",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-84",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x90",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-90",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x96",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-96",
+      "price": 50
+    },
+    {
+      "id": "price-cell-hc1-96x108",
+      "priceBandId": "price-band-honeycomb-cellular-1",
+      "widthBandId": "wb-in-96",
+      "heightBandId": "hb-in-108",
+      "price": 50
     }
   ],
   "customizationOptions": [
@@ -37169,6 +38266,38 @@
       "name": "Reverse Roll",
       "description": null,
       "sortOrder": 14
+    },
+    {
+      "id": "opt-hc-continuous-chain",
+      "category": "control-option",
+      "optionId": "hc-continuous-chain",
+      "name": "Continuous Chain",
+      "description": null,
+      "sortOrder": 0
+    },
+    {
+      "id": "opt-hc-cordless",
+      "category": "control-option",
+      "optionId": "hc-cordless",
+      "name": "Cordless",
+      "description": null,
+      "sortOrder": 1
+    },
+    {
+      "id": "opt-hc-single-channel",
+      "category": "motorization",
+      "optionId": "hc-single-channel",
+      "name": "Single Channel",
+      "description": null,
+      "sortOrder": 0
+    },
+    {
+      "id": "opt-hc-multi-channel",
+      "category": "motorization",
+      "optionId": "hc-multi-channel",
+      "name": "Multi Channel",
+      "description": null,
+      "sortOrder": 1
     }
   ],
   "customizationPricings": [
@@ -38361,9 +39490,37 @@
       "widthBandId": null,
       "price": 0,
       "isPerUnit": false
+    },
+    {
+      "id": "price-hc-continuous-chain",
+      "customizationOptionId": "opt-hc-continuous-chain",
+      "widthBandId": null,
+      "price": 0,
+      "isPerUnit": false
+    },
+    {
+      "id": "price-hc-cordless",
+      "customizationOptionId": "opt-hc-cordless",
+      "widthBandId": null,
+      "price": 35.75,
+      "isPerUnit": false
+    },
+    {
+      "id": "price-hc-single-channel",
+      "customizationOptionId": "opt-hc-single-channel",
+      "widthBandId": null,
+      "price": 24,
+      "isPerUnit": false
+    },
+    {
+      "id": "price-hc-multi-channel",
+      "customizationOptionId": "opt-hc-multi-channel",
+      "widthBandId": null,
+      "price": 39,
+      "isPerUnit": false
     }
   ],
-  "checksum": "989e5d893c9f677ad1d79ad1cc5a8570bd67996ba50c456134747d49baa808c5",
+  "checksum": "8016529fbf182759353f3c716309fea0aa29f7f40343d0d69566d2e8a02135a4",
   "variantCodeBands": [
     {
       "code": "Z10010002",

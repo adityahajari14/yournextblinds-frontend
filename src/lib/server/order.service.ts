@@ -414,18 +414,15 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
           lineItems,
           useCustomerDefaultAddress: true,
           note: request.note || '',
-          // Draft-order checkout hides the discount code box by default; this is
-          // required for a customer to enter one on Shopify's hosted payment page.
-          allowDiscountCodesInCheckout: true,
           ...(request.customerEmail && { email: request.customerEmail }),
-          ...(discountCode && discountAmount > 0 && {
-            appliedDiscount: {
-              description: `Discount code ${discountCode}`,
-              title: discountCode,
-              value: discountAmount,
-              valueType: 'FIXED_AMOUNT',
-            },
-          }),
+          // Redeem the code through Shopify's own `discountCodes` field rather than
+          // a hand-computed appliedDiscount, so it shows up as a real, removable
+          // discount at checkout instead of a fixed line item baked into the order.
+          ...(discountCode && { discountCodes: [discountCode] }),
+          // Draft-order checkout hides the discount code box by default; keep it open
+          // so the applied code above is editable/removable, and so a customer who
+          // didn't apply one in the cart can still enter one at checkout.
+          allowDiscountCodesInCheckout: true,
           // Analytics session ID rides along as an order custom attribute so the
           // orders-paid webhook can attribute the purchase to the browser session.
           ...(request.analyticsSessionId && {

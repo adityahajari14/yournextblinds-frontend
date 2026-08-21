@@ -22,6 +22,10 @@ import {
   HIDDEN_TEST_PRODUCT_TAG,
 } from '@/data/dayNightBandH';
 import { ROLLER_BAND_F_TAG } from '@/data/rollerBandF';
+import {
+  HONEYCOMB_CELLULAR_PRODUCT_HANDLE,
+  HONEYCOMB_CELLULAR_TAG,
+} from '@/data/honeycombCellular';
 import type { CuratedCollection, CuratedClause, CuratedRule } from '@/data/curatedCollections';
 import type { StoreSessionContext } from '@/lib/store-events';
 
@@ -647,6 +651,14 @@ export function transformProduct(apiProduct: ApiProduct): Product {
     if (!hasEclipse) {
       categorySlugs = ['eclipsecore-shades', ...categorySlugs];
     }
+  }
+
+  // Honeycomb Cellular Shades: hidden, direct-link-only product (not in any real
+  // Shopify collection), so force its feature category regardless of collection membership.
+  const isHoneycombCellular =
+    apiProduct.slug === HONEYCOMB_CELLULAR_PRODUCT_HANDLE || apiTagSlugs.includes(HONEYCOMB_CELLULAR_TAG);
+  if (isHoneycombCellular && !categorySlugs.includes('honeycomb-cellular-shades')) {
+    categorySlugs = ['honeycomb-cellular-shades', ...categorySlugs];
   }
 
   // Price is now the minimum band price (20x20) from the backend
