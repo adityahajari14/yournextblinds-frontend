@@ -133,12 +133,12 @@ export const CartProvider = ({ children }: CartProviderProps) => {
     }
   }, [cart]);
 
-  const addToCart = (product: Product, configuration: ProductConfiguration) => {
+  const addToCart = (product: Product, configuration: ProductConfiguration, quantity: number = 1) => {
     const newItem: CartItem = {
       id: `${product.id}-${Date.now()}`,
       product,
       configuration,
-      quantity: 1,
+      quantity,
       addedAt: new Date(),
     };
 

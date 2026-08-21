@@ -38,3 +38,27 @@ export function getNextMidnight(now: Date = new Date()): Date {
   next.setHours(24, 0, 0, 0); // rolls to 00:00:00 tomorrow
   return next;
 }
+
+// ============================================
+// Discount codes redeemable at checkout
+// ============================================
+// Both codes are advertised publicly (announcement bar, popup), so validating
+// them client-side is not a security concern — the server re-validates against
+// this same list before applying anything to the Shopify draft order.
+
+export interface DiscountCodeDefinition {
+  code: string;
+  percentOff: number;
+  description: string;
+}
+
+export const CHECKOUT_DISCOUNT_CODES: DiscountCodeDefinition[] = [
+  { code: PROMO_CODE, percentOff: PROMO_CODE_PERCENT, description: 'Site-wide offer' },
+  { code: SUBSCRIBE_POPUP_CODE, percentOff: SUBSCRIBE_POPUP_PERCENT, description: 'Newsletter signup offer' },
+];
+
+export function findDiscountCode(rawCode: string): DiscountCodeDefinition | null {
+  const normalized = rawCode.trim().toUpperCase();
+  if (!normalized) return null;
+  return CHECKOUT_DISCOUNT_CODES.find((entry) => entry.code.toUpperCase() === normalized) ?? null;
+}

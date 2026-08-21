@@ -2,6 +2,7 @@ import { calculateProductPrice, type PricingRequest } from './pricing.service';
 import { getAdminApiUrl, getAdminHeaders, validateShopifyConfig } from './shopify-admin';
 import { getCachedProduct } from './product-cache';
 import { recordCheckoutStarted, type AbandonedCheckoutItem } from './abandoned-checkout.service';
+import { findDiscountCode } from '@/data/promo';
 
 // ============================================
 // Types
@@ -47,6 +48,9 @@ export interface CreateCheckoutRequest {
   items: CheckoutItemRequest[];
   customerEmail?: string;
   note?: string;
+  /** Coupon code entered in the cart; re-validated server-side against the
+   *  same list used by the marketing pages before it's applied to the order. */
+  discountCode?: string;
   /** First-party analytics session ID, carried onto the order so a completed
    *  purchase can be attributed back to the browser session (abandonment). */
   analyticsSessionId?: string;
@@ -74,6 +78,8 @@ export interface CreateCheckoutResponse {
     quantity: number;
   }[];
   subtotal: number;
+  discountCode?: string;
+  discountAmount?: number;
 }
 
 interface ShopifyDraftOrderLineItem {
@@ -373,6 +379,16 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
     );
   }
 
+  let discountCode: string | null = null;
+  let discountAmount = 0;
+  if (request.discountCode) {
+    const promo = findDiscountCode(request.discountCode);
+    if (promo) {
+      discountCode = promo.code;
+      discountAmount = Math.round(subtotal * (promo.percentOff / 100) * 100) / 100;
+    }
+  }
+
   const mutation = `
     mutation DraftOrderCreate($input: DraftOrderInput!) {
       draftOrderCreate(input: $input) {
@@ -398,7 +414,18 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
           lineItems,
           useCustomerDefaultAddress: true,
           note: request.note || '',
+          // Draft-order checkout hides the discount code box by default; this is
+          // required for a customer to enter one on Shopify's hosted payment page.
+          allowDiscountCodesInCheckout: true,
           ...(request.customerEmail && { email: request.customerEmail }),
+          ...(discountCode && discountAmount > 0 && {
+            appliedDiscount: {
+              description: `Discount code ${discountCode}`,
+              title: discountCode,
+              value: discountAmount,
+              valueType: 'FIXED_AMOUNT',
+            },
+          }),
           // Analytics session ID rides along as an order custom attribute so the
           // orders-paid webhook can attribute the purchase to the browser session.
           ...(request.analyticsSessionId && {
@@ -483,6 +510,7 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
     draftOrderId: draftOrder.id.toString(),
     lineItems: responseLineItems,
     subtotal,
+    ...(discountCode && discountAmount > 0 && { discountCode, discountAmount }),
   };
 }
 

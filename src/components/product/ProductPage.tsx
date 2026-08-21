@@ -237,6 +237,7 @@ const ProductPage = ({
   const [pricingLoaded, setPricingLoaded] = useState(hasInitialPricing);
   const [isValidating, setIsValidating] = useState(false);
   const [isBuyingNow, setIsBuyingNow] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [buyNowError, setBuyNowError] = useState<string | null>(null);
   const fetchingRef = useRef(false);
   const [isBandHInstallationGuideOpen, setIsBandHInstallationGuideOpen] = useState(false);
@@ -927,14 +928,14 @@ const ProductPage = ({
           ...product,
           price: validation.calculatedPrice,
         };
-        addToCart(productWithPrice, cartConfiguration);
+        addToCart(productWithPrice, cartConfiguration, quantity);
       } else {
         // Price matches, proceed with cart
         const productWithPrice = {
           ...product,
           price: totalPrice,
         };
-        addToCart(productWithPrice, cartConfiguration);
+        addToCart(productWithPrice, cartConfiguration, quantity);
       }
     } catch (error) {
       console.error('Price validation failed:', error);
@@ -943,7 +944,7 @@ const ProductPage = ({
         ...product,
         price: totalPrice,
       };
-      addToCart(productWithPrice, cartConfiguration);
+      addToCart(productWithPrice, cartConfiguration, quantity);
     } finally {
       setIsValidating(false);
     }
@@ -994,12 +995,12 @@ const ProductPage = ({
 
       const storeSession = getStoreSessionContext();
       trackStoreCheckoutInitiated(
-        [{ id: 'buy-now', product, configuration: cartConfiguration, quantity: 1, addedAt: new Date() }],
+        [{ id: 'buy-now', product, configuration: cartConfiguration, quantity, addedAt: new Date() }],
         price
       );
 
       const result = await createCheckout(
-        [buildCheckoutItem(product.slug, cartConfiguration, 1, price)],
+        [buildCheckoutItem(product.slug, cartConfiguration, quantity, price)],
         undefined,
         storeSession?.sessionId,
         storeSession
@@ -2060,6 +2061,38 @@ const ProductPage = ({
                       )}
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Quantity Selector */}
+              <div className="flex items-center gap-3 mt-4 md:mt-6">
+                <span className="text-sm text-gray-600">Quantity:</span>
+                <div className="flex items-center border border-gray-300 rounded-lg">
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                    disabled={quantity <= 1}
+                    className="px-3 py-1.5 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                    aria-label="Decrease quantity"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                    </svg>
+                  </button>
+                  <span className="px-4 py-1.5 text-sm font-medium min-w-[40px] text-center">
+                    {quantity}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+                    disabled={quantity >= 99}
+                    className="px-3 py-1.5 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+                    aria-label="Increase quantity"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                    </svg>
+                  </button>
                 </div>
               </div>
 

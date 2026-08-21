@@ -11,6 +11,7 @@ import {
 } from '@/lib/api';
 import { buildCheckoutItem } from '@/lib/checkout';
 import { trackStoreCartView, trackStoreCheckoutInitiated, getStoreSessionContext } from '@/lib/store-events';
+import { findDiscountCode, type DiscountCodeDefinition } from '@/data/promo';
 import { CartItem, CheckoutItemRequest, PriceOption } from '@/types';
 import CartItemEditModal from '@/components/cart/CartItemEditModal';
 import Image from 'next/image';
@@ -63,6 +64,9 @@ export default function CartPage() {
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
   const [priceMismatches, setPriceMismatches] = useState<CheckoutPriceMismatch[] | null>(null);
+  const [discountInput, setDiscountInput] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState<DiscountCodeDefinition | null>(null);
+  const [discountError, setDiscountError] = useState<string | null>(null);
 
   useEffect(() => {
     if (cart.items.length > 0) {
@@ -91,7 +95,8 @@ export default function CartPage() {
         buildCheckoutItems(items),
         customer?.email || undefined,
         storeSession?.sessionId,
-        storeSession
+        storeSession,
+        appliedDiscount?.code
       );
 
       // Keep the cart until the order is confirmed paid (CartContext clears it
@@ -127,6 +132,23 @@ export default function CartPage() {
 
   const handleCheckout = () => startCheckout(cart.items);
 
+  const handleApplyDiscount = () => {
+    const match = findDiscountCode(discountInput);
+    if (!match) {
+      setAppliedDiscount(null);
+      setDiscountError('That code is invalid or has expired.');
+      return;
+    }
+    setAppliedDiscount(match);
+    setDiscountError(null);
+  };
+
+  const handleRemoveDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountInput('');
+    setDiscountError(null);
+  };
+
   // Apply the server's recalculated prices to the affected items, then retry.
   const handleAcceptUpdatedPrices = () => {
     if (!priceMismatches) return;
@@ -146,7 +168,10 @@ export default function CartPage() {
     startCheckout(updatedItems);
   };
 
-  const finalTotal = cart.total;
+  const discountAmount = appliedDiscount
+    ? Math.round(cart.total * (appliedDiscount.percentOff / 100) * 100) / 100
+    : 0;
+  const finalTotal = cart.total - discountAmount;
   const editingItem = editingItemId
     ? cart.items.find((item) => item.id === editingItemId) ?? null
     : null;
@@ -542,6 +567,67 @@ export default function CartPage() {
                     <span className="text-gray-600">Shipping</span>
                     <span className="text-sm text-gray-500 italic">Calculated at checkout</span>
                   </div>
+                  {appliedDiscount && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">
+                        Discount ({appliedDiscount.code})
+                      </span>
+                      <span className="font-medium text-green-700">
+                        -{formatPriceWithCurrency(discountAmount)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  {appliedDiscount ? (
+                    <div className="flex items-center justify-between gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2">
+                      <span className="text-sm font-medium text-green-800">
+                        &quot;{appliedDiscount.code}&quot; applied
+                      </span>
+                      <button
+                        onClick={handleRemoveDiscount}
+                        className="text-xs font-medium text-gray-500 hover:text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <label htmlFor="discount-code" className="block text-sm text-gray-600 mb-1.5">
+                        Discount code
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          id="discount-code"
+                          type="text"
+                          value={discountInput}
+                          onChange={(e) => {
+                            setDiscountInput(e.target.value);
+                            if (discountError) setDiscountError(null);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleApplyDiscount();
+                            }
+                          }}
+                          placeholder="Enter code"
+                          className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00473c]"
+                        />
+                        <button
+                          onClick={handleApplyDiscount}
+                          disabled={!discountInput.trim()}
+                          className="rounded-lg border border-[#00473c] px-4 py-2 text-sm font-medium text-[#00473c] hover:bg-[#f0fdf9] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {discountError && (
+                        <p className="mt-1.5 text-xs text-red-600">{discountError}</p>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 <div className="border-t border-gray-200 pt-4 mb-6">
@@ -662,7 +748,7 @@ export default function CartPage() {
       </div>
 
       {showClearConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 className="text-xl font-bold text-[#3a3a3a] mb-3">Clear Cart?</h3>
             <p className="text-gray-600 mb-6">

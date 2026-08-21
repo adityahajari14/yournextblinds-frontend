@@ -181,7 +181,7 @@ export interface Cart {
 
 export interface CartContextType {
   cart: Cart;
-  addToCart: (product: Product, configuration: ProductConfiguration) => void;
+  addToCart: (product: Product, configuration: ProductConfiguration, quantity?: number) => void;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   updateCartItem: (itemId: string, product: Product, configuration: ProductConfiguration) => void;
@@ -455,6 +455,7 @@ export interface CheckoutRequest {
   items: CheckoutItemRequest[];
   customerEmail?: string;
   note?: string;
+  discountCode?: string;
 }
 
 export interface CheckoutResponse {
@@ -467,4 +468,6 @@ export interface CheckoutResponse {
     quantity: number;
   }[];
   subtotal: number;
+  discountCode?: string;
+  discountAmount?: number;
 }

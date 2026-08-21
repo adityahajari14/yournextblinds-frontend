@@ -506,12 +506,13 @@ export async function createCheckout(
   items: CheckoutItemRequest[],
   customerEmail?: string,
   analyticsSessionId?: string,
-  storeSession?: StoreSessionContext | null
+  storeSession?: StoreSessionContext | null,
+  discountCode?: string
 ): Promise<CheckoutResponse> {
   const response = await fetch('/api/orders/create-checkout', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ items, customerEmail, analyticsSessionId, storeSession }),
+    body: JSON.stringify({ items, customerEmail, analyticsSessionId, storeSession, discountCode }),
   });
 
   let body: CheckoutApiResponse | null = null;
