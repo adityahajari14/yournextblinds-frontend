@@ -10,6 +10,7 @@ import {
   Installation,
   BestSelling,
   Craftsmanship,
+  FitGuaranteeSection,
   FreeSamples,
   FlashSale,
   FAQ,
@@ -36,6 +37,7 @@ export default function Home() {
         <BestSelling />
         <Craftsmanship />
         {/* <Installation /> */}
+        <FitGuaranteeSection />
         <FreeSamples />
         <FlashSale />
         <FAQ />

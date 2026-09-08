@@ -14,6 +14,8 @@ import { trackStoreCartView, trackStoreCheckoutInitiated, getStoreSessionContext
 import { findDiscountCode, type DiscountCodeDefinition } from '@/data/promo';
 import { CartItem, CheckoutItemRequest, PriceOption } from '@/types';
 import CartItemEditModal from '@/components/cart/CartItemEditModal';
+import { FitGuaranteeIcon } from '@/components/fit-guarantee';
+import { FIT_GUARANTEE_PATH } from '@/data/fitGuarantee';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
@@ -574,6 +576,26 @@ export default function CartPage() {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                     Continue Shopping
+                  </Link>
+                </div>
+              </div>
+
+              {/* Fit Guarantee reassurance under the cart products (spec item 7) */}
+              <div className="mt-4 flex items-start gap-3 rounded-lg border border-[#00473c]/15 bg-[#00473c]/5 p-4">
+                <FitGuaranteeIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#00473c]" />
+                <div className="text-sm">
+                  <p className="font-semibold text-[#3a3a3a]">
+                    You&apos;re Protected by Your Next Fit Guarantee™
+                  </p>
+                  <p className="mt-1 text-gray-600">
+                    Eligible custom blinds and shades include added protection against genuine
+                    measuring mistakes.
+                  </p>
+                  <Link
+                    href={FIT_GUARANTEE_PATH}
+                    className="mt-1.5 inline-block font-medium text-[#00473c] underline underline-offset-2"
+                  >
+                    View Fit Guarantee Terms
                   </Link>
                 </div>
               </div>

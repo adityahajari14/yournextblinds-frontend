@@ -22,6 +22,7 @@ const Footer = () => {
             <Link href="/about" className="hover:text-[#00473c] transition-colors">About.</Link>
             <Link href="/collections" className="hover:text-[#00473c] transition-colors">Shop.</Link>
             <Link href="/guides" className="hover:text-[#00473c] transition-colors">Measure Guides.</Link>
+            <Link href="/your-next-fit-guarantee" className="hover:text-[#00473c] transition-colors">Fit Guarantee.</Link>
             <Link href="/contact" className="hover:text-[#00473c] transition-colors">Contact.</Link>
           </nav>
         </div>
@@ -48,6 +49,7 @@ const Footer = () => {
             <Link href="/privacy-policy" className="hover:text-[#00473c] transition-colors">Privacy Policy</Link>
             <Link href="/shipping-policy" className="hover:text-[#00473c] transition-colors">Shipping Policy</Link>
             <Link href="/refund-policy" className="hover:text-[#00473c] transition-colors">Refund Policy</Link>
+            <Link href="/your-next-fit-guarantee" className="hover:text-[#00473c] transition-colors">Fit Guarantee</Link>
             <Link href="/terms-and-conditions" className="hover:text-[#00473c] transition-colors">Terms &amp; Conditions</Link>
           </div>
           <p className="text-xs text-[#999]">© {new Date().getFullYear()} Your Next Blinds. All rights reserved.</p>

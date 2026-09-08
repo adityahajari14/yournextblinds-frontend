@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { Header, NavBar, Footer } from '@/components';
+import { FitGuaranteeIcon } from '@/components/fit-guarantee';
+import { FIT_GUARANTEE_PATH } from '@/data/fitGuarantee';
 
 export const metadata: Metadata = {
   title: 'Measure & Fit Guides | Your Next Blinds',
@@ -139,6 +142,30 @@ export default function GuidesPage() {
             <p className="text-white/80 text-base md:text-lg max-w-xl mx-auto">
               Download our free step-by-step guides to measure and install your blinds perfectly every time.
             </p>
+          </div>
+        </section>
+
+        {/* Measure with confidence + Fit Guarantee (spec item 15) */}
+        <section className="px-4 md:px-6 lg:px-20 pt-10 md:pt-12">
+          <div className="max-w-[1400px] mx-auto flex flex-col gap-3 rounded-xl border border-[#00473c]/15 bg-[#00473c]/5 p-5 md:flex-row md:items-center md:gap-4">
+            <FitGuaranteeIcon className="h-8 w-8 shrink-0 text-[#00473c]" />
+            <div className="text-sm text-[#484848]">
+              <p className="text-base font-semibold text-[#1a1a1a]">
+                Follow Our Guide &amp; Measure With Confidence
+              </p>
+              <p className="mt-1">
+                Take your time, measure carefully and follow the instructions below. And for
+                additional peace of mind, eligible purchases are protected by our Your Next Fit
+                Guarantee™ against genuine measuring mistakes.{' '}
+                <Link
+                  href={FIT_GUARANTEE_PATH}
+                  className="font-medium text-[#00473c] underline underline-offset-2"
+                >
+                  View Fit Guarantee
+                </Link>
+                .
+              </p>
+            </div>
           </div>
         </section>
 

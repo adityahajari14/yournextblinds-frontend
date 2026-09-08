@@ -1,6 +1,6 @@
 import { PROMO_CODE, PROMO_CODE_PERCENT, SALE_MAX_PERCENT } from '@/data/promo';
 import { PRODUCT_GUIDES } from '@/data/guides';
-import { REFUND_POLICY, SHIPPING_POLICY, TERMS_AND_CONDITIONS, PRIVACY_POLICY, type Policy } from '@/data/policies';
+import { REFUND_POLICY, SHIPPING_POLICY, TERMS_AND_CONDITIONS, PRIVACY_POLICY, FIT_GUARANTEE, type Policy } from '@/data/policies';
 
 // ============================================
 // Static brand knowledge
@@ -88,6 +88,13 @@ ${renderPolicyFull(REFUND_POLICY)}
 ## Shipping policy (general — you CAN answer these questions)
 ${renderPolicyFull(SHIPPING_POLICY)}
 
+## Your Next Fit Guarantee™ (general — you CAN answer these questions)
+An additional commercial guarantee: if a customer makes a genuine measuring
+mistake and their eligible custom-made blind or shade does not fit, Your Next
+Blinds remakes the eligible product to corrected measurements, subject to the
+terms. It is not a cash refund and does not replace warranty or damage rights.
+${renderPolicyFull(FIT_GUARANTEE)}
+
 ## Terms & conditions (summary — for narrow legal/account questions only)
 ${renderPolicySummary(TERMS_AND_CONDITIONS)}
 Do not recite specific clauses verbatim or invent legal terms not shown here —
@@ -128,6 +135,7 @@ height (largest of 3). Outside mount: add 3-6" to frame width and 5-10" to heigh
 - All products: /collections
 - Free samples: /samples
 - Measuring & installation guides: /guides
+- Your Next Fit Guarantee: /your-next-fit-guarantee
 - Contact us: /contact
 - Cart: /cart
 - Account & order history: ${ORDER_STATUS_URL}

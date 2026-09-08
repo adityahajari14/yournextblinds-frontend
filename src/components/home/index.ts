@@ -6,6 +6,7 @@ export { default as BestSelling } from './BestSelling';
 export { default as WindowTypes } from './WindowTypes';
 export { default as Installation } from './Installation';
 export { default as Craftsmanship } from './Craftsmanship';
+export { default as FitGuaranteeSection } from './FitGuaranteeSection';
 export { default as FreeSamples } from './FreeSamples';
 export { default as FlashSale } from './FlashSale';
 export { default as FAQ } from './FAQ';

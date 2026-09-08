@@ -15,6 +15,10 @@
 // shopper as if reciting the binding text. The chatbot always links to the real
 // page (`path`) alongside its summary so the shopper can read the actual terms.
 //
+// FIT_GUARANTEE is a condensed paraphrase of the full 24-clause terms in
+// src/data/fitGuarantee.ts (FIT_GUARANTEE_TERMS), which is the source of truth
+// rendered on /your-next-fit-guarantee.
+//
 // If a page's policy text changes, update it here too — there is no automated
 // sync, so a page edit and a knowledge edit are two separate, deliberate steps.
 
@@ -416,4 +420,73 @@ export const PRIVACY_POLICY: Policy = {
   ],
 };
 
-export const ALL_POLICIES: Policy[] = [REFUND_POLICY, SHIPPING_POLICY, TERMS_AND_CONDITIONS, PRIVACY_POLICY];
+export const FIT_GUARANTEE: Policy = {
+  slug: 'your-next-fit-guarantee',
+  path: '/your-next-fit-guarantee',
+  pageTitle: 'Your Next Fit Guarantee™',
+  metaDescription:
+    'Order custom blinds and shades with confidence. The Your Next Fit Guarantee™ provides protection against genuine measuring mistakes on eligible orders. Terms apply.',
+  lastUpdated: 'September 8, 2026',
+  intro:
+    'The Your Next Fit Guarantee™ is an additional commercial guarantee. If a customer makes a genuine measuring mistake and their eligible custom-made blind or shade does not fit the intended window, Your Next Blinds will remake the eligible product using the corrected measurements, subject to the terms of the guarantee. It does not replace or limit rights relating to manufacturing defects, wrong products supplied, shipping damage, warranties, or rights under applicable law.',
+  sections: [
+    {
+      title: 'Who and what is covered',
+      content:
+        'Applies only to eligible custom-made blinds and shades bought directly from Your Next Blinds by residential customers, and only to a genuine measurement error for the window the product was originally purchased for. Specialty, oversized, clearance, discontinued, commercial, trade, resale and bulk orders may be excluded; any product-specific exclusion is shown on the product page or during ordering.',
+    },
+    {
+      title: 'Claim period',
+      content:
+        'A claim must be submitted within 30 calendar days of delivery of the original product. Later claims do not qualify unless Your Next Blinds agrees otherwise.',
+    },
+    {
+      title: 'Remake limits',
+      content:
+        'One approved remake per eligible product. A replacement made under the guarantee is not eligible for another guarantee remake. A maximum of four guarantee remakes per household/account over the lifetime of the program, unless agreed otherwise in writing.',
+    },
+    {
+      title: 'Same product',
+      content:
+        'A remake must remain substantially the same product ordered. The guarantee cannot be used to change collection, fabric, color, pattern, material, operating system, motorization, headrail/cassette, bottom rail, control type or color, accessories, upgrades or other options. It corrects a measurement error, not a change of mind about color, fabric, transparency, blackout level, style or other personal preferences.',
+    },
+    {
+      title: 'Corrected measurements',
+      content:
+        'The customer provides the correct replacement measurements. As an anti-abuse measure, corrected dimensions should normally be within 2 inches per dimension/side of what was originally ordered; larger differences may need more evidence and can be declined if not a genuine mistake. A genuine width/height transposition (entered in reverse) may be considered with supporting evidence. Where reasonably necessary, a change between Inside Mount and Outside Mount may be approved as part of the claim.',
+    },
+    {
+      title: 'Evidence and approval',
+      content:
+        'Your Next Blinds may require reasonable evidence before approving a remake, such as the order number, photos of the product, photos of the product at the window, photos of a tape measure showing the correct width and height, photos of the window/recess, and video where needed. Submitting a request does not mean it is approved. Your Next Blinds must review and approve the claim before production, then confirm the corrected dimensions; the customer is responsible for checking those corrected measurements are accurate before the replacement enters production.',
+    },
+    {
+      title: 'Costs',
+      content:
+        'The guarantee provides a remake, not a cash refund, credit or a different product. If corrected measurements make the product larger or otherwise increase the price, the customer may need to pay the difference before production. It cannot be used for free upgrades. Standard replacement shipping may be included where stated, but oversized, remote-area, special handling or expedited freight may remain payable; any charges are disclosed before manufacture.',
+    },
+    {
+      title: 'Original product',
+      content:
+        'Your Next Blinds will advise whether the original product must be returned, retained or disposed of. Do not return products without authorization.',
+    },
+    {
+      title: 'Not covered',
+      content:
+        'Installation errors (incorrect fitting, wrong brackets, unsuitable surfaces, damage during or after installation) are not covered. Manufacturing errors by Your Next Blinds and shipping damage are handled under the applicable warranty/damage processes, not the Fit Guarantee, and do not consume the customer’s guarantee allowance. Claims may be declined where there is reasonable evidence of fraud, misuse, repeated abuse, false measurements or misleading information.',
+    },
+    {
+      title: 'General',
+      content:
+        'The guarantee applies to the original purchaser and original order and is not transferable. Your Next Blinds may ask the customer to confirm the corrected measurements in writing before manufacture. Nothing in these terms excludes, restricts or modifies rights that cannot lawfully be excluded under applicable law.',
+    },
+  ],
+};
+
+export const ALL_POLICIES: Policy[] = [
+  REFUND_POLICY,
+  SHIPPING_POLICY,
+  TERMS_AND_CONDITIONS,
+  PRIVACY_POLICY,
+  FIT_GUARANTEE,
+];

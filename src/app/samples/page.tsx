@@ -1,4 +1,7 @@
+import Link from 'next/link';
 import { TopBar, Header, NavBar, Footer } from '@/components';
+import { FitGuaranteeIcon } from '@/components/fit-guarantee';
+import { FIT_GUARANTEE_PATH } from '@/data/fitGuarantee';
 import { fetchProductsByCategory, transformProduct } from '@/lib/api';
 import { isSampleEligible, getVariantColorOption } from '@/data/samples';
 import {
@@ -160,6 +163,31 @@ export default async function SamplesPage() {
               Feel the quality and see the true color before you buy. Choose up to 10 free
               swatches and we&apos;ll deliver them straight to your mailbox — completely free.
             </p>
+          </div>
+
+          {/* Samples + Fit Guarantee (spec item 14) */}
+          <div className="mb-8 flex flex-col gap-3 rounded-lg border border-[#00473c]/15 bg-[#00473c]/5 p-4 md:flex-row md:items-center md:gap-4 md:p-5">
+            <FitGuaranteeIcon className="h-7 w-7 shrink-0 text-[#00473c]" />
+            <div className="text-sm text-[#484848]">
+              <p className="text-base font-semibold text-[#3a3a3a]">
+                Measure With Confidence. Choose Your Color With Confidence.
+              </p>
+              <p className="mt-1">
+                Free Fabric Samples + Your Next Fit Guarantee™. Order free samples to check your
+                color and fabric at home, and use our{' '}
+                <Link href="/guides" className="font-medium text-[#00473c] underline underline-offset-2">
+                  measuring guides
+                </Link>{' '}
+                to confidently measure your windows.{' '}
+                <Link
+                  href={FIT_GUARANTEE_PATH}
+                  className="font-medium text-[#00473c] underline underline-offset-2"
+                >
+                  View Fit Guarantee
+                </Link>
+                .
+              </p>
+            </div>
           </div>
 
           {categories.length === 0 ? (

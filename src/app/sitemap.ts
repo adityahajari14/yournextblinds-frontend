@@ -13,6 +13,7 @@ const STATIC_ROUTES = [
   '/about',
   '/contact',
   '/search',
+  '/your-next-fit-guarantee',
   '/shipping-policy',
   '/refund-policy',
   '/privacy-policy',
