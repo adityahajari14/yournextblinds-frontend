@@ -6,6 +6,12 @@ import { useEffect, useState } from 'react';
 
 const slides = [
   {
+    src: '/home/hero/hero-1.webp',
+    mobileSrc: '/home/hero/hero-1-mobile.webp',
+    alt: 'Made-to-Measure Blinds and Shades, Manufactured in Texas',
+    href: '/collections',
+  },
+  {
     src: '/home/hero/hero-zebra.webp',
     mobileSrc: '/home/hero/hero-zebra-mobile.webp',
     alt: 'Dual Zebra Shades — Light, Your Way',

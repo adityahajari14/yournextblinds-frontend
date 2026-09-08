@@ -14,10 +14,10 @@ import { REFUND_POLICY, SHIPPING_POLICY, TERMS_AND_CONDITIONS, PRIVACY_POLICY, t
 export const ORDER_STATUS_URL = 'https://account.yournextblinds.com';
 
 const GUIDE_LINES = Object.entries(PRODUCT_GUIDES)
-  .map(
-    ([type, links]) =>
-      `- ${type}: measuring guide ${links.measurement} | installation guide ${links.installation}`
-  )
+  .map(([type, links]) => {
+    const installation = 'installation' in links ? ` | installation guide ${links.installation}` : '';
+    return `- ${type}: measuring guide ${links.measurement}${installation}`;
+  })
   .join('\n');
 
 /**

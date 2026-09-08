@@ -11,6 +11,10 @@ export const PRODUCT_GUIDES = {
     installation: '/guides/vertical_blinds_installation_guide_yournextblinds.pdf',
     measurement:  '/guides/vertical_blinds_measurement_guide_yournextblinds.pdf',
   },
+  honeycomb: {
+    // No general installation guide for this line yet — measurement guide only.
+    measurement:  '/guides/honecomb-cellular-measuring-guide.pdf',
+  },
 } as const;
 
 export type GuideType = keyof typeof PRODUCT_GUIDES;

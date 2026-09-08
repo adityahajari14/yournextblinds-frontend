@@ -96,6 +96,11 @@ const guides = [
     category: 'EclipseCore Honeycomb Blinds',
     items: [
       {
+        title: 'Honeycomb & Cellular Shades – Measuring Guide',
+        file: '/guides/honecomb-cellular-measuring-guide.pdf',
+        type: 'Measuring',
+      },
+      {
         title: 'EclipseCore – Drill-Free Measuring Guide',
         file: '/guides/eclipsecore_honeycomb_drillfree_measuring_guide.pdf',
         type: 'Measuring',

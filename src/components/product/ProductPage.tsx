@@ -542,12 +542,19 @@ const ProductPage = ({
   }, [product.category]);
 
   const guideType = useMemo(() => {
+    if (isHoneycombCellular)                                                    return 'honeycomb' as const;
     const cat = product.category.toLowerCase();
     if (cat.includes('vertical'))                                               return 'vertical' as const;
     if (cat.includes('zebra') || cat.includes('day') || cat.includes('night')) return 'zebra' as const;
     if (cat.includes('roller'))                                                return 'roller' as const;
     return null;
-  }, [product.category]);
+  }, [isHoneycombCellular, product.category]);
+
+  // Not every guide has an installation PDF yet (e.g. honeycomb/cellular has
+  // only a measurement guide), so this may be undefined even when guideType is set.
+  const guideInstallationHref: string | undefined = guideType
+    ? (PRODUCT_GUIDES[guideType] as { installation?: string }).installation
+    : undefined;
 
   const bandHColorVariants = useMemo(
     () => (isBandHProduct || isRollerBandF || isHoneycombCellular) ? (product.variants ?? []).filter((variant) => variant.image) : [],
@@ -2463,16 +2470,16 @@ const ProductPage = ({
                     >
                       Installation Guide
                     </button>
-                  ) : (
+                  ) : guideInstallationHref ? (
                     <a
-                      href={PRODUCT_GUIDES[guideType].installation}
+                      href={guideInstallationHref}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="flex-1 py-2.5 border border-[#00473c] text-[#00473c] text-sm font-medium rounded-lg text-center hover:bg-[#f0fdf9] transition-colors"
                     >
                       Installation Guide
                     </a>
-                  )}
+                  ) : null}
                   <a
                     href={PRODUCT_GUIDES[guideType].measurement}
                     target="_blank"
