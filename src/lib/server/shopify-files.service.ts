@@ -138,3 +138,10 @@ export async function uploadReviewImage(image: UploadableImage): Promise<string>
   await putBytesToTarget(target, image);
   return finalizeFile(target.resourceUrl);
 }
+
+/**
+ * Same operation as {@link uploadReviewImage} — upload an image to Shopify Files
+ * and get back a public CDN URL. Aliased for callers outside the reviews flow
+ * (e.g. Fit Guarantee claim photos).
+ */
+export const uploadPublicImage = uploadReviewImage;

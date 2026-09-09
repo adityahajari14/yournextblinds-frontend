@@ -93,6 +93,8 @@ An additional commercial guarantee: if a customer makes a genuine measuring
 mistake and their eligible custom-made blind or shade does not fit, Your Next
 Blinds remakes the eligible product to corrected measurements, subject to the
 terms. It is not a cash refund and does not replace warranty or damage rights.
+A claim is filed on the online form at /your-next-fit-guarantee/claim within 30
+days of delivery; submitting it is not the same as it being approved.
 ${renderPolicyFull(FIT_GUARANTEE)}
 
 ## Terms & conditions (summary — for narrow legal/account questions only)
@@ -136,6 +138,7 @@ height (largest of 3). Outside mount: add 3-6" to frame width and 5-10" to heigh
 - Free samples: /samples
 - Measuring & installation guides: /guides
 - Your Next Fit Guarantee: /your-next-fit-guarantee
+- File a Fit Guarantee claim: /your-next-fit-guarantee/claim
 - Contact us: /contact
 - Cart: /cart
 - Account & order history: ${ORDER_STATUS_URL}

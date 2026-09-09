@@ -2,9 +2,9 @@ import Link from 'next/link';
 
 const USPS = [
   {
-    title: 'Custom Made',
-    description: 'Cut to your exact size',
-    href: '/collections',
+    title: 'Your Next Fit Guarantee™',
+    description: "Measured wrong? We'll make it right.",
+    href: '/your-next-fit-guarantee',
   },
   {
     title: 'Free Fabric Samples',

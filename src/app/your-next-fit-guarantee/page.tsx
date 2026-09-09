@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Header, NavBar, Footer } from '@/components';
 import { FitGuaranteeIcon } from '@/components/fit-guarantee';
+import { FIT_GUARANTEE_CLAIM_PATH } from '@/data/fitGuarantee';
 import {
   FIT_GUARANTEE_INTRO,
   FIT_GUARANTEE_REASSURANCE,
@@ -81,6 +82,15 @@ export default function YourNextFitGuaranteePage() {
                 </li>
               ))}
             </ol>
+
+            <div className="mt-8 text-center">
+              <Link
+                href={FIT_GUARANTEE_CLAIM_PATH}
+                className="inline-block rounded-full bg-[#00473c] px-7 py-3 text-sm font-semibold tracking-wide text-white transition-colors hover:bg-[#003830]"
+              >
+                Start a Fit Guarantee Claim
+              </Link>
+            </div>
           </div>
         </section>
 

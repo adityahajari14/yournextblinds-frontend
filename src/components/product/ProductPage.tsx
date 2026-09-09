@@ -16,6 +16,8 @@ import CategoryInfoSection from '@/components/collection/CategoryInfoSection';
 import { formatPrice, formatPriceWithCurrency, fetchPriceMatrix, fetchCustomizationPricing, validateCartPrice, createCheckout } from '@/lib/api';
 import { buildCheckoutItem } from '@/lib/checkout';
 import StickyBottomBar from './StickyBottomBar';
+import { FitGuaranteeTrustBlock, MeasureReassurance, FitGuaranteeIcon } from '@/components/fit-guarantee';
+import { FIT_GUARANTEE_PATH } from '@/data/fitGuarantee';
 import { PRODUCT_GUIDES } from '@/data/guides';
 import { PROMO_CODE, PROMO_CODE_PERCENT, FLASH_SALE_DISCOUNT_PERCENT } from '@/data/promo';
 import { trackShopifyProductView } from '@/lib/shopify-analytics';
@@ -1432,6 +1434,19 @@ const ProductPage = ({
                     </div>
                   )}
                 </div>
+
+                {/* Fit Guarantee — kept beside the price on mobile (spec item 17) */}
+                <Link
+                  href={FIT_GUARANTEE_PATH}
+                  className="mt-3 flex items-center gap-2 rounded-md bg-[#00473c]/5 px-3 py-2"
+                >
+                  <FitGuaranteeIcon className="h-4 w-4 shrink-0 text-[#00473c]" />
+                  <span className="text-[11px] leading-tight text-[#00473c]">
+                    <span className="font-semibold">Your Next Fit Guarantee™</span>
+                    {' — '}Measured wrong? We&apos;ll make it right.{' '}
+                    <span className="underline underline-offset-2">Learn more</span>
+                  </span>
+                </Link>
               </div>
             </div>
 
@@ -1552,6 +1567,11 @@ const ProductPage = ({
 
                   {isMeasureOpen && (
                     <div className="p-4 md:p-6 space-y-5 md:space-y-6">
+                      {/* Reassurance at the exact point shoppers get nervous (spec item 6) */}
+                      <MeasureReassurance
+                        measureGuideHref={guideType ? PRODUCT_GUIDES[guideType].measurement : '/guides'}
+                      />
+
                       {/* Size Selector */}
                       {product.features.hasSize && (
                         <RequiredFieldWrapper
@@ -2361,6 +2381,7 @@ const ProductPage = ({
                     isBuyingNow={isBuyingNow}
                     buyNowError={buyNowError}
                   />
+                  <FitGuaranteeTrustBlock className="mt-4 md:mt-6" />
                 </div>
               ) : (
                 <>
@@ -2442,6 +2463,8 @@ const ProductPage = ({
                   <p className="text-sm font-medium text-red-800">{buyNowError}</p>
                 </div>
               )}
+
+              <FitGuaranteeTrustBlock className="mt-4 md:mt-6" />
                 </>
               )}
 

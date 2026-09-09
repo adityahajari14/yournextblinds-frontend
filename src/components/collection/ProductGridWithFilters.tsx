@@ -5,6 +5,7 @@ import { Product } from '@/types';
 import { ProductCard } from '@/components/product';
 import type { CollectionContext } from '@/components/product/ProductCard';
 import SubCategoryCards from './SubCategoryCards';
+import { FitGuaranteeBadge } from '@/components/fit-guarantee';
 import type { HoneycombSubCategoryCard } from '@/data/honeycombCellularCatalog';
 
 interface FilterOptions {
@@ -493,6 +494,8 @@ export default function ProductGridWithFilters({
           activeId={activeSubCategoryId ?? 'all'}
         />
       )}
+
+      <FitGuaranteeBadge variant="strip" />
 
       <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
       {/* Desktop Sidebar */}

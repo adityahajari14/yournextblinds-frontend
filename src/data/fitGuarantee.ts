@@ -12,6 +12,7 @@
 // update this file and that one.
 
 export const FIT_GUARANTEE_PATH = '/your-next-fit-guarantee';
+export const FIT_GUARANTEE_CLAIM_PATH = '/your-next-fit-guarantee/claim';
 export const FIT_GUARANTEE_NAME = 'Your Next Fit Guarantee™';
 export const FIT_GUARANTEE_TAGLINE = "Measured wrong? We'll make it right.";
 export const FIT_GUARANTEE_DISCLAIMER = '*Terms, eligibility and limitations apply.';
