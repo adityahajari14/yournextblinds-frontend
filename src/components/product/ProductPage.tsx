@@ -1414,40 +1414,6 @@ const ProductPage = ({
                   Write a review
                 </button>
               </div>
-
-              <div className="border border-gray-200 rounded-lg p-4 mb-4">
-                <div className="flex flex-col items-start">
-                  <div className="flex flex-wrap items-baseline gap-2">
-                    <span className="text-sm font-medium text-gray-400 line-through">
-                      {formatPriceWithCurrency(formatPrice(compareAtPrice), product.currency)}
-                    </span>
-                    <span className="text-2xl font-bold text-[#3a3a3a]">
-                      {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
-                    </span>
-                    <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
-                      {FLASH_SALE_DISCOUNT_PERCENT}% Off Flash Sale
-                    </span>
-                  </div>
-                  {priceCalculation && !showMinPriceIndicator && (
-                    <div className="mt-3 text-xs text-gray-400">
-                      Size: {priceCalculation.widthBand?.inches}" × {priceCalculation.heightBand?.inches}"
-                    </div>
-                  )}
-                </div>
-
-                {/* Fit Guarantee — kept beside the price on mobile (spec item 17) */}
-                <Link
-                  href={FIT_GUARANTEE_PATH}
-                  className="mt-3 flex items-center gap-2 rounded-md bg-[#00473c]/5 px-3 py-2"
-                >
-                  <FitGuaranteeIcon className="h-4 w-4 shrink-0 text-[#00473c]" />
-                  <span className="text-[11px] leading-tight text-[#00473c]">
-                    <span className="font-semibold">Your Next Fit Guarantee™</span>
-                    {' — '}Measured wrong? We&apos;ll make it right.{' '}
-                    <span className="underline underline-offset-2">Learn more</span>
-                  </span>
-                </Link>
-              </div>
             </div>
 
             {/* Left - Gallery with Thumbnails on Left */}
@@ -1493,6 +1459,41 @@ const ProductPage = ({
 
               {renderBandHColorSelector('mb-4 lg:hidden', 'colorVariant-mobile')}
 
+              {/* Price card (mobile) — below the image and variant picker, above the dispatch box */}
+              <div className="lg:hidden border border-gray-200 rounded-lg p-4 mb-4">
+                <div className="flex flex-col items-start">
+                  <div className="flex flex-wrap items-baseline gap-2">
+                    <span className="text-sm font-medium text-gray-400 line-through">
+                      {formatPriceWithCurrency(formatPrice(compareAtPrice), product.currency)}
+                    </span>
+                    <span className="text-2xl font-bold text-[#3a3a3a]">
+                      {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
+                    </span>
+                    <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
+                      {FLASH_SALE_DISCOUNT_PERCENT}% Off Flash Sale
+                    </span>
+                  </div>
+                  {priceCalculation && !showMinPriceIndicator && (
+                    <div className="mt-3 text-xs text-gray-400">
+                      Size: {priceCalculation.widthBand?.inches}" × {priceCalculation.heightBand?.inches}"
+                    </div>
+                  )}
+                </div>
+
+                {/* Fit Guarantee — kept beside the price on mobile (spec item 17) */}
+                <Link
+                  href={FIT_GUARANTEE_PATH}
+                  className="mt-3 flex items-center gap-2 rounded-md bg-[#00473c]/5 px-3 py-2"
+                >
+                  <FitGuaranteeIcon className="h-4 w-4 shrink-0 text-[#00473c]" />
+                  <span className="text-[11px] leading-tight text-[#00473c]">
+                    <span className="font-semibold">Your Next Fit Guarantee™</span>
+                    {' — '}Measured wrong? We&apos;ll make it right.{' '}
+                    <span className="underline underline-offset-2">Learn more</span>
+                  </span>
+                </Link>
+              </div>
+
               {/* Shipping Info Box */}
               <div className="flex items-center border border-gray-200 rounded-lg mb-4 md:mb-6 px-3 md:px-4 py-2 md:py-3">
                 <div className="w-10 h-10 md:w-12 md:h-12 bg-gray-100 rounded-lg flex items-center justify-center shrink-0">
@@ -1530,6 +1531,19 @@ const ProductPage = ({
                     </div>
                   )}
                 </div>
+
+                {/* Fit Guarantee — kept beside the price (spec items 5 & 17) */}
+                <Link
+                  href={FIT_GUARANTEE_PATH}
+                  className="group mt-3 flex items-center gap-2 rounded-md bg-[#00473c]/5 px-3 py-2 transition-colors hover:bg-[#00473c]/10"
+                >
+                  <FitGuaranteeIcon className="h-4 w-4 shrink-0 text-[#00473c]" />
+                  <span className="text-xs leading-tight text-[#00473c]">
+                    <span className="font-semibold">Your Next Fit Guarantee™</span>
+                    {' — '}Measured wrong? We&apos;ll make it right.{' '}
+                    <span className="underline underline-offset-2 group-hover:no-underline">Learn more</span>
+                  </span>
+                </Link>
               </div>
 
               {renderBandHColorSelector('hidden lg:block mb-4 md:mb-6', 'colorVariant-desktop')}
