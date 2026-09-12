@@ -66,16 +66,6 @@ const curatedRoomCards = (): RoomCard[] =>
 // Navigation data - used by NavBar component
 export const navigationData: NavigationItem[] = [
   {
-    label: 'Blinds',
-    showInHomeGrid: true,
-    submenu: [
-      { label: 'Light filtering Vertical blinds', href: '/collections/light-filtering-vertical-blinds', icon: '/nav-icons/vertical-blinds.webp' },
-      { label: 'Blackout vertical blinds', href: '/collections/blackout-vertical-blinds', icon: '/nav-icons/blackout-blinds.svg' },
-      { label: 'Waterproof Blackout vertical blinds', href: '/collections/waterproof-blackout-vertical-blinds', icon: '/nav-icons/waterproof-blinds.svg' },
-      { label: 'All blinds and shades', href: '/collections', icon: '/nav-icons/roller-blinds.webp' },
-    ]
-  },
-  {
     label: 'Shades',
     showInHomeGrid: true,
     submenu: [
@@ -102,7 +92,6 @@ export const navigationData: NavigationItem[] = [
     submenu: [
       { label: 'Blackout Roller Shades', href: '/collections/blackout-roller-shades-category', icon: '/nav-icons/blackout-blinds.svg' },
       { label: 'Blackout Dual zebra shades', href: '/collections/blackout-dual-zebra-shades', icon: '/nav-icons/day-night-blinds.webp' },
-      { label: 'Blackout Vertical blinds', href: '/collections/blackout-vertical-blinds-category', icon: '/nav-icons/vertical-blinds.webp' },
       { label: 'Eclipse Complete Blackout Blinds', href: '/product/non-driii-honeycomb-blackout-blinds', icon: '/nav-icons/blackout-blinds.svg' },
     ]
   },
