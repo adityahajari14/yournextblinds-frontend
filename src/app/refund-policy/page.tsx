@@ -11,12 +11,12 @@ const sections = [
   {
     title: 'Reporting Damaged or Defective Goods',
     content:
-      'All items are quality checked before dispatch, but please inspect your order as soon as it arrives. Damage or defects caused by manufacturing or transit must be reported within 3 working days of delivery.',
+      'All items are quality checked before dispatch, but please inspect your order as soon as it arrives. Damage or defects caused by manufacturing or transit must be reported within 3 business days of delivery.',
   },
   {
     title: 'How to Report an Issue',
     content:
-      'Email enquiries@yournextblinds.com with your order details and a clear description of the issue. We aim to respond within 1 working day, and no later than 3 working days.',
+      'Email enquiries@yournextblinds.com with your order details and a clear description of the issue. We aim to respond within 1 business day, and no later than 3 business days.',
   },
   {
     title: 'Claim Investigation',
@@ -56,7 +56,7 @@ const sections = [
   {
     title: 'Delivery and Failed Delivery',
     content:
-      'Blinds are typically manufactured within 3-5 working days and dispatched after production. Deliveries usually take place Monday to Friday and may require a signature. Multiple failed delivery attempts may incur re-delivery charges. Items returned to us by the courier will be held for 4 weeks before disposal.',
+      'Blinds are typically manufactured within 3-5 business days and dispatched after production. Deliveries usually take place Monday to Friday and may require a signature. Multiple failed delivery attempts may incur re-delivery charges. Items returned to us by the courier will be held for 4 weeks before disposal.',
   },
   {
     title: 'Warranty',
@@ -81,7 +81,7 @@ export default function RefundPolicyPage() {
       <main>
         {/* Hero */}
         <section className="relative h-60 md:h-[300px] w-full overflow-hidden bg-linear-to-br from-[#00473c] via-[#00594a] to-[#003a31]">
-          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.jpg')] bg-cover bg-center opacity-10" />
+          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.webp')] bg-cover bg-center opacity-10" />
           <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl text-white font-bold tracking-tight">
               Returns & Refunds Policy
@@ -125,7 +125,7 @@ export default function RefundPolicyPage() {
                 >
                   enquiries@yournextblinds.com
                 </a>
-                . Response time is 1-3 working days.
+                . Response time is 1-3 business days.
               </p>
             </div>
           </div>

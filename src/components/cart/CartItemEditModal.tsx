@@ -33,22 +33,33 @@ import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 import {
   DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS,
   DAY_NIGHT_BAND_H_SIZE_LIMITS,
+  capDayNightBandHSizeLimits,
+  getDayNightBandHSizeLimits,
+  isDayAndNightCategoryProduct,
   isDayNightBandHProduct,
   supportsBandHWrappedCassette,
 } from '@/data/dayNightBandH';
 import {
   ROLLER_BAND_F_MOTORIZATION_OPTIONS,
   ROLLER_BAND_F_SIZE_LIMITS,
+  applyRollerBandFRoomDarkeningCap,
+  capRollerBandFSizeLimits,
+  getRollerBandFSizeLimits,
   isRollerBandFProduct,
+  isRollerCategoryProduct,
   supportsRollerBandFWrappedCassette,
   rollerBandFShowsRollOption,
 } from '@/data/rollerBandF';
+import { HONEYCOMB_CELLULAR_SIZE_LIMITS, isHoneycombCellularProduct } from '@/data/honeycombCellular';
 
 interface CartItemEditModalProps {
   item: CartItem;
   onClose: () => void;
   onSave: (itemId: string, product: Product, configuration: ProductConfiguration) => void;
 }
+
+const EMPTY_MISSING_FIELD_KEYS = new Set<string>();
+const NOOP_REGISTER_FIELD_REF = () => {};
 
 const getBottomBarPricing = () =>
   BOTTOM_BAR_OPTIONS.map(option => ({
@@ -86,7 +97,10 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
 
   const product = item.product;
   const isBandHProduct = isDayNightBandHProduct(product);
+  const isDayAndNightProduct = isDayAndNightCategoryProduct(product);
   const isRollerBandF = isRollerBandFProduct(product);
+  const isRollerProduct = isRollerCategoryProduct(product);
+  const isHoneycombCellular = isHoneycombCellularProduct(product);
   const defaultMotorizationOption = getFirstMotorizationOption(isBandHProduct, isRollerBandF);
   const activeMotorizationOptions = isBandHProduct
     ? DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS
@@ -292,10 +306,74 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     visibleOptions,
   ]);
 
+  // Size ranges from the selected variant's matrix (per-color max width applied).
+  // Honeycomb Cellular is excluded — its selectable range is fixed to the supplier
+  // catalogue's stated spec (HONEYCOMB_CELLULAR_SIZE_LIMITS), not to whatever the
+  // price grid covers; sizes outside the grid still price correctly via the ceiling/
+  // clamp-to-max logic in calculateTotalPrice (src/lib/pricing.ts). See ProductPage.tsx
+  // for the same bypass.
+  const sizeRanges = useMemo(() => {
+    if (isHoneycombCellular) {
+      return null;
+    }
+    if (!priceMatrix || priceMatrix.widthBands.length === 0 || priceMatrix.heightBands.length === 0) {
+      return null;
+    }
+    const bandMaxWidth = Math.max(...priceMatrix.widthBands.map((b) => b.inches));
+    return {
+      minWidth: Math.min(...priceMatrix.widthBands.map((b) => b.inches)),
+      maxWidth:
+        typeof priceMatrix.maxWidthInches === 'number'
+          ? Math.min(bandMaxWidth, priceMatrix.maxWidthInches)
+          : bandMaxWidth,
+      minHeight: Math.min(...priceMatrix.heightBands.map((b) => b.inches)),
+      maxHeight: Math.max(...priceMatrix.heightBands.map((b) => b.inches)),
+    };
+  }, [priceMatrix, isHoneycombCellular]);
+
+  // Zebra/Day-and-Night's selectable range is fixed to the supplier spec
+  // sheet's per-control-system numbers (CCL / Cordless / Motorized), not to
+  // what the price grid happens to cover — sizes outside the grid are still
+  // priced correctly via the ceiling-to-nearest-band / clamp-to-max-band logic
+  // in calculateTotalPrice (src/lib/pricing.ts) and lib/server/pricing.service.ts.
+  // The only price-matrix input that still narrows the range is the genuine
+  // per-color fabric max-width cap. Non-Band-H day-and-night products (Band
+  // A-G) only ever offer Continuous Chain or Motorization, never Cordless.
+  const bandHSizeLimits = useMemo(() => {
+    if (!isDayAndNightProduct) return null;
+    const controlOption = isBandHProduct ? normalizedConfig.controlOption : 'continuous-chain';
+    const limits = getDayNightBandHSizeLimits(controlOption, isMotorizationActive);
+    return capDayNightBandHSizeLimits(limits, priceMatrix?.maxWidthInches);
+  }, [isDayAndNightProduct, isBandHProduct, normalizedConfig.controlOption, isMotorizationActive, priceMatrix]);
+
+  // Roller's selectable range is fixed to the supplier spec sheet's
+  // per-control-system numbers (CCL / Cordless / No-Drill / Motorized), not to
+  // what the price grid happens to cover — sizes outside the grid are still
+  // priced correctly via the ceiling-to-nearest-band / clamp-to-max-band logic
+  // in calculateTotalPrice (src/lib/pricing.ts) and lib/server/pricing.service.ts.
+  // Room Darkening + Flat Headrail still caps max height, and the price
+  // matrix's genuine per-color fabric max-width cap still applies. Non-Band-F
+  // roller products (Band A-E) only ever offer Continuous Chain or Motorization.
+  const rollerSizeLimits = useMemo(() => {
+    if (!isRollerProduct) return null;
+    const controlOption = isRollerBandF ? normalizedConfig.controlOption : 'roller-f-continuous-chain';
+    const limits = getRollerBandFSizeLimits(controlOption, isMotorizationActive, normalizedConfig.headrail);
+    const darkened = applyRollerBandFRoomDarkeningCap(limits, normalizedConfig.headrail, normalizedConfig.roomDarkening);
+    return capRollerBandFSizeLimits(darkened, priceMatrix?.maxWidthInches);
+  }, [
+    isRollerProduct,
+    isRollerBandF,
+    normalizedConfig.controlOption,
+    normalizedConfig.headrail,
+    normalizedConfig.roomDarkening,
+    isMotorizationActive,
+    priceMatrix,
+  ]);
+
   const missingCustomizations = useMemo(() => {
     const missing = getMissingRequiredCustomizations(normalizedConfig, requiredVisibility);
 
-    const isBandProduct = isBandHProduct || isRollerBandF;
+    const isBandProduct = isDayAndNightProduct || isRollerProduct || isHoneycombCellular;
     if (!isBandProduct || normalizedConfig.width <= 0 || normalizedConfig.height <= 0) {
       return missing;
     }
@@ -310,15 +388,38 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
       normalizedConfig.heightFraction,
       normalizedConfig.heightUnit
     );
-    const limits = isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS : ROLLER_BAND_F_SIZE_LIMITS;
+    const limits = isDayAndNightProduct
+      ? bandHSizeLimits ?? DAY_NIGHT_BAND_H_SIZE_LIMITS
+      : isRollerProduct
+      ? rollerSizeLimits ?? ROLLER_BAND_F_SIZE_LIMITS
+      : HONEYCOMB_CELLULAR_SIZE_LIMITS;
     const isOutOfRange =
       widthInches < limits.minWidth ||
       widthInches > limits.maxWidth ||
       heightInches < limits.minHeight ||
       heightInches > limits.maxHeight;
 
-    return isOutOfRange ? [...missing, isBandHProduct ? 'valid Band H size' : 'valid Roller Band F size'] : missing;
-  }, [isBandHProduct, isRollerBandF, normalizedConfig, requiredVisibility]);
+    return isOutOfRange
+      ? [
+          ...missing,
+          isDayAndNightProduct
+            ? { key: 'bandHSize', label: isBandHProduct ? 'valid Band H size' : 'valid size' }
+            : isRollerProduct
+            ? { key: 'rollerBandFSize', label: isRollerBandF ? 'valid Roller Band F size' : 'valid size' }
+            : { key: 'honeycombCellularSize', label: 'valid size' },
+        ]
+      : missing;
+  }, [
+    bandHSizeLimits,
+    rollerSizeLimits,
+    isBandHProduct,
+    isDayAndNightProduct,
+    isRollerBandF,
+    isRollerProduct,
+    isHoneycombCellular,
+    normalizedConfig,
+    requiredVisibility,
+  ]);
 
   const selectedCustomizations = useMemo(() => configToCustomizations({
     headrail: visibleOptions.showHeadrail ? normalizedConfig.headrail : null,
@@ -345,6 +446,8 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     rollStyle: visibleOptions.showRollStyle ? normalizedConfig.rollStyle : null,
     roomDarkening: normalizedConfig.roomDarkening,
     rollOption: normalizedConfig.rollOption,
+    noDrillUpgrade: normalizedConfig.noDrillUpgrade,
+    tdbuSheerUpgrade: normalizedConfig.tdbuSheerUpgrade,
   }), [isBandHProduct, isRollerBandF, normalizedConfig, product.features.hasRollerCassette, visibleOptions]);
 
   const priceCalculation = useMemo(() => {
@@ -383,23 +486,6 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
     return widthInches > 93 ? 100 : 0;
   }, [isRollerBandF, normalizedConfig.width, normalizedConfig.widthFraction, normalizedConfig.widthUnit]);
 
-  // Size ranges from the selected variant's matrix (per-color max width applied).
-  const sizeRanges = useMemo(() => {
-    if (!priceMatrix || priceMatrix.widthBands.length === 0 || priceMatrix.heightBands.length === 0) {
-      return null;
-    }
-    const bandMaxWidth = Math.max(...priceMatrix.widthBands.map((b) => b.inches));
-    return {
-      minWidth: Math.min(...priceMatrix.widthBands.map((b) => b.inches)),
-      maxWidth:
-        typeof priceMatrix.maxWidthInches === 'number'
-          ? Math.min(bandMaxWidth, priceMatrix.maxWidthInches)
-          : bandMaxWidth,
-      minHeight: Math.min(...priceMatrix.heightBands.map((b) => b.inches)),
-      maxHeight: Math.max(...priceMatrix.heightBands.map((b) => b.inches)),
-    };
-  }, [priceMatrix]);
-
   const editedPrice = priceCalculation
     ? priceCalculation.totalPrice + oversizeSurcharge
     : product.price;
@@ -412,7 +498,7 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
 
   const handleSave = async () => {
     if (missingCustomizations.length > 0) {
-      setError(`Please select ${missingCustomizations.join(', ')}.`);
+      setError(`Please select ${missingCustomizations.map((item) => item.label).join(', ')}.`);
       return;
     }
 
@@ -524,10 +610,10 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                 onHeightChange={(value) => updateConfig({ height: value })}
                 onHeightFractionChange={(value) => updateConfig({ heightFraction: value })}
                 onUnitChange={(unit) => updateConfig({ widthUnit: unit, heightUnit: unit })}
-                minWidth={sizeRanges?.minWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minWidth : undefined)}
-                maxWidth={sizeRanges?.maxWidth ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxWidth : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxWidth : undefined)}
-                minHeight={sizeRanges?.minHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.minHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.minHeight : undefined)}
-                maxHeight={sizeRanges?.maxHeight ?? (isBandHProduct ? DAY_NIGHT_BAND_H_SIZE_LIMITS.maxHeight : isRollerBandF ? ROLLER_BAND_F_SIZE_LIMITS.maxHeight : undefined)}
+                minWidth={isDayAndNightProduct ? bandHSizeLimits?.minWidth : isRollerProduct ? rollerSizeLimits?.minWidth : sizeRanges?.minWidth ?? (isHoneycombCellular ? HONEYCOMB_CELLULAR_SIZE_LIMITS.minWidth : undefined)}
+                maxWidth={isDayAndNightProduct ? bandHSizeLimits?.maxWidth : isRollerProduct ? rollerSizeLimits?.maxWidth : sizeRanges?.maxWidth ?? (isHoneycombCellular ? HONEYCOMB_CELLULAR_SIZE_LIMITS.maxWidth : undefined)}
+                minHeight={isDayAndNightProduct ? bandHSizeLimits?.minHeight : isRollerProduct ? rollerSizeLimits?.minHeight : sizeRanges?.minHeight ?? (isHoneycombCellular ? HONEYCOMB_CELLULAR_SIZE_LIMITS.minHeight : undefined)}
+                maxHeight={isDayAndNightProduct ? bandHSizeLimits?.maxHeight : isRollerProduct ? rollerSizeLimits?.maxHeight : sizeRanges?.maxHeight ?? (isHoneycombCellular ? HONEYCOMB_CELLULAR_SIZE_LIMITS.maxHeight : undefined)}
               />
             )}
 
@@ -550,6 +636,8 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                   config={config}
                   updateConfig={updateConfig}
                   isMotorizationSelected={selectedOptionalCards.motorization}
+                  missingFieldKeys={EMPTY_MISSING_FIELD_KEYS}
+                  registerFieldRef={NOOP_REGISTER_FIELD_REF}
                   onMotorizationSelectedChange={(selected) =>
                     setSelectedOptionalCards((prev) => ({
                       ...prev,
@@ -572,6 +660,8 @@ const CartItemEditModal = ({ item, onClose, onSave }: CartItemEditModalProps) =>
                   config={config}
                   updateConfig={updateConfig}
                   isMotorizationSelected={selectedOptionalCards.motorization}
+                  missingFieldKeys={EMPTY_MISSING_FIELD_KEYS}
+                  registerFieldRef={NOOP_REGISTER_FIELD_REF}
                   onMotorizationSelectedChange={(selected) =>
                     setSelectedOptionalCards((prev) => ({
                       ...prev,

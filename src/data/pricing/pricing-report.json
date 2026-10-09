@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-07-02T07:35:06.193Z",
-  "source": "manual+phase1-multi-table (Roller Band F G1-4, Dayandnight Band H G1-2)",
-  "checksum": "74ec8a2ce5e7d3ff11d04a595da6fe812e2ee873d98cdd39b5abe241811a41ce",
+  "generatedAt": "2026-09-01T21:03:54.784Z",
+  "source": "manual+phase1-multi-table (Roller Band F G1-4, Dayandnight Band H G1-2)+honeycomb-cellular-g1-12",
+  "checksum": "1a1b48e883cd66d269b5edb608426e3dbc4c33ceee15b00f282d57be93943160",
   "counts": {
-    "priceBands": 26,
+    "priceBands": 48,
     "widthBands": 58,
     "heightBands": 43,
-    "priceCells": 5105,
-    "customizationOptions": 86,
-    "customizationPricings": 170
+    "priceCells": 7767,
+    "customizationOptions": 91,
+    "customizationPricings": 175
   },
   "priceBandNames": [
     "Dayandnight - Band A",
@@ -36,7 +36,29 @@
     "Roller - Band F - Group 3",
     "Roller - Band F - Group 4",
     "Dayandnight - Band H - Group 1",
-    "Dayandnight - Band H - Group 2"
+    "Dayandnight - Band H - Group 2",
+    "Honeycomb Cellular - Group 1",
+    "Honeycomb Cellular - Group 2",
+    "Honeycomb Cellular - Group 3",
+    "Honeycomb Cellular - Group 4",
+    "Honeycomb Cellular - Group 5",
+    "Honeycomb Cellular - Group 6",
+    "Honeycomb Cellular - Group 7",
+    "Honeycomb Cellular - Group 8",
+    "Honeycomb Cellular - Group 9",
+    "Honeycomb Cellular - Group 10",
+    "Honeycomb Cellular - Group 11",
+    "Honeycomb Cellular - Group 12",
+    "Honeycomb Cellular - Group 1 - TDBU Cordless",
+    "Honeycomb Cellular - Group 2 - TDBU Cordless",
+    "Honeycomb Cellular - Group 3 - TDBU Cordless",
+    "Honeycomb Cellular - Group 4 - TDBU Cordless",
+    "Honeycomb Cellular - Group 6 - TDBU Cordless",
+    "Honeycomb Cellular - Group 7 - TDBU Cordless",
+    "Honeycomb Cellular - Group 8 - TDBU Cordless",
+    "Honeycomb Cellular - Group 9 - TDBU Cordless",
+    "Honeycomb Cellular - Group 10 - TDBU Cordless",
+    "Honeycomb Cellular - Group 11 - TDBU Cordless"
   ],
   "validation": {
     "errors": [],

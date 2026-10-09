@@ -138,7 +138,7 @@ type ShopifyCustomerByEmailGraphqlResponse = {
   errors?: Array<{ message?: string }>;
 };
 
-async function adminGraphqlFetch<T>(query: string, variables: Record<string, unknown>): Promise<T> {
+export async function adminGraphqlFetch<T>(query: string, variables: Record<string, unknown>): Promise<T> {
   validateShopifyConfig();
 
   const response = await fetch(getAdminApiUrl('/graphql.json'), {

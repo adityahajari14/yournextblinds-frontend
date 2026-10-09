@@ -49,7 +49,7 @@ export default function AboutPage() {
       <main className="overflow-hidden">
         {/* Hero Section */}
         <section className="relative h-[380px] md:h-[450px] w-full overflow-hidden bg-gradient-to-br from-[#00473c] via-[#00594a] to-[#003a31]">
-          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.jpg')] bg-cover bg-center opacity-10" />
+          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.webp')] bg-cover bg-center opacity-10" />
           
           <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 md:px-12 lg:px-20">
             <div className="max-w-[800px] text-center space-y-5 md:space-y-6">
@@ -83,7 +83,7 @@ export default function AboutPage() {
               </div>
               <div className="relative w-full h-[300px] md:h-[380px] order-1 lg:order-2 rounded-xl overflow-hidden shadow-lg">
                 <Image
-                  src="/home/craftsmanship-bg.jpg"
+                  src="/home/craftsmanship-bg.webp"
                   alt="Our craftsmanship"
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-700"
@@ -99,7 +99,7 @@ export default function AboutPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
               <div className="relative w-full h-[300px] md:h-[380px] rounded-xl overflow-hidden shadow-lg">
                 <Image
-                  src="/home/samples.jpg"
+                  src="/home/samples.webp"
                   alt="Made in Texas"
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-700"
@@ -256,7 +256,7 @@ export default function AboutPage() {
         <section className="relative w-full overflow-hidden">
           <div className="absolute inset-0">
             <Image
-              src="/home/hero/hero-background.jpg"
+              src="/home/hero/hero-background.webp"
               alt="Your next space"
               fill
               className="object-cover"

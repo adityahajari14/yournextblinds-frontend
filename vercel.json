@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/orders/reconcile-abandoned",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

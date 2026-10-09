@@ -4,23 +4,40 @@ interface CategoryHeroProps {
   title: string;
   description: string;
   productCount: number;
+  /**
+   * Explicit hero image, bypassing the title lookup below. Curated collections
+   * (src/data/curatedCollections.ts) pass their own so they don't depend on
+   * their title matching a key in `categoryImages`.
+   *
+   * `null` means "this collection has no hero image" and renders a text-only
+   * hero — distinct from `undefined`, which falls back to the title lookup.
+   */
+  image?: string | null;
 }
 
-// Category images mapping
+// Category images mapping. Keys are the display titles from COLLECTION_DISPLAY_NAMES
+// (src/data/navigation.ts) — they must match exactly or the hero falls back to the default.
+// Kept in sync with IMAGE_MAP in the home "Shop by Category" grid
+// (src/components/home/CategoryGrid.tsx), which is keyed by collection href instead.
 const categoryImages: Record<string, string> = {
-  'Vertical Blinds': '/home/products/vertical-blinds-1.jpg',
-  'Roller Blinds': '/home/products/vertical-blinds-2.jpg',
-  'Metal Venetian Blinds': '/home/products/vertical-blinds-5.jpg',
-  'Venetian Blinds': '/home/products/vertical-blinds-5.jpg',
-  'Roman Blinds': '/home/products/vertical-blinds-3.jpg',
-  'Day and Night Blinds': '/home/products/vertical-blinds.jpg',
-  'Dual zebra Shades': '/home/categories/dual-zebra-shades.webp',
   'Light filtering roller Shades': '/home/categories/light-filtering-roller-shades.webp',
   'Blackout roller Shades': '/home/categories/blackout-roller-shades.webp',
+  'Waterproof Blackout roller Shades': '/home/categories/Waterproof%20Blackout%20roller%20Shades.webp',
+  'Dual zebra Shades': '/home/categories/dual-zebra-shades.webp',
+  'Light filtering Vertical blinds': '/home/categories/light%20filtering%20vertical%20blinds.webp',
+  'Blackout vertical blinds': '/home/categories/blackout%20vertical%20blinds.webp',
+  'Waterproof Blackout vertical blinds': '/home/categories/water%20proof%20vertical%20blinds.webp',
+  'Motorized roller shades': '/home/categories/Motorised%20roller%20shades.webp',
+  'Motorized Dual zebra shades': '/home/categories/motorised%20zebra%20dual%20shades.webp',
+  'Motorized EclipseCore': '/home/categories/motorised%20eclipsecore.webp',
+  'Roller Shades': '/home/categories/blackout-roller-shades.webp',
+  'Dual zebra shades': '/home/categories/Dual%20zebra%20Shades.webp',
+  'Vertical blinds': '/home/categories/blackout%20vertical%20blinds.webp',
+  'EclipseCore shades': '/home/categories/eclipse%20core%20shades.webp',
 };
 
-export default function CategoryHero({ title, description, productCount }: CategoryHeroProps) {
-  const image = categoryImages[title] || '/home/products/blinds.jpeg';
+export default function CategoryHero({ title, description, productCount, image: imageOverride }: CategoryHeroProps) {
+  const image = imageOverride === null ? null : (imageOverride || categoryImages[title] || '/home/products/blinds.jpeg');
   const isComingSoon = productCount === 0;
 
   return (
@@ -29,9 +46,9 @@ export default function CategoryHero({ title, description, productCount }: Categ
       <div className="absolute bottom-0 left-0 w-64 h-64 md:w-96 md:h-96 bg-[#00473c]/3 rounded-full blur-3xl" />
       
       <div className="max-w-[1400px] mx-auto relative">
-        <div className="grid lg:grid-cols-2 min-h-[350px] sm:min-h-[400px] md:min-h-[450px] lg:min-h-[500px]">
+        <div className={`grid min-h-[350px] sm:min-h-[400px] md:min-h-[450px] ${image ? 'lg:grid-cols-2 lg:min-h-[500px]' : 'lg:min-h-[360px]'}`}>
           <div className="flex items-center px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 py-8 sm:py-10 md:py-12 lg:py-16">
-            <div className="max-w-xl space-y-4 sm:space-y-5 md:space-y-6">
+            <div className={`space-y-4 sm:space-y-5 md:space-y-6 ${image ? 'max-w-xl' : 'max-w-3xl'}`}>
               <div className="inline-block">
                 {isComingSoon ? (
                   <span className="text-[10px] sm:text-xs uppercase tracking-wider sm:tracking-widest text-amber-600 font-semibold bg-amber-50 px-3 sm:px-4 py-1.5 sm:py-2 rounded-full">
@@ -72,15 +89,17 @@ export default function CategoryHero({ title, description, productCount }: Categ
             </div>
           </div>
 
-          <div className="relative h-[250px] sm:h-[300px] md:h-[400px] lg:h-full">
-            <Image
-              src={image}
-              alt={title}
-              fill
-              className="object-cover"
-              priority
-            />
-          </div>
+          {image && (
+            <div className="relative h-[250px] sm:h-[300px] md:h-[400px] lg:h-full">
+              <Image
+                src={image}
+                alt={title}
+                fill
+                className="object-cover"
+                priority
+              />
+            </div>
+          )}
         </div>
       </div>
     </section>

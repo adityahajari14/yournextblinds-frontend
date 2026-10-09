@@ -30,7 +30,7 @@ const InstallationMethodSelector = ({ options, selectedMethod, onMethodChange }:
                         key={option.id}
                         type="button"
                         onClick={() => onMethodChange(option.id)}
-                        className={`relative flex flex-col border-2 rounded-lg p-4 transition-all hover:border-[#00473c] text-left ${selectedMethod === option.id
+                        className={`relative flex flex-row items-center gap-3 border-2 rounded-lg p-3 transition-all hover:border-[#00473c] text-left md:flex-col md:p-4 ${selectedMethod === option.id
                                 ? 'border-[#00473c] bg-[#f6fffd]'
                                 : 'border-gray-300 bg-white'
                             }`}
@@ -42,22 +42,24 @@ const InstallationMethodSelector = ({ options, selectedMethod, onMethodChange }:
                                 alt={option.name}
                                 width={120}
                                 height={120}
-                                containerClassName="relative h-[120px] w-full mb-3 bg-gray-50 rounded overflow-hidden flex items-center justify-center"
+                                containerClassName="relative h-16 w-16 shrink-0 bg-gray-50 rounded overflow-hidden flex items-center justify-center md:h-[120px] md:w-full md:mb-3"
                                 imageClassName="object-contain"
                             />
                         )}
 
-                        {/* Option Name */}
-                        <p className="text-base font-medium text-[#3a3a3a] mb-1">
-                            {option.name}
-                        </p>
-
-                        {/* Description */}
-                        {option.description && (
-                            <p className="text-sm text-gray-500">
-                                {option.description}
+                        <div className="min-w-0">
+                            {/* Option Name */}
+                            <p className="text-base font-medium text-[#3a3a3a] mb-1">
+                                {option.name}
                             </p>
-                        )}
+
+                            {/* Description */}
+                            {option.description && (
+                                <p className="text-sm text-gray-500">
+                                    {option.description}
+                                </p>
+                            )}
+                        </div>
 
                         {/* Price Badge (if price > 0) */}
                         {option.price != null && option.price > 0 && (

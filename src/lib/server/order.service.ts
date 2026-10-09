@@ -1,6 +1,8 @@
 import { calculateProductPrice, type PricingRequest } from './pricing.service';
 import { getAdminApiUrl, getAdminHeaders, validateShopifyConfig } from './shopify-admin';
 import { getCachedProduct } from './product-cache';
+import { recordCheckoutStarted, type AbandonedCheckoutItem } from './abandoned-checkout.service';
+import { findDiscountCode } from '@/data/promo';
 
 // ============================================
 // Types
@@ -32,6 +34,9 @@ export interface CheckoutItemRequest {
     openingDirection?: string;
     bottomBar?: string;
     rollStyle?: string;
+    roomDarkening?: string;
+    noDrillUpgrade?: string;
+    tdbuSheerUpgrade?: string;
     selectedVariantId?: string;
     selectedVariantTitle?: string;
     selectedVariantImage?: string;
@@ -45,6 +50,24 @@ export interface CreateCheckoutRequest {
   items: CheckoutItemRequest[];
   customerEmail?: string;
   note?: string;
+  /** Coupon code entered in the cart; re-validated server-side against the
+   *  same list used by the marketing pages before it's applied to the order. */
+  discountCode?: string;
+  /** First-party analytics session ID, carried onto the order so a completed
+   *  purchase can be attributed back to the browser session (abandonment). */
+  analyticsSessionId?: string;
+  /** Session/attribution context from the storefront tracker, recorded onto
+   *  the abandoned-checkout row so an unrecovered checkout can be attributed. */
+  storeSession?: {
+    sessionId: string;
+    utmSource: string | null;
+    utmMedium: string | null;
+    utmCampaign: string | null;
+    referrer: string | null;
+    deviceType: string;
+    userAgent: string;
+    sessionDurationSeconds: number;
+  } | null;
 }
 
 export interface CreateCheckoutResponse {
@@ -57,6 +80,8 @@ export interface CreateCheckoutResponse {
     quantity: number;
   }[];
   subtotal: number;
+  discountCode?: string;
+  discountAmount?: number;
 }
 
 interface ShopifyDraftOrderLineItem {
@@ -97,6 +122,9 @@ function configToCustomizations(config: CheckoutItemRequest['configuration']): P
     openingDirection: 'opening-direction',
     bottomBar: 'bottom-bar',
     rollStyle: 'roll-style',
+    roomDarkening: 'room-darkening',
+    noDrillUpgrade: 'no-drill-upgrade',
+    tdbuSheerUpgrade: 'tdbu-sheer-upgrade',
   };
 
   for (const [configKey, category] of Object.entries(mappings)) {
@@ -149,6 +177,9 @@ function buildLineItemProperties(
     openingDirection: 'Opening Direction',
     bottomBar: 'Bottom Bar',
     rollStyle: 'Roll Style',
+    roomDarkening: 'Room Darkening',
+    noDrillUpgrade: 'No Drill Upgrade',
+    tdbuSheerUpgrade: 'Additional Sheer',
   };
 
   for (const [key, label] of Object.entries(labelMap)) {
@@ -218,12 +249,29 @@ const PRICE_TOLERANCE = 0.50;
 // Service Functions
 // ============================================
 
+export interface PriceMismatchDetail {
+  index: number;
+  handle: string;
+  title: string;
+  submittedPrice: number;
+  calculatedPrice: number;
+}
+
 export class CheckoutError extends Error {
   statusCode: number;
-  constructor(message: string, statusCode: number = 500) {
+  code?: string;
+  details?: PriceMismatchDetail[];
+  constructor(
+    message: string,
+    statusCode: number = 500,
+    code?: string,
+    details?: PriceMismatchDetail[]
+  ) {
     super(message);
     this.name = 'CheckoutError';
     this.statusCode = statusCode;
+    this.code = code;
+    this.details = details;
   }
 }
 
@@ -236,9 +284,10 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
 
   const lineItems: ShopifyDraftOrderLineItem[] = [];
   const responseLineItems: CreateCheckoutResponse['lineItems'] = [];
+  const priceMismatches: PriceMismatchDetail[] = [];
   let subtotal = 0;
 
-  for (const item of request.items) {
+  for (const [index, item] of request.items.entries()) {
     if (!item.handle) {
       throw new CheckoutError('Each item must have a handle', 400);
     }
@@ -274,11 +323,14 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
 
     const priceDifference = Math.abs(pricing.totalPrice - item.submittedPrice);
     if (priceDifference > PRICE_TOLERANCE) {
-      throw new CheckoutError(
-        `Price mismatch for "${productTitle}": submitted $${item.submittedPrice.toFixed(2)}, ` +
-        `calculated $${pricing.totalPrice.toFixed(2)} (diff: $${priceDifference.toFixed(2)})`,
-        422
-      );
+      priceMismatches.push({
+        index,
+        handle: item.handle,
+        title: productTitle,
+        submittedPrice: item.submittedPrice,
+        calculatedPrice: pricing.totalPrice,
+      });
+      continue;
     }
 
     const itemPrice = pricing.totalPrice;
@@ -321,6 +373,28 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
     subtotal += itemPrice * item.quantity;
   }
 
+  if (priceMismatches.length > 0) {
+    const summary = priceMismatches
+      .map((m) => `"${m.title}": submitted $${m.submittedPrice.toFixed(2)}, current $${m.calculatedPrice.toFixed(2)}`)
+      .join('; ');
+    throw new CheckoutError(
+      `Some prices have changed since they were added to the cart: ${summary}`,
+      422,
+      'PRICE_MISMATCH',
+      priceMismatches
+    );
+  }
+
+  let discountCode: string | null = null;
+  let discountAmount = 0;
+  if (request.discountCode) {
+    const promo = findDiscountCode(request.discountCode);
+    if (promo) {
+      discountCode = promo.code;
+      discountAmount = Math.round(subtotal * (promo.percentOff / 100) * 100) / 100;
+    }
+  }
+
   const mutation = `
     mutation DraftOrderCreate($input: DraftOrderInput!) {
       draftOrderCreate(input: $input) {
@@ -347,6 +421,19 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
           useCustomerDefaultAddress: true,
           note: request.note || '',
           ...(request.customerEmail && { email: request.customerEmail }),
+          // Redeem the code through Shopify's own `discountCodes` field rather than
+          // a hand-computed appliedDiscount, so it shows up as a real, removable
+          // discount at checkout instead of a fixed line item baked into the order.
+          ...(discountCode && { discountCodes: [discountCode] }),
+          // Draft-order checkout hides the discount code box by default; keep it open
+          // so the applied code above is editable/removable, and so a customer who
+          // didn't apply one in the cart can still enter one at checkout.
+          allowDiscountCodesInCheckout: true,
+          // Analytics session ID rides along as an order custom attribute so the
+          // orders-paid webhook can attribute the purchase to the browser session.
+          ...(request.analyticsSessionId && {
+            customAttributes: [{ key: '_analytics_session', value: request.analyticsSessionId }],
+          }),
           presentmentCurrencyCode: DRAFT_ORDER_CURRENCY,
         },
       },
@@ -391,11 +478,42 @@ export async function createCheckout(request: CreateCheckoutRequest): Promise<Cr
     throw new CheckoutError('Failed to create Shopify draft order: no invoice URL returned', 500);
   }
 
+  try {
+    const abandonedItems: AbandonedCheckoutItem[] = request.items.map((item, index) => ({
+      handle: item.handle,
+      title: responseLineItems[index]?.title || item.handle,
+      quantity: item.quantity,
+      calculatedPrice: responseLineItems[index]?.calculatedPrice ?? item.submittedPrice,
+      widthInches: item.widthInches,
+      heightInches: item.heightInches,
+      configuration: item.configuration,
+    }));
+
+    await recordCheckoutStarted({
+      customerEmail: request.customerEmail,
+      sessionId: request.storeSession?.sessionId ?? request.analyticsSessionId,
+      draftOrderId: draftOrder.id.toString(),
+      checkoutUrl: draftOrder.invoiceUrl,
+      subtotal,
+      items: abandonedItems,
+      utmSource: request.storeSession?.utmSource,
+      utmMedium: request.storeSession?.utmMedium,
+      utmCampaign: request.storeSession?.utmCampaign,
+      referrer: request.storeSession?.referrer,
+      deviceType: request.storeSession?.deviceType,
+      userAgent: request.storeSession?.userAgent,
+      sessionDurationSeconds: request.storeSession?.sessionDurationSeconds,
+    });
+  } catch (error) {
+    console.error('[AbandonedCheckout] Failed to record checkout started:', error);
+  }
+
   return {
     checkoutUrl: draftOrder.invoiceUrl,
     draftOrderId: draftOrder.id.toString(),
     lineItems: responseLineItems,
     subtotal,
+    ...(discountCode && discountAmount > 0 && { discountCode, discountAmount }),
   };
 }
 

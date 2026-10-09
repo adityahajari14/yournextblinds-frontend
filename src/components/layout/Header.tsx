@@ -1,66 +1,232 @@
 'use client';
 
+import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useCart } from '@/context/CartContext';
 import { useSamples } from '@/context/SampleContext';
+import { navigationData, type NavigationLink } from '@/data/navigation';
+import SearchPopup from './SearchPopup';
+
+const DEFAULT_NAV_ICON = '/nav-icons/vertical-blinds.webp';
+
+/** A single link row inside a desktop dropdown: icon tile + label, with a hover surface. */
+const NavDropdownLink = ({ link }: { link: NavigationLink }) => {
+  const inner = (
+    <>
+      <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-[#f4f2ec] transition-colors group-hover/row:bg-[#e3ede9]">
+        <Image src={link.icon ?? DEFAULT_NAV_ICON} alt="" width={18} height={18} className="opacity-80" />
+      </span>
+      <span className="text-[14px] leading-tight text-gray-700 transition-colors group-hover/row:text-[#00473c]">
+        {link.label}
+      </span>
+    </>
+  );
+  const className =
+    'group/row flex items-center gap-3 rounded-lg px-2.5 py-2 transition-colors hover:bg-[#f7f6f2]';
+  return link.href ? (
+    <Link href={link.href} className={className}>
+      {inner}
+    </Link>
+  ) : (
+    <div className={className}>{inner}</div>
+  );
+};
 
 const Header = () => {
   const { cart } = useCart();
   const { count: sampleCount } = useSamples();
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
 
   return (
-    <div className="bg-white backdrop-blur-sm px-4 md:px-6 lg:px-20 py-4 md:py-5 lg:py-6 flex items-center justify-between">
+    <>
+    {/* Row 1: logo + action icons */}
+    <div className="bg-white backdrop-blur-sm px-2 sm:px-3 md:px-4 lg:px-12 py-2 sm:py-2.5 md:py-3 flex items-center justify-between gap-2 sm:gap-3 md:gap-4">
       {/* Logo */}
-      <Link href="/" className="flex gap-1.5 md:gap-2 items-center">
-        <Image src="/icons/logo.svg" alt="Your Next Blinds" width={16} height={20} className="md:w-[19px] md:h-[23px]" />
-        <span className="font-medium text-base md:text-lg lg:text-[23px] text-[#00473c] leading-tight">
+      <Link href="/" className="flex gap-1 sm:gap-1.5 md:gap-2 items-center shrink-0 min-w-0">
+        <Image src="/icons/logo.svg" alt="Your Next Blinds" width={14} height={18} className="shrink-0 sm:w-4 sm:h-5 md:w-[18px] md:h-[22px]" />
+        <span className="font-medium text-[13px] sm:text-base md:text-lg lg:text-xl text-[#00473c] leading-tight whitespace-nowrap truncate">
           Your <span className="italic">Next </span>Blinds
         </span>
       </Link>
-      
+
       {/* Action Icons */}
-      <div className="flex gap-4 md:gap-5 lg:gap-6 items-center">
-        <Link href="/search" aria-label="Search" className="hover:opacity-70 transition-opacity">
-          <Image src="/icons/search.svg" alt="Search" width={20} height={20} className="md:w-6 md:h-6" />
+      <div className="flex gap-2 sm:gap-3 md:gap-4 items-center shrink-0">
+        <button
+          type="button"
+          onClick={() => setIsSearchOpen(true)}
+          aria-label="Search"
+          className="group relative flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity"
+        >
+          <Image src="/icons/search.svg" alt="" width={24} height={24} className="w-5 h-5 sm:w-6 sm:h-6 md:w-[22px] md:h-[22px]" />
+          <span className="hidden min-[400px]:block md:hidden text-[11px] font-medium leading-none text-black">Search</span>
+          <span className="hidden md:block pointer-events-none absolute top-full right-1/2 translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#00473c] px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            Search
+          </span>
+        </button>
+        <Link href="/account" aria-label="Account" className="group relative flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity">
+          <Image src="/icons/profile.svg" alt="" width={24} height={24} className="w-5 h-5 sm:w-6 sm:h-6 md:w-[22px] md:h-[22px]" />
+          <span className="hidden min-[400px]:block md:hidden text-[11px] font-medium leading-none text-black">Account</span>
+          <span className="hidden md:block pointer-events-none absolute top-full right-1/2 translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#00473c] px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            Account
+          </span>
         </Link>
-        <Link href="/account" aria-label="Account" className="hover:opacity-70 transition-opacity">
-          <Image src="/icons/profile.svg" alt="Profile" width={20} height={20} className="md:w-6 md:h-6" />
+        <Link href="/samples" aria-label="Free samples" className="group relative flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity">
+          <span className="relative">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="#00473c"
+              strokeWidth={1.8}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className="w-5 h-5 sm:w-6 sm:h-6 md:w-[22px] md:h-[22px]"
+            >
+              <path d="M2 13.5V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v9.5" />
+              <path d="M14.5 5.5 20 11a2 2 0 0 1 0 2.83l-6.59 6.59a2 2 0 0 1-2.82 0L4 13.83" />
+              <path d="M2 13.5a5 5 0 0 0 10 0" />
+              <circle cx="7" cy="7" r="0.5" fill="#00473c" />
+            </svg>
+            {sampleCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#00473c] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {sampleCount > 99 ? '99+' : sampleCount}
+              </span>
+            )}
+          </span>
+          <span className="hidden min-[400px]:block md:hidden text-[11px] font-medium leading-none text-black">Samples</span>
+          <span className="hidden md:block pointer-events-none absolute top-full right-1/2 translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#00473c] px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            Free samples
+          </span>
         </Link>
-        <Link href="/samples" aria-label="Free samples" className="hover:opacity-70 transition-opacity relative">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width={20}
-            height={20}
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="#00473c"
-            strokeWidth={1.8}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="md:w-6 md:h-6"
-          >
-            <path d="M2 13.5V4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v9.5" />
-            <path d="M14.5 5.5 20 11a2 2 0 0 1 0 2.83l-6.59 6.59a2 2 0 0 1-2.82 0L4 13.83" />
-            <path d="M2 13.5a5 5 0 0 0 10 0" />
-            <circle cx="7" cy="7" r="0.5" fill="#00473c" />
-          </svg>
-          {sampleCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-[#00473c] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-              {sampleCount > 99 ? '99+' : sampleCount}
-            </span>
-          )}
-        </Link>
-        <Link href="/cart" aria-label="Cart" className="hover:opacity-70 transition-opacity relative">
-          <Image src="/icons/cart.svg" alt="Cart" width={20} height={20} className="md:w-6 md:h-6" />
-          {cart.itemCount > 0 && (
-            <span className="absolute -top-2 -right-2 bg-[#00473c] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-              {cart.itemCount > 99 ? '99+' : cart.itemCount}
-            </span>
-          )}
+        <Link href="/cart" aria-label="Cart" className="group relative flex flex-col items-center gap-0.5 hover:opacity-70 transition-opacity">
+          <span className="relative">
+            <Image src="/icons/cart.svg" alt="" width={24} height={24} className="w-5 h-5 sm:w-6 sm:h-6 md:w-[22px] md:h-[22px]" />
+            {cart.itemCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-[#00473c] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                {cart.itemCount > 99 ? '99+' : cart.itemCount}
+              </span>
+            )}
+          </span>
+          <span className="hidden min-[400px]:block md:hidden text-[11px] font-medium leading-none text-black">Cart</span>
+          <span className="hidden md:block pointer-events-none absolute top-full right-1/2 translate-x-1/2 mt-2 whitespace-nowrap rounded bg-[#00473c] px-2 py-1 text-xs text-white opacity-0 group-hover:opacity-100 transition-opacity z-10">
+            Cart
+          </span>
         </Link>
       </div>
     </div>
+
+    {/* Row 2: desktop navigation (own full-width row, wraps if it ever runs out of room) */}
+    <nav className="hidden lg:block border-t border-[#eaeaea]">
+      <ul className="flex flex-wrap items-center justify-center gap-x-5 xl:gap-x-7 2xl:gap-x-8 gap-y-1.5 px-4 lg:px-12 py-2.5">
+        {navigationData.map((item, index) => (
+          <li key={index} className="group static">
+            {item.submenu || item.megaMenu || item.roomMenu ? (
+              <>
+                <div className="flex items-center gap-1.5 text-[13px] xl:text-sm font-semibold text-black hover:text-[#00473c] transition-colors cursor-pointer whitespace-nowrap py-1">
+                  <span>{item.label}</span>
+                  <Image
+                    src="/icons/CaretDown.svg"
+                    alt=""
+                    width={11}
+                    height={11}
+                    className="opacity-60 transition-transform group-hover:rotate-180"
+                  />
+                </div>
+
+                {/* Dropdown Menu */}
+                <div className="absolute left-0 right-0 top-full z-50 translate-y-1 opacity-0 invisible transition-all duration-200 group-hover:translate-y-0 group-hover:opacity-100 group-hover:visible">
+                  <div className="max-h-[80vh] overflow-y-auto border-t-2 border-[#00473c] bg-white shadow-[0_24px_48px_-16px_rgba(0,0,0,0.18)]">
+                    <div className="mx-auto max-w-6xl px-10 py-9">
+                      {/* Single-column list */}
+                      {item.submenu && (
+                        <ul className="mx-auto max-w-xl space-y-0.5">
+                          {item.submenu.map((link, linkIndex) => (
+                            <li key={linkIndex}>
+                              <NavDropdownLink link={link} />
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+
+                      {/* Multi-column mega menu */}
+                      {item.megaMenu && (
+                        <div
+                          className="grid gap-x-8 gap-y-8"
+                          style={{
+                            gridTemplateColumns: `repeat(${item.megaMenu.columns.length}, minmax(0, 1fr))`,
+                            maxWidth: `${item.megaMenu.columns.length * 20}rem`,
+                          }}
+                        >
+                          {item.megaMenu.columns.map((column, columnIndex) => (
+                            <div key={columnIndex}>
+                              {column.title && (
+                                <p className="mb-2.5 px-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#00473c]">
+                                  {column.title}
+                                </p>
+                              )}
+                              <ul className="space-y-0.5">
+                                {column.links.map((link, linkIndex) => (
+                                  <li key={linkIndex}>
+                                    <NavDropdownLink link={link} />
+                                  </li>
+                                ))}
+                              </ul>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
+                      {/* Image-card grid */}
+                      {item.roomMenu && (
+                        <div className={item.megaMenu ? 'mt-8 border-t border-[#eaeaea] pt-7' : ''}>
+                          <p className="mb-4 px-2.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#00473c]">
+                            Shop by Room
+                          </p>
+                          <div className="grid grid-cols-4 gap-4">
+                            {item.roomMenu.map((room, roomIndex) => (
+                              <Link
+                                key={roomIndex}
+                                href={room.href}
+                                className="group/room relative block aspect-16/10 overflow-hidden rounded-lg ring-1 ring-black/5 transition-shadow hover:shadow-lg"
+                              >
+                                <Image
+                                  src={room.image}
+                                  alt={room.name}
+                                  fill
+                                  className="object-cover transition-transform duration-500 group-hover/room:scale-105"
+                                />
+                                <span className="absolute inset-0 bg-linear-to-t from-black/55 via-black/10 to-transparent" />
+                                <span className="absolute bottom-2.5 left-3 right-3 text-sm font-semibold text-white drop-shadow-sm">
+                                  {room.name}
+                                </span>
+                              </Link>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </>
+            ) : item.href ? (
+              <Link
+                href={item.href}
+                className="flex items-center gap-1.5 text-[13px] xl:text-sm font-semibold text-black hover:text-[#00473c] transition-colors whitespace-nowrap py-1"
+              >
+                <span>{item.label}</span>
+              </Link>
+            ) : (
+              <div className="flex items-center gap-1.5 text-[13px] xl:text-sm font-semibold text-black whitespace-nowrap py-1">
+                <span>{item.label}</span>
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+    <SearchPopup open={isSearchOpen} onClose={() => setIsSearchOpen(false)} />
+    </>
   );
 };
 

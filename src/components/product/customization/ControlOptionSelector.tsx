@@ -24,13 +24,13 @@ const ControlOptionSelector = ({ options, selectedOption, onOptionChange }: Cont
             </div>
 
             {/* Options Grid */}
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 {options.map((option) => (
                     <button
                         key={option.id}
                         type="button"
                         onClick={() => onOptionChange(option.id)}
-                        className={`relative border-2 rounded-lg p-3 transition-all hover:border-[#00473c] text-center ${selectedOption === option.id
+                        className={`relative flex flex-row items-center gap-3 border-2 rounded-lg p-3 text-left transition-all hover:border-[#00473c] md:block md:text-center ${selectedOption === option.id
                                 ? 'border-[#00473c] bg-[#f6fffd]'
                                 : 'border-gray-300 bg-white'
                             }`}
@@ -42,13 +42,13 @@ const ControlOptionSelector = ({ options, selectedOption, onOptionChange }: Cont
                                 alt={option.name}
                                 width={70}
                                 height={70}
-                                containerClassName="relative h-[70px] w-full mb-2 bg-gray-50 rounded overflow-hidden flex items-center justify-center"
+                                containerClassName="relative h-14 w-14 shrink-0 bg-gray-50 rounded overflow-hidden flex items-center justify-center md:h-[70px] md:w-full md:mb-2"
                                 imageClassName="object-contain"
                             />
                         )}
 
                         {/* Option Name */}
-                        <p className="text-sm font-medium text-[#3a3a3a]">
+                        <p className="min-w-0 text-sm font-medium text-[#3a3a3a]">
                             {option.name}
                         </p>
 

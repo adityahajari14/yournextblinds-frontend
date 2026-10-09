@@ -106,7 +106,7 @@ export default function PrivacyPolicyPage() {
       <main>
         {/* Hero */}
         <section className="relative h-60 md:h-[300px] w-full overflow-hidden bg-linear-to-br from-[#00473c] via-[#00594a] to-[#003a31]">
-          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.jpg')] bg-cover bg-center opacity-10" />
+          <div className="absolute inset-0 bg-[url('/home/hero/hero-background.webp')] bg-cover bg-center opacity-10" />
           <div className="relative z-10 flex flex-col items-center justify-center h-full px-6 text-center">
             <h1 className="text-3xl md:text-4xl lg:text-5xl text-white font-bold tracking-tight">
               Privacy Policy

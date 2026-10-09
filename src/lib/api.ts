@@ -22,6 +22,9 @@ import {
   HIDDEN_TEST_PRODUCT_TAG,
 } from '@/data/dayNightBandH';
 import { ROLLER_BAND_F_TAG } from '@/data/rollerBandF';
+import { HONEYCOMB_CELLULAR_TAG, TOP_DOWN_BOTTOM_UP_CORDLESS_TAG } from '@/data/honeycombCellular';
+import type { CuratedCollection, CuratedClause, CuratedRule } from '@/data/curatedCollections';
+import type { StoreSessionContext } from '@/lib/store-events';
 
 const SERVER_API_CACHE_REVALIDATE_SECONDS =
   Number(process.env.SERVER_API_CACHE_REVALIDATE_SECONDS || 3_600);
@@ -41,6 +44,17 @@ function getApiBaseUrl(): string {
   if (vercelUrl) return `https://${vercelUrl}`;
   const port = process.env.PORT || '3000';
   return `http://localhost:${port}`;
+}
+
+/**
+ * True only during the actual `next build` compile phase — NOT during runtime
+ * ISR regeneration on the server. This matters because empty/fallback data is
+ * acceptable at build time (the page will regenerate later), but during runtime
+ * ISR a data failure must throw so Next.js aborts and retries rather than
+ * caching a broken (empty / $0-priced) page for the whole revalidate window.
+ */
+export function isRealBuildPhase(): boolean {
+  return process.env.NEXT_PHASE === 'phase-production-build';
 }
 
 // ============================================
@@ -197,8 +211,10 @@ export async function fetchProducts(params?: FetchProductsParams): Promise<ApiPr
     };
   } catch (error: any) {
     console.warn('Shopify products unavailable:', error.message);
-    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
-    if (isBuildTime) {
+    // Only swallow into an empty result during the actual build compile — never
+    // during runtime ISR regeneration, where returning [] (or $0 prices) would
+    // get cached as a broken page. There we rethrow so Next.js retries instead.
+    if (isRealBuildPhase()) {
       return {
         success: true,
         data: [],
@@ -282,10 +298,78 @@ export async function fetchProductsByCategory(
       return true;
     });
   } catch (error: any) {
-    const isBuildTime = typeof window === 'undefined' && process.env.NODE_ENV !== 'development';
-    if (isBuildTime) return [];
+    // Build compile: tolerate empty (page regenerates via ISR later).
+    // Runtime ISR: rethrow so a pricing/data failure doesn't cache a broken page.
+    if (isRealBuildPhase()) return [];
     throw error;
   }
+}
+
+/**
+ * How many products must carry a curated collection's `tagSlug` before the tag
+ * is treated as deliberate merchandising and allowed to replace the code rules.
+ */
+const MIN_TAGGED_PRODUCTS_TO_OVERRIDE = 5;
+
+/**
+ * Fetch products for a curated collection (window type / feature / room).
+ *
+ * Hybrid selection: if the definition names a `tagSlug` and any product in the
+ * catalog carries it, that tag alone decides membership — so tagging products
+ * in Shopify later transparently takes over from the hand-written rules.
+ * Otherwise the `include` rules are applied, then `exclude` is subtracted.
+ */
+export async function fetchProductsForCuratedCollection(
+  collection: CuratedCollection
+): Promise<ApiProduct[]> {
+  try {
+    const response = await fetchProducts({ limit: 500 });
+    const catalog = response.data;
+
+    // Hybrid switch — real Shopify tags win over the code rules once they exist.
+    // The threshold guards against a stray tag on one or two products (the
+    // catalog has several such leftovers) silently reducing a whole landing
+    // page to a near-empty grid.
+    if (collection.tagSlug) {
+      const tagged = catalog.filter((product) =>
+        product.tags.some((tag) => tag.slug === collection.tagSlug)
+      );
+      if (tagged.length >= MIN_TAGGED_PRODUCTS_TO_OVERRIDE) return tagged;
+    }
+
+    const included = catalog.filter((product) => matchesCuratedRule(product, collection.include));
+    if (!collection.exclude) return included;
+
+    return included.filter((product) => !matchesCuratedRule(product, collection.exclude!));
+  } catch (error: any) {
+    // Build compile: tolerate empty (page regenerates via ISR later).
+    // Runtime ISR: rethrow so a pricing/data failure doesn't cache a broken page.
+    if (isRealBuildPhase()) return [];
+    throw error;
+  }
+}
+
+/** A product matches the rule if it is listed explicitly or satisfies any clause. */
+function matchesCuratedRule(product: ApiProduct, rule: CuratedRule): boolean {
+  if (rule.productSlugs?.includes(product.slug)) return true;
+  return (rule.anyOf ?? []).some((clause) => matchesCuratedClause(product, clause));
+}
+
+/** Every condition present on the clause must hold. */
+function matchesCuratedClause(product: ApiProduct, clause: CuratedClause): boolean {
+  const categorySlugs = product.categories.map((category) => category.slug);
+  const tagSlugs = product.tags.map((tag) => tag.slug);
+
+  if (clause.categories && !clause.categories.some((slug) => categorySlugs.includes(slug))) {
+    return false;
+  }
+  if (clause.tagsAny && !clause.tagsAny.some((tag) => tagSlugs.includes(tag))) {
+    return false;
+  }
+  if (clause.tagsAll && !clause.tagsAll.every((tag) => tagSlugs.includes(tag))) {
+    return false;
+  }
+  return true;
 }
 
 // ============================================
@@ -385,34 +469,70 @@ export async function validateCartPrice(
 // Checkout API
 // ============================================
 
+export interface CheckoutPriceMismatch {
+  index: number;
+  handle: string;
+  title: string;
+  submittedPrice: number;
+  calculatedPrice: number;
+}
+
+export class CheckoutRequestError extends Error {
+  status: number;
+  code?: string;
+  details?: CheckoutPriceMismatch[];
+  constructor(message: string, status: number, code?: string, details?: CheckoutPriceMismatch[]) {
+    super(message);
+    this.name = 'CheckoutRequestError';
+    this.status = status;
+    this.code = code;
+    this.details = details;
+  }
+}
+
 interface CheckoutApiResponse {
   success: boolean;
   data: CheckoutResponse;
-  error?: { message: string };
+  error?: { message: string; code?: string; details?: CheckoutPriceMismatch[] };
 }
 
 /**
  * Create a Shopify checkout session via Draft Order.
  * Sends cart items to the backend for server-side price validation,
  * which creates a Shopify Draft Order and returns a checkout URL.
+ * Throws CheckoutRequestError with code/details so callers can recover
+ * (e.g. PRICE_MISMATCH carries the recalculated prices).
  */
 export async function createCheckout(
   items: CheckoutItemRequest[],
-  customerEmail?: string
+  customerEmail?: string,
+  analyticsSessionId?: string,
+  storeSession?: StoreSessionContext | null,
+  discountCode?: string
 ): Promise<CheckoutResponse> {
-  const response = await apiFetch<CheckoutApiResponse>('/api/orders/create-checkout', {
+  const response = await fetch('/api/orders/create-checkout', {
     method: 'POST',
-    body: JSON.stringify({
-      items,
-      customerEmail,
-    }),
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ items, customerEmail, analyticsSessionId, storeSession, discountCode }),
   });
 
-  if (!response.success) {
-    throw new Error((response as any).error?.message || 'Failed to create checkout');
+  let body: CheckoutApiResponse | null = null;
+  try {
+    body = await response.json();
+  } catch {
+    // Non-JSON response (e.g. proxy error page) — fall through to generic error
   }
 
-  return response.data;
+  if (!response.ok || !body?.success) {
+    throw new CheckoutRequestError(
+      body?.error?.message || 'Failed to create checkout',
+      response.status,
+      body?.error?.code,
+      body?.error?.details
+    );
+  }
+
+  return body.data;
 }
 
 // ============================================
@@ -530,6 +650,16 @@ export function transformProduct(apiProduct: ApiProduct): Product {
     }
   }
 
+  // Honeycomb Cellular Shades: the 19 base products (and the standalone Top
+  // Down Bottom Up Cordless products, tagged separately so they stay off the
+  // main collection) live in curated/tag collections rather than a real
+  // Shopify collection, so force the feature category from either tag.
+  const isHoneycombCellular =
+    apiTagSlugs.includes(HONEYCOMB_CELLULAR_TAG) || apiTagSlugs.includes(TOP_DOWN_BOTTOM_UP_CORDLESS_TAG);
+  if (isHoneycombCellular && !categorySlugs.includes('honeycomb-cellular-shades')) {
+    categorySlugs = ['honeycomb-cellular-shades', ...categorySlugs];
+  }
+
   // Price is now the minimum band price (20x20) from the backend
   const price = typeof apiProduct.price === 'string' ? parseFloat(apiProduct.price) : apiProduct.price;
 
@@ -558,6 +688,7 @@ export function transformProduct(apiProduct: ApiProduct): Product {
     variants: apiProduct.variants || [],
     videos: apiProduct.videos || [],
     features: features,
+    productContent: apiProduct.productContent ?? null,
     reviews: [],
     relatedProducts: [],
   };

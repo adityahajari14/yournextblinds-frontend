@@ -2,12 +2,18 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
+import { PROMO_CODE, PROMO_CODE_PERCENT } from '@/data/promo';
 
 const faqData = [
   {
     id: 1,
     question: 'How do I measure my windows for blinds?',
     answer: 'We provide easy-to-follow measuring guides on our website. Just follow the step-by-step instructions to get the perfect fit.',
+  },
+  {
+    id: 5,
+    question: `How do I use my ${PROMO_CODE_PERCENT}% off discount code?`,
+    answer: `Add your made-to-measure blinds to the cart and proceed to checkout. Enter the code ${PROMO_CODE} in the discount field to take an extra ${PROMO_CODE_PERCENT}% off your order. It stacks on top of any current sale pricing.`,
   },
   {
     id: 2,
@@ -17,7 +23,7 @@ const faqData = [
   {
     id: 3,
     question: 'How long will delivery take?',
-    answer: 'Standard delivery takes 5-7 business days. Express delivery options are also available for faster shipping.',
+    answer: 'Every blind is made to measure. Manufacturing typically takes 3-5 business days, and most orders arrive within 7-12 business days of purchase. Your estimated delivery date is shown on each product page.',
   },
   {
     id: 4,
@@ -30,9 +36,9 @@ const FAQ = () => {
   const [openId, setOpenId] = useState<number | null>(null);
 
   return (
-    <section className="bg-neutral-50 px-4 md:px-6 lg:px-20 py-12 md:py-16 lg:py-24">
-      <div className="max-w-[900px] mx-auto flex flex-col gap-6 md:gap-8 lg:gap-10">
-        <h2 className="text-2xl md:text-3xl lg:text-[40px] font-medium text-[#3a3a3a] text-center tracking-tight">
+    <section className="bg-neutral-50 px-4 md:px-6 lg:px-20 py-12 md:py-16 lg:py-20">
+      <div className="max-w-[860px] mx-auto flex flex-col gap-6 md:gap-8">
+        <h2 className="text-xl md:text-2xl lg:text-[32px] font-medium text-[#3a3a3a] text-center tracking-tight">
           FAQ
         </h2>
         

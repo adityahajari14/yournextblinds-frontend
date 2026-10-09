@@ -11,6 +11,7 @@ import {
 import type { ShopifyPageViewPayload } from "@shopify/hydrogen-react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useRef } from "react";
+import { getPageType } from "@/lib/page-type";
 
 const shopDomain = normalizeDomain(process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN);
 const shopId = normalizeShopId(process.env.NEXT_PUBLIC_SHOPIFY_SHOP_ID);
@@ -31,21 +32,17 @@ function normalizeShopId(id: string | undefined) {
   return id.startsWith("gid://shopify/Shop/") ? id : `gid://shopify/Shop/${id}`;
 }
 
-function getPageType(pathname: string): string {
-  if (pathname === "/") return AnalyticsPageType.home;
-  if (pathname === "/cart") return AnalyticsPageType.cart;
-  if (pathname === "/account") return AnalyticsPageType.customersAccount;
-  if (pathname === "/login") return AnalyticsPageType.customersLogin;
-  if (pathname === "/collections" || pathname.startsWith("/collections/")) {
-    return AnalyticsPageType.collection;
-  }
-  if (pathname.startsWith("/product/")) return AnalyticsPageType.product;
-  if (pathname.endsWith("-policy") || pathname.startsWith("/terms")) {
-    return AnalyticsPageType.policy;
-  }
-
-  return AnalyticsPageType.page;
-}
+// Maps the shared page classification onto Shopify's own enum values.
+const SHOPIFY_PAGE_TYPES: Record<ReturnType<typeof getPageType>, string> = {
+  home: AnalyticsPageType.home,
+  cart: AnalyticsPageType.cart,
+  customersAccount: AnalyticsPageType.customersAccount,
+  customersLogin: AnalyticsPageType.customersLogin,
+  collection: AnalyticsPageType.collection,
+  product: AnalyticsPageType.product,
+  policy: AnalyticsPageType.policy,
+  page: AnalyticsPageType.page,
+};
 
 export default function ShopifyAnalytics() {
   const pathname = usePathname();
@@ -80,7 +77,7 @@ export default function ShopifyAnalytics() {
       marketingAllowed: false,
       saleOfDataAllowed: false,
       canonicalUrl: window.location.href,
-      pageType: getPageType(pathname),
+      pageType: SHOPIFY_PAGE_TYPES[getPageType(pathname)],
     };
 
     sendShopifyAnalytics(

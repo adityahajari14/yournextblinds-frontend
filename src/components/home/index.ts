@@ -1,10 +1,12 @@
 export { default as Hero } from './Hero';
+export { default as UspBar } from './UspBar';
 export { default as Categories } from './Categories';
 export { default as CategoryGrid } from './CategoryGrid';
 export { default as BestSelling } from './BestSelling';
 export { default as WindowTypes } from './WindowTypes';
 export { default as Installation } from './Installation';
 export { default as Craftsmanship } from './Craftsmanship';
+export { default as FitGuaranteeSection } from './FitGuaranteeSection';
 export { default as FreeSamples } from './FreeSamples';
 export { default as FlashSale } from './FlashSale';
 export { default as FAQ } from './FAQ';

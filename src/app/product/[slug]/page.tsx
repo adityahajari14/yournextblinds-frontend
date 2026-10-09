@@ -5,6 +5,9 @@ import { ProductPage, CustomerReviewsSection, ProductFeatureSection, ProductComp
 import { TopBar, Header, FlashSale, FAQ, Footer, NavBar } from '@/components';
 import { fetchProductBySlug, fetchProducts, transformProduct } from '@/lib/api';
 import { getCustomizationPricing, getPriceBandMatrix, resolveHandleToPriceBand } from '@/lib/server/pricing.service';
+import { getProductReviews } from '@/lib/server/judgeme.service';
+import { getSiteUrl } from '@/lib/site';
+import ProductLoading from './loading';
 
 export const revalidate = 3_600;
 
@@ -37,10 +40,24 @@ export async function generateMetadata({ params }: ProductPageProps) {
   try {
     const response = await fetchProductBySlug(slug);
     const product = transformProduct(response.data);
+    const description = (product.description || '')
+      .replace(/\s+/g, ' ')
+      .trim()
+      .slice(0, 160);
 
     return {
       title: `${product.name} | Your Next Blinds`,
-      description: product.description,
+      description,
+      alternates: {
+        canonical: `/product/${slug}`,
+      },
+      openGraph: {
+        type: 'website',
+        title: product.name,
+        description,
+        url: `/product/${slug}`,
+        images: product.images?.length ? [product.images[0]] : undefined,
+      },
     };
   } catch {
     return {
@@ -64,9 +81,67 @@ export default async function ProductPageRoute({ params }: ProductPageProps) {
     notFound();
   }
 
+  if (!productData || !productData.id) {
+    notFound();
+  }
+
   const product = transformProduct(productData);
+
+  // Reviews live in Judge.me; fetch published ones and fold the aggregate into
+  // the product so the hero stars, schema, and reviews section stay in sync.
+  const reviewData = await getProductReviews(product.slug);
+  product.reviews = reviewData.reviews;
+  product.reviewCount = reviewData.totalReviews;
+  if (reviewData.totalReviews > 0) {
+    product.rating = reviewData.averageRating;
+  }
+
   let initialPriceMatrix: PriceBandMatrix | null = null;
   let initialCustomizationPricing: CustomizationPricing[] = [];
+
+  const siteUrl = getSiteUrl();
+  const productJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: product.name,
+    description: (product.description || '').replace(/\s+/g, ' ').trim().slice(0, 500),
+    image: product.images?.slice(0, 4),
+    url: `${siteUrl}/product/${product.slug}`,
+    brand: { '@type': 'Brand', name: 'Your Next Blinds' },
+    ...(product.reviewCount > 0
+      ? {
+          aggregateRating: {
+            '@type': 'AggregateRating',
+            ratingValue: product.rating,
+            reviewCount: product.reviewCount,
+          },
+        }
+      : {}),
+    offers: {
+      '@type': 'Offer',
+      url: `${siteUrl}/product/${product.slug}`,
+      priceCurrency: 'USD',
+      price: product.price.toFixed(2),
+      priceSpecification: {
+        '@type': 'PriceSpecification',
+        price: product.price.toFixed(2),
+        priceCurrency: 'USD',
+        // Made-to-measure: the listed price is the minimum (smallest size).
+        valueAddedTaxIncluded: false,
+      },
+      availability: 'https://schema.org/InStock',
+      itemCondition: 'https://schema.org/NewCondition',
+    },
+  };
+  const breadcrumbJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl },
+      { '@type': 'ListItem', position: 2, name: 'Collections', item: `${siteUrl}/collections` },
+      { '@type': 'ListItem', position: 3, name: product.name, item: `${siteUrl}/product/${product.slug}` },
+    ],
+  };
 
   try {
     // For multi-table products the band depends on the color variant; resolve the
@@ -146,11 +221,21 @@ export default async function ProductPageRoute({ params }: ProductPageProps) {
 
   return (
     <>
-      {/* <TopBar /> */}
-      <Header />
-      <NavBar />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
+      />
+      <header className="sticky top-0 z-50 bg-white shadow-sm">
+        {/* <TopBar /> */}
+        <Header />
+        <NavBar />
+      </header>
       <main className="bg-white min-h-screen">
-        <Suspense fallback={<div className="min-h-screen flex items-center justify-center">Loading...</div>}>
+        <Suspense fallback={<ProductLoading />}>
           <ProductPage
             product={product}
             relatedProducts={relatedProducts}

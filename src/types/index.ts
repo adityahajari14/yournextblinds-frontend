@@ -29,6 +29,8 @@ export interface ProductReview {
   title: string;
   content: string;
   verified: boolean;
+  /** Public URLs of reviewer-submitted photos (from Judge.me). */
+  images?: string[];
 }
 
 export interface ProductVariantOption {
@@ -42,6 +44,26 @@ export interface ProductVariant {
   image?: string | null;
   imageAlt?: string | null;
   selectedOptions: ProductVariantOption[];
+}
+
+/**
+ * Structured marketing copy from the `custom.product_content` metafield, rendered
+ * as sections below the configurator. Mirrors the section order of the supplier
+ * copy verbatim — nothing is reworded in transit.
+ */
+export interface ProductContentSection {
+  /** Verbatim heading from the source copy, e.g. "Features & Benefits". */
+  heading: string;
+  /** How the body renders: a bullet list, or a run of paragraphs. */
+  kind: 'list' | 'prose';
+  items: string[];
+}
+
+export interface ProductContent {
+  /** Opening paragraphs, before the first heading. */
+  description: string[];
+  /** Headed sections, in source order. */
+  sections: ProductContentSection[];
 }
 
 export interface ProductFeatures {
@@ -83,6 +105,8 @@ export interface Product {
   variants?: ProductVariant[];
   videos?: string[];
   features: ProductFeatures;
+  /** Structured marketing copy shown below the configurator; null when unset. */
+  productContent?: ProductContent | null;
   reviews: ProductReview[];
   relatedProducts: string[];
 }
@@ -124,6 +148,10 @@ export interface ProductConfiguration {
   selectedVariantImage: string | null;
   selectedVariantOptionName: string | null;
   selectedVariantOptionValue: string | null;
+  /** Honeycomb Cellular only: optional "Upgrade to No Drill System" checkbox. */
+  noDrillUpgrade: string | null;
+  /** Top Down Bottom Up Cordless only: optional "with Additional Sheer" upgrade. */
+  tdbuSheerUpgrade: string | null;
 }
 
 export const DEFAULT_CONFIGURATION: ProductConfiguration = {
@@ -159,6 +187,8 @@ export const DEFAULT_CONFIGURATION: ProductConfiguration = {
   selectedVariantImage: null,
   selectedVariantOptionName: null,
   selectedVariantOptionValue: null,
+  noDrillUpgrade: null,
+  tdbuSheerUpgrade: null,
 };
 
 // ============================================
@@ -181,7 +211,7 @@ export interface Cart {
 
 export interface CartContextType {
   cart: Cart;
-  addToCart: (product: Product, configuration: ProductConfiguration) => void;
+  addToCart: (product: Product, configuration: ProductConfiguration, quantity?: number) => void;
   removeFromCart: (itemId: string) => void;
   updateQuantity: (itemId: string, quantity: number) => void;
   updateCartItem: (itemId: string, product: Product, configuration: ProductConfiguration) => void;
@@ -295,6 +325,7 @@ export interface ApiProduct {
   specifications?: string | null;
   measuringInstallation?: string | null;
   deliveryReturns?: string | null;
+  productContent?: ProductContent | null;
   categories: ApiCategory[];
   tags: ApiTag[];
 }
@@ -360,7 +391,7 @@ export const DEFAULT_PRODUCT_FEATURES: ProductFeatures = {
   hasRollerCassette: false,
 };
 
-export const DEFAULT_ESTIMATED_DELIVERY = '22 December 2025';
+export const DEFAULT_ESTIMATED_DELIVERY = '8-12 business days';
 export const DEFAULT_RATING = 5;
 export const DEFAULT_REVIEW_COUNT = 0;
 
@@ -455,6 +486,7 @@ export interface CheckoutRequest {
   items: CheckoutItemRequest[];
   customerEmail?: string;
   note?: string;
+  discountCode?: string;
 }
 
 export interface CheckoutResponse {
@@ -467,4 +499,6 @@ export interface CheckoutResponse {
     quantity: number;
   }[];
   subtotal: number;
+  discountCode?: string;
+  discountAmount?: number;
 }

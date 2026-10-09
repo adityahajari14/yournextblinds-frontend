@@ -26,9 +26,20 @@ export interface CachedProduct {
   variants: CachedVariant[];
 }
 
+// Shopify's Admin GraphQL API caps a single query's cost (~1000 points), and
+// connection fields multiply: products(first: N) each carrying variants(first: M)
+// costs roughly N * (1 + M). At 100 * 100 that approaches/exceeds the cap once
+// the catalog has products with many color variants (Band F/H), causing Shopify
+// to return a MAX_COST_EXCEEDED / THROTTLED error — which previously got
+// swallowed and cached as a partial/empty result (see fetchAllShopifyProducts).
+// Keep the product page small so the per-request cost stays comfortably under
+// the limit; pagination still covers the whole catalog.
+const PRODUCTS_PAGE_SIZE = 25;
+const VARIANTS_PAGE_SIZE = 100;
+
 const PRODUCTS_WITH_METAFIELD_QUERY = `
-  query ProductsWithMetafield($cursor: String) {
-    products(first: 100, after: $cursor) {
+  query ProductsWithMetafield($first: Int!, $cursor: String, $variantsFirst: Int!) {
+    products(first: $first, after: $cursor) {
       pageInfo {
         hasNextPage
         endCursor
@@ -41,7 +52,7 @@ const PRODUCTS_WITH_METAFIELD_QUERY = `
           priceBandName: metafield(namespace: "custom", key: "price_band_name") {
             value
           }
-          variants(first: 100) {
+          variants(first: $variantsFirst) {
             edges {
               node {
                 id
@@ -83,19 +94,89 @@ interface ProductNode {
   variants?: { edges: { node: VariantNode }[] };
 }
 
+interface GraphQLError {
+  message?: string;
+  extensions?: { code?: string };
+}
+
+interface ProductsConnection {
+  pageInfo: { hasNextPage: boolean; endCursor: string | null };
+  edges: { node: ProductNode }[];
+}
+
 interface ProductsQueryResponse {
   data?: {
-    products?: {
-      pageInfo: { hasNextPage: boolean; endCursor: string | null };
-      edges: { node: ProductNode }[];
-    };
+    products?: ProductsConnection;
   };
-  errors?: unknown;
+  errors?: GraphQLError[];
 }
 
 function getGraphQLUrl(): string {
   const domain = shopifyConfig.storeDomain.replace(/^https?:\/\//, '');
   return `https://${domain}/admin/api/${shopifyConfig.apiVersion}/graphql.json`;
+}
+
+const MAX_PAGE_RETRIES = 4;
+const RETRY_BASE_DELAY_MS = 1_000;
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Fetch a single page, retrying on Shopify throttling (THROTTLED). Any other
+ * GraphQL error — or exhausting retries — throws, so a bad/partial response is
+ * NEVER returned as a success (and therefore never cached by unstable_cache).
+ * This is the fix for products silently showing $0: previously a throttled or
+ * cost-limited response was swallowed and its incomplete product map cached.
+ */
+async function fetchProductsPage(
+  cursor: string | null
+): Promise<ProductsConnection> {
+  for (let attempt = 0; attempt <= MAX_PAGE_RETRIES; attempt++) {
+    const response = await fetch(getGraphQLUrl(), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': shopifyConfig.adminAccessToken,
+      },
+      body: JSON.stringify({
+        query: PRODUCTS_WITH_METAFIELD_QUERY,
+        variables: { first: PRODUCTS_PAGE_SIZE, cursor, variantsFirst: VARIANTS_PAGE_SIZE },
+      }),
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error(`Shopify GraphQL request failed: ${response.status}`);
+    }
+
+    const json = (await response.json()) as ProductsQueryResponse;
+
+    // Shopify returns HTTP 200 with a data:null + errors body on throttling and
+    // cost-limit failures. Treat any GraphQL error as a hard failure — retry if
+    // it's a transient throttle, otherwise throw.
+    if (json.errors?.length) {
+      const isThrottled = json.errors.some((e) => e.extensions?.code === 'THROTTLED');
+      if (isThrottled && attempt < MAX_PAGE_RETRIES) {
+        await delay(RETRY_BASE_DELAY_MS * 2 ** attempt);
+        continue;
+      }
+      throw new Error(
+        `Shopify GraphQL error while loading product cache: ${JSON.stringify(json.errors)}`
+      );
+    }
+
+    const products = json.data?.products;
+    if (!products) {
+      throw new Error(
+        `Shopify GraphQL returned no product data: ${JSON.stringify(json)}`
+      );
+    }
+
+    return products;
+  }
+
+  // Unreachable — the loop either returns or throws — but satisfies the type checker.
+  throw new Error('Shopify GraphQL product cache: retries exhausted');
 }
 
 async function fetchAllShopifyProducts(): Promise<Record<string, CachedProduct>> {
@@ -106,30 +187,7 @@ async function fetchAllShopifyProducts(): Promise<Record<string, CachedProduct>>
   let hasNextPage = true;
 
   while (hasNextPage) {
-    const response: Response = await fetch(getGraphQLUrl(), {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': shopifyConfig.adminAccessToken,
-      },
-      body: JSON.stringify({
-        query: PRODUCTS_WITH_METAFIELD_QUERY,
-        variables: { cursor },
-      }),
-      cache: 'no-store',
-    });
-
-    if (!response.ok) {
-      throw new Error(`Shopify GraphQL request failed: ${response.status}`);
-    }
-
-    const json = (await response.json()) as ProductsQueryResponse;
-    const data = json.data?.products;
-
-    if (!data) {
-      console.error('[Cache] Unexpected GraphQL response:', JSON.stringify(json.errors || json));
-      break;
-    }
+    const data = await fetchProductsPage(cursor);
 
     for (const edge of data.edges) {
       const node = edge.node;

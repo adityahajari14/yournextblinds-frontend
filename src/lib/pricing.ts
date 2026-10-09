@@ -222,6 +222,8 @@ export function configToCustomizations(config: {
   rollStyle?: string | null;
   roomDarkening?: string | null;
   rollOption?: string | null;
+  noDrillUpgrade?: string | null;
+  tdbuSheerUpgrade?: string | null;
 }): { category: string; optionId: string }[] {
   const customizations: { category: string; optionId: string }[] = [];
 
@@ -261,6 +263,12 @@ export function configToCustomizations(config: {
   }
   if (config.motorization && config.motorization !== 'none') {
     customizations.push({ category: 'motorization', optionId: config.motorization });
+  }
+  if (config.noDrillUpgrade) {
+    customizations.push({ category: 'no-drill-upgrade', optionId: config.noDrillUpgrade });
+  }
+  if (config.tdbuSheerUpgrade) {
+    customizations.push({ category: 'tdbu-sheer-upgrade', optionId: config.tdbuSheerUpgrade });
   }
   if (config.blindColor) {
     customizations.push({ category: 'blind-color', optionId: config.blindColor });

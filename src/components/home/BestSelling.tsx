@@ -59,7 +59,7 @@ const BestSelling = () => {
 
   if (loading) {
     return (
-      <section className="bg-white py-12 md:py-16 lg:py-24 overflow-hidden">
+      <section className="bg-white py-12 md:py-16 lg:py-20 overflow-hidden">
         <div className="flex flex-col gap-6 md:gap-6 lg:gap-8">
           <div className="px-4 md:px-6 lg:px-20">
             <h2 className="text-xl md:text-2xl lg:text-[32px] font-medium text-[#3a3a3a]">
@@ -77,7 +77,7 @@ const BestSelling = () => {
   }
 
   return (
-    <section className="bg-white py-12 md:py-16 lg:py-24 overflow-hidden">
+    <section className="bg-white py-12 md:py-16 lg:py-20 overflow-hidden">
       <div className="flex flex-col gap-6 md:gap-6 lg:gap-8">
         <div className="flex items-center justify-between px-4 md:px-6 lg:px-20">
           <h2 className="text-xl md:text-2xl lg:text-[32px] font-medium text-[#3a3a3a]">

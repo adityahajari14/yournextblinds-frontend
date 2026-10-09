@@ -12,17 +12,17 @@ export const CONTINUOUS_CHAIN_CARD: OptionalCustomizationCard = {
   name: 'Continuous Chain - Select Location',
   description: 'Choose the location of your control chain',
   price: 0,
-  image: '/products/chainColor/continuous-chain-roller.png',
+  image: '/products/chainColor/continuous-chain-roller.webp',
 };
 
 export const CONTINUOUS_CHAIN_CARD_ROLLER: OptionalCustomizationCard = {
   ...CONTINUOUS_CHAIN_CARD,
-  image: '/products/chainColor/continuous-chain-roller.png',
+  image: '/products/chainColor/continuous-chain-roller.webp',
 };
 
 export const CONTINUOUS_CHAIN_CARD_ZEBRA: OptionalCustomizationCard = {
   ...CONTINUOUS_CHAIN_CARD,
-  image: '/products/chainColor/continuous-chain-zebra.png',
+  image: '/products/chainColor/continuous-chain-zebra.webp',
 };
 
 export const CASSETTE_CARD: OptionalCustomizationCard = {
@@ -30,17 +30,17 @@ export const CASSETTE_CARD: OptionalCustomizationCard = {
   name: 'Cassette and Bottom Matching Bar',
   description: 'Select cassette color options',
   price: 0,
-  image: '/products/cassette/cassette-roller.png',
+  image: '/products/cassette/cassette-roller.webp',
 };
 
 export const CASSETTE_CARD_ROLLER: OptionalCustomizationCard = {
   ...CASSETTE_CARD,
-  image: '/products/cassette/cassette-roller.png',
+  image: '/products/cassette/cassette-roller.webp',
 };
 
 export const CASSETTE_CARD_ZEBRA: OptionalCustomizationCard = {
   ...CASSETTE_CARD,
-  image: '/products/cassette/cassette-zebra.png',
+  image: '/products/cassette/cassette-zebra.webp',
 };
 
 export const MOTORIZATION_CARD: OptionalCustomizationCard = {
@@ -56,5 +56,5 @@ export const BOTTOM_BAR_CARD: OptionalCustomizationCard = {
   name: 'Bottom Bar Option',
   description: 'Customize your blind with a premium bottom bar',
   price: 0,
-  image: '/products/bottomBar/bottomBar.png',
+  image: '/products/bottomBar/bottomBar.webp',
 };

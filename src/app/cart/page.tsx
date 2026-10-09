@@ -1,15 +1,24 @@
 'use client';
 
-import { useCart } from '@/context/CartContext';
+import { useCart, PENDING_CHECKOUT_KEY } from '@/context/CartContext';
 import { useAuth } from '@/context/AuthContext';
 import { TopBar, Header, NavBar, Footer } from '@/components';
-import { formatPriceWithCurrency, createCheckout } from '@/lib/api';
-import { getTotalInches } from '@/lib/pricing';
-import { CheckoutItemRequest, PriceOption } from '@/types';
+import {
+  formatPriceWithCurrency,
+  createCheckout,
+  CheckoutRequestError,
+  CheckoutPriceMismatch,
+} from '@/lib/api';
+import { buildCheckoutItem } from '@/lib/checkout';
+import { trackStoreCartView, trackStoreCheckoutInitiated, getStoreSessionContext } from '@/lib/store-events';
+import { findDiscountCode, type DiscountCodeDefinition } from '@/data/promo';
+import { CartItem, CheckoutItemRequest, PriceOption } from '@/types';
 import CartItemEditModal from '@/components/cart/CartItemEditModal';
+import { FitGuaranteeIcon } from '@/components/fit-guarantee';
+import { FIT_GUARANTEE_PATH } from '@/data/fitGuarantee';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import {
   HEADRAIL_OPTIONS,
@@ -47,6 +56,12 @@ import {
   ROLLER_BAND_F_ROOM_DARKENING_OPTIONS,
   ROLLER_BAND_F_ROLL_OPTIONS,
 } from '@/data/rollerBandF';
+import {
+  HONEYCOMB_CELLULAR_CONTROL_OPTIONS,
+  HONEYCOMB_CELLULAR_MOTORIZATION_OPTIONS,
+  HONEYCOMB_CELLULAR_NO_DRILL_UPGRADE_OPTION,
+  HONEYCOMB_CELLULAR_TDBU_SHEER_UPGRADE_OPTION,
+} from '@/data/honeycombCellular';
 import { ROOM_TYPE_OPTIONS } from '@/data/roomTypes';
 
 export default function CartPage() {
@@ -56,83 +71,115 @@ export default function CartPage() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [priceMismatches, setPriceMismatches] = useState<CheckoutPriceMismatch[] | null>(null);
+  const [discountInput, setDiscountInput] = useState('');
+  const [appliedDiscount, setAppliedDiscount] = useState<DiscountCodeDefinition | null>(null);
+  const [discountError, setDiscountError] = useState<string | null>(null);
 
-  const handleCheckout = async () => {
+  useEffect(() => {
+    if (cart.items.length > 0) {
+      trackStoreCartView(cart.items, cart.total);
+    }
+    // Fire once per visit to the cart page, not on every cart mutation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const buildCheckoutItems = (items: CartItem[]): CheckoutItemRequest[] =>
+    items.map((item) =>
+      buildCheckoutItem(item.product.slug, item.configuration, item.quantity, item.product.price)
+    );
+
+  const startCheckout = async (items: CartItem[]) => {
     setIsCheckingOut(true);
     setCheckoutError(null);
+    setPriceMismatches(null);
 
     try {
-      // Convert cart items to checkout request format
-      const checkoutItems: CheckoutItemRequest[] = cart.items.map((item) => {
-        const config = item.configuration;
+      const cartValue = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+      trackStoreCheckoutInitiated(items, cartValue);
+      const storeSession = getStoreSessionContext();
 
-        // Convert to inches (handles cm/fractions)
-        const widthInches = getTotalInches(
-          config.width,
-          config.widthFraction,
-          config.widthUnit
-        );
-        const heightInches = getTotalInches(
-          config.height,
-          config.heightFraction,
-          config.heightUnit
-        );
+      const result = await createCheckout(
+        buildCheckoutItems(items),
+        customer?.email || undefined,
+        storeSession?.sessionId,
+        storeSession,
+        appliedDiscount?.code
+      );
 
-        // Build configuration object for backend (strip non-customization fields)
-        const backendConfig: Record<string, string | undefined> = {
-          roomType: config.roomType || undefined,
-          blindName: config.blindName || undefined,
-          headrail: config.headrail || undefined,
-          headrailColour: config.headrailColour || undefined,
-          installationMethod: config.installationMethod || undefined,
-          controlOption: config.controlOption || undefined,
-          stacking: config.stacking || undefined,
-          controlSide: config.controlSide || undefined,
-          bottomChain: config.bottomChain || undefined,
-          bracketType: config.bracketType || undefined,
-          chainColor: config.chainColor || undefined,
-          wrappedCassette: config.wrappedCassette || undefined,
-          cassetteMatchingBar: config.cassetteMatchingBar || undefined,
-          motorization: config.motorization || undefined,
-          blindColor: config.blindColor || undefined,
-          frameColor: config.frameColor || undefined,
-          openingDirection: config.openingDirection || undefined,
-          bottomBar: config.bottomBar || undefined,
-          rollStyle: config.rollStyle || undefined,
-          selectedVariantId: config.selectedVariantId || undefined,
-          selectedVariantTitle: config.selectedVariantTitle || undefined,
-          selectedVariantImage: config.selectedVariantImage || undefined,
-          selectedVariantOptionName: config.selectedVariantOptionName || undefined,
-          selectedVariantOptionValue: config.selectedVariantOptionValue || undefined,
-        };
-
-        return {
-          handle: item.product.slug,
-          widthInches,
-          heightInches,
-          quantity: item.quantity,
-          submittedPrice: item.product.price,
-          configuration: backendConfig,
-        };
-      });
-
-      const result = await createCheckout(checkoutItems, customer?.email || undefined);
-
-      // Clear cart before redirecting
-      clearCart();
+      // Keep the cart until the order is confirmed paid (CartContext clears it
+      // once the draft order completes), so a failed redirect loses nothing.
+      localStorage.setItem(
+        PENDING_CHECKOUT_KEY,
+        JSON.stringify({ draftOrderId: result.draftOrderId, createdAt: Date.now() })
+      );
 
       // Redirect to Shopify checkout
       window.location.href = result.checkoutUrl;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Checkout error:', error);
-      setCheckoutError(
-        error.message || 'Something went wrong. Please try again.'
-      );
+
+      if (
+        error instanceof CheckoutRequestError &&
+        error.code === 'PRICE_MISMATCH' &&
+        error.details?.length
+      ) {
+        setPriceMismatches(error.details);
+      } else if (error instanceof CheckoutRequestError && error.status < 500) {
+        setCheckoutError(error.message);
+      } else {
+        setCheckoutError(
+          "We couldn't start your checkout. Please try again in a moment — your cart is saved. " +
+          'If it keeps happening, call +1 832-670-6705 or email enquiries@yournextblinds.com and ' +
+          "we'll take your order directly."
+        );
+      }
       setIsCheckingOut(false);
     }
   };
 
-  const finalTotal = cart.total;
+  const handleCheckout = () => startCheckout(cart.items);
+
+  const handleApplyDiscount = () => {
+    const match = findDiscountCode(discountInput);
+    if (!match) {
+      setAppliedDiscount(null);
+      setDiscountError('That code is invalid or has expired.');
+      return;
+    }
+    setAppliedDiscount(match);
+    setDiscountError(null);
+  };
+
+  const handleRemoveDiscount = () => {
+    setAppliedDiscount(null);
+    setDiscountInput('');
+    setDiscountError(null);
+  };
+
+  // Apply the server's recalculated prices to the affected items, then retry.
+  const handleAcceptUpdatedPrices = () => {
+    if (!priceMismatches) return;
+
+    const updatedItems = cart.items.map((item, index) => {
+      const mismatch = priceMismatches.find((m) => m.index === index);
+      if (!mismatch) return item;
+      return { ...item, product: { ...item.product, price: mismatch.calculatedPrice } };
+    });
+
+    updatedItems.forEach((item, index) => {
+      if (priceMismatches.some((m) => m.index === index)) {
+        updateCartItem(item.id, item.product, item.configuration);
+      }
+    });
+
+    startCheckout(updatedItems);
+  };
+
+  const discountAmount = appliedDiscount
+    ? Math.round(cart.total * (appliedDiscount.percentOff / 100) * 100) / 100
+    : 0;
+  const finalTotal = cart.total - discountAmount;
   const editingItem = editingItemId
     ? cart.items.find((item) => item.id === editingItemId) ?? null
     : null;
@@ -169,7 +216,7 @@ export default function CartPage() {
       { key: 'headrail', label: 'Headrail', options: [...HEADRAIL_OPTIONS, ...DAY_NIGHT_BAND_H_HEADRAIL_OPTIONS, ...ROLLER_BAND_F_HEADRAIL_OPTIONS] },
       { key: 'headrailColour', label: 'Headrail Colour', options: HEADRAIL_COLOUR_OPTIONS },
       { key: 'installationMethod', label: 'Installation', options: [...INSTALLATION_METHOD_OPTIONS, ...ROLLER_INSTALLATION_OPTIONS] },
-      { key: 'controlOption', label: 'Control', options: [...CONTROL_OPTIONS, ...ROLLER_CONTROL_OPTIONS, ...DAY_NIGHT_BAND_H_CONTROL_OPTIONS, ...ROLLER_BAND_F_CONTROL_OPTIONS] },
+      { key: 'controlOption', label: 'Control', options: [...CONTROL_OPTIONS, ...ROLLER_CONTROL_OPTIONS, ...DAY_NIGHT_BAND_H_CONTROL_OPTIONS, ...ROLLER_BAND_F_CONTROL_OPTIONS, ...HONEYCOMB_CELLULAR_CONTROL_OPTIONS] },
       { key: 'stacking', label: 'Stacking', options: Object.values(VERTICAL_STACKING_OPTIONS).flat() },
       { key: 'controlSide', label: 'Control Side', options: CONTROL_SIDE_OPTIONS },
       { key: 'bottomChain', label: 'Bottom Weight/Chain', options: BOTTOM_CHAIN_OPTIONS },
@@ -177,7 +224,9 @@ export default function CartPage() {
       { key: 'chainColor', label: 'Chain Color', options: CHAIN_COLOR_OPTIONS },
       { key: 'wrappedCassette', label: 'Wrapped Cassette', options: [...WRAPPED_CASSETTE_OPTIONS, ...DAY_NIGHT_BAND_H_WRAPPED_CASSETTE_OPTIONS, ...ROLLER_BAND_F_WRAPPED_CASSETTE_OPTIONS] },
       { key: 'cassetteMatchingBar', label: 'Cassette Bar', options: [...CASSETTE_MATCHING_BAR_OPTIONS, ...ROLLER_CASSETTE_OPTIONS] },
-      { key: 'motorization', label: 'Motorisation', options: [...MOTORIZATION_OPTIONS, ...DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS, ...ROLLER_BAND_F_MOTORIZATION_OPTIONS] },
+      { key: 'motorization', label: 'Motorisation', options: [...MOTORIZATION_OPTIONS, ...DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS, ...ROLLER_BAND_F_MOTORIZATION_OPTIONS, ...HONEYCOMB_CELLULAR_MOTORIZATION_OPTIONS] },
+      { key: 'noDrillUpgrade', label: 'No Drill Upgrade', options: [HONEYCOMB_CELLULAR_NO_DRILL_UPGRADE_OPTION] },
+      { key: 'tdbuSheerUpgrade', label: 'Additional Sheer', options: [HONEYCOMB_CELLULAR_TDBU_SHEER_UPGRADE_OPTION] },
       { key: 'blindColor', label: 'Blind Color', options: BLIND_COLOR_OPTIONS },
       { key: 'frameColor', label: 'Frame Color', options: FRAME_COLOR_OPTIONS },
       { key: 'openingDirection', label: 'Opening Direction', options: OPENING_DIRECTION_OPTIONS },
@@ -241,7 +290,8 @@ export default function CartPage() {
     if (config.controlOption) {
       const option = CONTROL_OPTIONS.find(opt => opt.id === config.controlOption) ||
         ROLLER_CONTROL_OPTIONS.find(opt => opt.id === config.controlOption) ||
-        DAY_NIGHT_BAND_H_CONTROL_OPTIONS.find(opt => opt.id === config.controlOption);
+        DAY_NIGHT_BAND_H_CONTROL_OPTIONS.find(opt => opt.id === config.controlOption) ||
+        HONEYCOMB_CELLULAR_CONTROL_OPTIONS.find(opt => opt.id === config.controlOption);
       if (option?.price && option.price > 0) {
         costs.push({ label: option.name, price: option.price });
       }
@@ -305,9 +355,25 @@ export default function CartPage() {
     }
 
     if (config.motorization && config.motorization !== 'none') {
-      const option = [...MOTORIZATION_OPTIONS, ...DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS]
+      const option = [...MOTORIZATION_OPTIONS, ...DAY_NIGHT_BAND_H_MOTORIZATION_OPTIONS, ...HONEYCOMB_CELLULAR_MOTORIZATION_OPTIONS]
         .find(opt => opt.id === config.motorization);
       costs.push({ label: 'Motorisation motor', price: 95 });
+      if (option?.price && option.price > 0) {
+        costs.push({ label: option.name, price: option.price });
+      }
+    }
+
+    // No Drill System upgrade (Honeycomb Cellular)
+    if (config.noDrillUpgrade) {
+      const option = [HONEYCOMB_CELLULAR_NO_DRILL_UPGRADE_OPTION].find(opt => opt.id === config.noDrillUpgrade);
+      if (option?.price && option.price > 0) {
+        costs.push({ label: option.name, price: option.price });
+      }
+    }
+
+    // Additional Sheer upgrade (Top Down Bottom Up Cordless)
+    if (config.tdbuSheerUpgrade) {
+      const option = [HONEYCOMB_CELLULAR_TDBU_SHEER_UPGRADE_OPTION].find(opt => opt.id === config.tdbuSheerUpgrade);
       if (option?.price && option.price > 0) {
         costs.push({ label: option.name, price: option.price });
       }
@@ -513,6 +579,26 @@ export default function CartPage() {
                   </Link>
                 </div>
               </div>
+
+              {/* Fit Guarantee reassurance under the cart products (spec item 7) */}
+              <div className="mt-4 flex items-start gap-3 rounded-lg border border-[#00473c]/15 bg-[#00473c]/5 p-4">
+                <FitGuaranteeIcon className="mt-0.5 h-5 w-5 shrink-0 text-[#00473c]" />
+                <div className="text-sm">
+                  <p className="font-semibold text-[#3a3a3a]">
+                    You&apos;re Protected by Your Next Fit Guarantee™
+                  </p>
+                  <p className="mt-1 text-gray-600">
+                    Eligible custom blinds and shades include added protection against genuine
+                    measuring mistakes.
+                  </p>
+                  <Link
+                    href={FIT_GUARANTEE_PATH}
+                    className="mt-1.5 inline-block font-medium text-[#00473c] underline underline-offset-2"
+                  >
+                    View Fit Guarantee Terms
+                  </Link>
+                </div>
+              </div>
             </div>
 
             <div className="lg:w-[380px]">
@@ -528,6 +614,67 @@ export default function CartPage() {
                     <span className="text-gray-600">Shipping</span>
                     <span className="text-sm text-gray-500 italic">Calculated at checkout</span>
                   </div>
+                  {appliedDiscount && (
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-600">
+                        Discount ({appliedDiscount.code})
+                      </span>
+                      <span className="font-medium text-green-700">
+                        -{formatPriceWithCurrency(discountAmount)}
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  {appliedDiscount ? (
+                    <div className="flex items-center justify-between gap-2 rounded-lg border border-green-200 bg-green-50 px-3 py-2">
+                      <span className="text-sm font-medium text-green-800">
+                        &quot;{appliedDiscount.code}&quot; applied
+                      </span>
+                      <button
+                        onClick={handleRemoveDiscount}
+                        className="text-xs font-medium text-gray-500 hover:text-red-600"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ) : (
+                    <>
+                      <label htmlFor="discount-code" className="block text-sm text-gray-600 mb-1.5">
+                        Discount code
+                      </label>
+                      <div className="flex gap-2">
+                        <input
+                          id="discount-code"
+                          type="text"
+                          value={discountInput}
+                          onChange={(e) => {
+                            setDiscountInput(e.target.value);
+                            if (discountError) setDiscountError(null);
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                              handleApplyDiscount();
+                            }
+                          }}
+                          placeholder="Enter code"
+                          className="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00473c]"
+                        />
+                        <button
+                          onClick={handleApplyDiscount}
+                          disabled={!discountInput.trim()}
+                          className="rounded-lg border border-[#00473c] px-4 py-2 text-sm font-medium text-[#00473c] hover:bg-[#f0fdf9] disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          Apply
+                        </button>
+                      </div>
+                      {discountError && (
+                        <p className="mt-1.5 text-xs text-red-600">{discountError}</p>
+                      )}
+                    </>
+                  )}
                 </div>
 
                 <div className="border-t border-gray-200 pt-4 mb-6">
@@ -536,6 +683,40 @@ export default function CartPage() {
                     <span className="text-2xl font-bold text-[#00473c]">{formatPriceWithCurrency(finalTotal)}</span>
                   </div>
                 </div>
+
+                {priceMismatches && (
+                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-4">
+                    <p className="text-sm font-semibold text-amber-900 mb-2">
+                      Prices have been updated
+                    </p>
+                    <p className="text-xs text-amber-800 mb-3">
+                      The price of {priceMismatches.length === 1 ? 'an item' : 'some items'} in
+                      your cart changed since you added {priceMismatches.length === 1 ? 'it' : 'them'}:
+                    </p>
+                    <ul className="space-y-1 mb-3">
+                      {priceMismatches.map((mismatch) => (
+                        <li key={mismatch.index} className="text-xs text-amber-900 flex justify-between gap-2">
+                          <span className="truncate">{mismatch.title}</span>
+                          <span className="whitespace-nowrap">
+                            <span className="line-through text-amber-700">
+                              {formatPriceWithCurrency(mismatch.submittedPrice)}
+                            </span>{' '}
+                            <span className="font-semibold">
+                              {formatPriceWithCurrency(mismatch.calculatedPrice)}
+                            </span>
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                    <button
+                      onClick={handleAcceptUpdatedPrices}
+                      disabled={isCheckingOut}
+                      className="w-full bg-amber-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors disabled:opacity-60"
+                    >
+                      Update prices &amp; continue to checkout
+                    </button>
+                  </div>
+                )}
 
                 {checkoutError && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
@@ -561,9 +742,12 @@ export default function CartPage() {
                   )}
                 </button>
 
-                <button className="w-full border border-gray-300 text-[#3a3a3a] py-3 px-6 rounded-lg text-base font-medium hover:bg-gray-50 transition-colors">
+                <Link
+                  href="/samples"
+                  className="block w-full border border-gray-300 text-[#3a3a3a] py-3 px-6 rounded-lg text-base font-medium hover:bg-gray-50 transition-colors text-center"
+                >
                   Request Free Samples
-                </button>
+                </Link>
 
                 <div className="mt-6 pt-6 border-t border-gray-200">
                   <div className="space-y-3">
@@ -571,13 +755,36 @@ export default function CartPage() {
                       <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-sm text-gray-600">Faulty item support</span>
+                      <span className="text-sm text-gray-600">Secure checkout</span>
                     </div>
                     <div className="flex items-center gap-3">
                       <svg className="w-5 h-5 text-green-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                       </svg>
-                      <span className="text-sm text-gray-600">Secure checkout</span>
+                      <span className="text-sm text-gray-600">5-year manufacturer warranty</span>
+                    </div>
+                  </div>
+
+                  <div className="mt-5">
+                    <p className="text-xs text-gray-400 mb-2">We accept</p>
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      {[
+                        { name: 'Visa', src: '/icons/payment/visa.svg' },
+                        { name: 'Mastercard', src: '/icons/payment/mastercard.svg' },
+                        { name: 'American Express', src: '/icons/payment/amex.svg' },
+                        { name: 'PayPal', src: '/icons/payment/paypal.svg' },
+                        { name: 'Apple Pay', src: '/icons/payment/apple-pay.svg' },
+                        { name: 'Google Pay', src: '/icons/payment/google-pay.svg' },
+                      ].map((method) => (
+                        <Image
+                          key={method.name}
+                          src={method.src}
+                          alt={method.name}
+                          width={60}
+                          height={39}
+                          className="h-9 w-auto"
+                        />
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -588,7 +795,7 @@ export default function CartPage() {
       </div>
 
       {showClearConfirm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg p-6 max-w-md w-full">
             <h3 className="text-xl font-bold text-[#3a3a3a] mb-3">Clear Cart?</h3>
             <p className="text-gray-600 mb-6">

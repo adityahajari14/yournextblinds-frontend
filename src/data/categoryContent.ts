@@ -206,9 +206,9 @@ const categoryContent: Record<string, CategoryContent> = {
 
   'motorised-eclipsecore': {
     productDetails: [
-      'Experience complete darkness and effortless motorised operation with our premium 100% blackout honeycomb blinds. Powered by a built-in electric motor, these innovative blinds can be raised or lowered using a remote control — no manual chains or cords required.',
+      'Experience complete darkness and effortless motorized operation with our premium 100% blackout honeycomb blinds. Powered by a built-in electric motor, these innovative blinds can be raised or lowered using a remote control — no manual chains or cords required.',
       'The honeycomb cellular design provides excellent blackout performance, blocking outside light completely while also improving thermal insulation. With drill-free installation, you can set them up inside your square window frame in minutes without any tools.',
-      'At Your Next Blinds, our motorised honeycomb blackout blinds are custom made to measure, combining modern convenience, superior light control, and clean minimal style.',
+      'At Your Next Blinds, our motorized honeycomb blackout blinds are custom made to measure, combining modern convenience, superior light control, and clean minimal style.',
     ],
     keyFeatures: [
       'Remote control convenience — raise or lower blinds with the press of a button',
@@ -223,7 +223,7 @@ const categoryContent: Record<string, CategoryContent> = {
       'Designed specifically for square window frames for a secure fit',
     ],
     specifications: [
-      { label: 'Product Type', value: 'Motorised Blackout Honeycomb Blinds' },
+      { label: 'Product Type', value: 'Motorized Blackout Honeycomb Blinds' },
       { label: 'Operation', value: 'Remote control (electric motor)' },
       { label: 'Control Type', value: 'Cordless — remote control included' },
       { label: 'Light Control', value: '100% Blackout' },
@@ -244,7 +244,7 @@ const categoryContent: Record<string, CategoryContent> = {
       'Any room requiring complete darkness and effortless control',
     ],
     whatsInTheBox: [
-      'Custom made motorised blackout honeycomb blind with built-in electric motor',
+      'Custom made motorized blackout honeycomb blind with built-in electric motor',
       'Remote control',
       'Drill-free installation brackets',
       'All necessary mounting hardware',
@@ -258,7 +258,7 @@ const categoryContent: Record<string, CategoryContent> = {
     ],
     childSafety: [
       'At Your Next Blinds, safety is a top priority. All of our blinds are designed in accordance with modern child safety standards.',
-      'Our motorised honeycomb blinds are completely cordless, eliminating hanging cords or chains and making them one of the safest window covering options for homes with children and pets.',
+      'Our motorized honeycomb blinds are completely cordless, eliminating hanging cords or chains and making them one of the safest window covering options for homes with children and pets.',
     ],
   },
 
@@ -319,8 +319,8 @@ const categoryContent: Record<string, CategoryContent> = {
 
   'motorised-roller-shades': {
     productDetails: [
-      'Motorised roller shades are a modern window covering solution designed to provide effortless light control and convenience. Powered by a built-in electric motor, these shades can be easily raised or lowered using a remote control, allowing you to adjust your window coverings with the press of a button.',
-      'At Your Next Blinds, our motorised roller shades are custom made to measure, ensuring a perfect fit for your windows. These shades combine modern design, smooth operation, and advanced motor technology to create a stylish and practical solution for any room in your home.',
+      'Motorized roller shades are a modern window covering solution designed to provide effortless light control and convenience. Powered by a built-in electric motor, these shades can be easily raised or lowered using a remote control, allowing you to adjust your window coverings with the press of a button.',
+      'At Your Next Blinds, our motorized roller shades are custom made to measure, ensuring a perfect fit for your windows. These shades combine modern design, smooth operation, and advanced motor technology to create a stylish and practical solution for any room in your home.',
       'With remote-controlled operation, you can easily manage sunlight, privacy, and comfort without manually adjusting your blinds.',
     ],
     keyFeatures: [
@@ -336,7 +336,7 @@ const categoryContent: Record<string, CategoryContent> = {
       'Sleek minimal design that suits both modern and traditional interiors',
     ],
     specifications: [
-      { label: 'Product Type', value: 'Motorised Roller Shades' },
+      { label: 'Product Type', value: 'Motorized Roller Shades' },
       { label: 'Operation', value: 'Remote control (electric motor)' },
       { label: 'Control Type', value: 'Cordless — remote control included' },
       { label: 'Motor', value: 'Built-in electric motor inside roller tube' },
@@ -354,7 +354,7 @@ const categoryContent: Record<string, CategoryContent> = {
       'Hard-to-reach windows',
     ],
     whatsInTheBox: [
-      'Custom made motorised roller shade with built-in electric motor',
+      'Custom made motorized roller shade with built-in electric motor',
       'Remote control',
       'Mounting brackets',
       'Screws and installation hardware',
@@ -368,7 +368,7 @@ const categoryContent: Record<string, CategoryContent> = {
     ],
     childSafety: [
       'At Your Next Blinds, safety is a top priority. All of our blinds are designed in accordance with modern child safety standards.',
-      'Our motorised roller shades are completely cordless, eliminating hanging cords or chains and making them one of the safest window covering options for homes with children and pets.',
+      'Our motorized roller shades are completely cordless, eliminating hanging cords or chains and making them one of the safest window covering options for homes with children and pets.',
     ],
   },
 
@@ -430,9 +430,9 @@ const categoryContent: Record<string, CategoryContent> = {
 
   'motorised-dual-zebra-shades': {
     productDetails: [
-      'Motorised dual zebra shades are a modern window covering designed to provide flexible light control, stylish design, and effortless remote operation. These innovative blinds feature alternating bands of sheer and opaque fabric that move past each other, allowing you to adjust the amount of natural light entering your room.',
-      'At Your Next Blinds, our motorised dual zebra shades are custom made to measure, ensuring the perfect fit for your windows. With a built-in motor and remote control operation, you can easily raise, lower, or adjust the shades with the press of a button.',
-      'Combining elegant design with modern convenience, motorised zebra shades are a popular choice for homeowners who want both style and functionality.',
+      'Motorized dual zebra shades are a modern window covering designed to provide flexible light control, stylish design, and effortless remote operation. These innovative blinds feature alternating bands of sheer and opaque fabric that move past each other, allowing you to adjust the amount of natural light entering your room.',
+      'At Your Next Blinds, our motorized dual zebra shades are custom made to measure, ensuring the perfect fit for your windows. With a built-in motor and remote control operation, you can easily raise, lower, or adjust the shades with the press of a button.',
+      'Combining elegant design with modern convenience, motorized zebra shades are a popular choice for homeowners who want both style and functionality.',
     ],
     keyFeatures: [
       'Remote control convenience — raise, lower, or adjust shades with a button press',
@@ -447,7 +447,7 @@ const categoryContent: Record<string, CategoryContent> = {
       'Suitable for both residential and modern apartment settings',
     ],
     specifications: [
-      { label: 'Product Type', value: 'Motorised Dual Zebra Shades (Day and Night Blinds)' },
+      { label: 'Product Type', value: 'Motorized Dual Zebra Shades (Day and Night Blinds)' },
       { label: 'Fabric Type', value: 'Dual-layer alternating sheer and opaque bands' },
       { label: 'Operation', value: 'Remote control (electric motor)' },
       { label: 'Control Type', value: 'Cordless — remote control included' },
@@ -467,7 +467,7 @@ const categoryContent: Record<string, CategoryContent> = {
       'Modern apartments',
     ],
     whatsInTheBox: [
-      'Custom made motorised dual zebra shade with built-in electric motor',
+      'Custom made motorized dual zebra shade with built-in electric motor',
       'Remote control',
       'Mounting brackets',
       'Screws and installation hardware',
@@ -481,7 +481,7 @@ const categoryContent: Record<string, CategoryContent> = {
     ],
     childSafety: [
       'At Your Next Blinds, safety is a top priority. All of our blinds are designed in accordance with modern child safety standards.',
-      'Our motorised dual zebra shades are completely cordless, eliminating hanging cords or chains and making them one of the safest window covering options for homes with children and pets.',
+      'Our motorized dual zebra shades are completely cordless, eliminating hanging cords or chains and making them one of the safest window covering options for homes with children and pets.',
     ],
   },
 

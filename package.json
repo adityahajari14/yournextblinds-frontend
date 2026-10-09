@@ -16,9 +16,17 @@
     "shopify:backfill-variant-bands": "node scripts/backfill-variant-price-bands.mjs",
     "shopify:add-free-sample-tag": "node scripts/add-free-sample-tag.mjs",
     "pricing:validate": "node scripts/validate-pricing-data.mjs",
-    "pricing:validate:shopify": "node scripts/validate-pricing-data.mjs --shopify"
+    "pricing:validate:shopify": "node scripts/validate-pricing-data.mjs --shopify",
+    "honeycomb:extract": "node scripts/extract-honeycomb-cellular-source.mjs",
+    "honeycomb:catalog": "node scripts/generate-honeycomb-cellular-catalog.mjs",
+    "honeycomb:pricing": "node scripts/generate-honeycomb-cellular-pricing.mjs",
+    "honeycomb:images": "node scripts/prepare-honeycomb-cellular-images.mjs",
+    "shopify:upsert-honeycomb": "node scripts/upsert-honeycomb-cellular-products.mjs",
+    "shopify:unhide-honeycomb": "node scripts/unhide-honeycomb-cellular-products.mjs"
   },
   "dependencies": {
+    "@google/genai": "^2.15.0",
+    "@neondatabase/serverless": "^1.1.0",
     "@shopify/hydrogen-react": "^2026.4.2",
     "next": "^16.0.8",
     "react": "^19.2.1",

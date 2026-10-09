@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Honeycomb/Cellular source assets — ~1.2GB of camera-resolution swatch photos,
+# the supplier catalogue PDF and the price xlsx. Never commit these: the
+# extracted, reviewable data lives in scripts/data/ and the optimised images are
+# uploaded to the Shopify CDN (swatches) or committed under public/ (category art).
+/Honeycomb-cellular/

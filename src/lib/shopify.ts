@@ -5,7 +5,7 @@
 // collections, tags) directly from Shopify's public Storefront API.
 // Pricing and checkout use local Next.js API routes.
 
-import type { ApiProduct, ApiCategory, ApiTag } from '@/types';
+import type { ApiProduct, ApiCategory, ApiTag, ProductContent, ProductContentSection } from '@/types';
 
 // ============================================
 // Configuration
@@ -118,7 +118,12 @@ export interface ShopifyCustomer {
 // GraphQL Queries
 // ============================================
 
-const PRODUCT_FIELDS = `
+// `imageCount` is parameterised because the collection/list query multiplies it
+// by up to 250 products (Storefront API query-cost limits), while a single
+// product-detail fetch needs every media item — some products (e.g. the
+// Honeycomb Cellular shades) carry a per-colour fabric swatch AND a code image
+// per variant, so 40+ images is normal.
+const productFields = (imageCount: number) => `
   id
   handle
   title
@@ -129,7 +134,7 @@ const PRODUCT_FIELDS = `
   tags
   createdAt
   updatedAt
-  images(first: 20) {
+  images(first: ${imageCount}) {
     edges {
       node {
         url
@@ -172,6 +177,7 @@ const PRODUCT_FIELDS = `
     { namespace: "custom", key: "specifications" }
     { namespace: "custom", key: "measuring_installation" }
     { namespace: "custom", key: "delivery_returns" }
+    { namespace: "custom", key: "product_content" }
   ]) {
     key
     namespace
@@ -179,6 +185,11 @@ const PRODUCT_FIELDS = `
     value
   }
 `;
+
+// List/collection queries: kept small — they only ever use the first image.
+const PRODUCT_FIELDS = productFields(20);
+// Product-detail query: pull every media item (Storefront `first` maxes at 250).
+const PRODUCT_DETAIL_FIELDS = productFields(250);
 
 const PRODUCTS_QUERY = `
   query Products($first: Int!, $after: String, $query: String) {
@@ -199,7 +210,7 @@ const PRODUCTS_QUERY = `
 const PRODUCT_BY_HANDLE_QUERY = `
   query ProductByHandle($handle: String!) {
     product(handle: $handle) {
-      ${PRODUCT_FIELDS}
+      ${PRODUCT_DETAIL_FIELDS}
     }
   }
 `;
@@ -374,9 +385,41 @@ function mapStorefrontProduct(
     specifications: metafields.specifications || null,
     measuringInstallation: metafields.measuring_installation || null,
     deliveryReturns: metafields.delivery_returns || null,
+    productContent: parseProductContent(metafields.product_content),
     categories,
     tags,
   };
+}
+
+/**
+ * `custom.product_content` holds structured marketing copy as JSON. Bad or absent
+ * values must never break the product page, so parse defensively and drop any
+ * section that is not an array of strings.
+ */
+function parseProductContent(raw: string | undefined): ProductContent | null {
+  if (!raw) return null;
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    const list = (value: unknown): string[] =>
+      Array.isArray(value) ? value.filter((v): v is string => typeof v === 'string' && v.trim().length > 0) : [];
+
+    const sections: ProductContentSection[] = (Array.isArray(parsed.sections) ? parsed.sections : [])
+      .map((entry): ProductContentSection | null => {
+        if (!entry || typeof entry !== 'object') return null;
+        const { heading, kind, items } = entry as Record<string, unknown>;
+        if (typeof heading !== 'string' || !heading.trim()) return null;
+        const parsedItems = list(items);
+        if (!parsedItems.length) return null;
+        return { heading, kind: kind === 'list' ? 'list' : 'prose', items: parsedItems };
+      })
+      .filter((section): section is ProductContentSection => section !== null);
+
+    const description = list(parsed.description);
+    if (!description.length && !sections.length) return null;
+    return { description, sections };
+  } catch {
+    return null;
+  }
 }
 
 // ============================================
@@ -421,6 +464,25 @@ export async function fetchAllShopifyProducts(
 }
 
 /**
+ * Fetch a single page of up to `first` products matching a search query,
+ * with no cursor pagination — for lightweight, live-typing search previews
+ * where only the top few results matter (unlike fetchAllShopifyProducts,
+ * which loops through the entire matching catalog).
+ */
+export async function fetchShopifyProductsPage(
+  searchQuery: string,
+  first: number
+): Promise<StorefrontProduct[]> {
+  const data = await storefrontFetch<StorefrontProductsResponse>(
+    PRODUCTS_QUERY,
+    { first, query: searchQuery },
+    { revalidate: false }
+  );
+
+  return data.products.edges.map((edge) => edge.node);
+}
+
+/**
  * Fetch a single product by its handle (slug) from Shopify.
  */
 export async function fetchShopifyProductByHandle(
@@ -462,10 +524,24 @@ export async function fetchShopifyCollections(): Promise<
 
 /**
  * Fetch minimum prices (handle → price) from our backend pricing engine.
- * Cached for 60 seconds to avoid repeated calls.
+ *
+ * Two caches with different jobs:
+ *  - `cachedMinimumPrices` / `pricesCacheTime`: a short-lived TTL cache to
+ *    avoid recomputing on every request.
+ *  - `lastGoodMinimumPrices`: the last NON-EMPTY successful result, kept
+ *    indefinitely. If a refresh fails or returns empty, we fall back to this
+ *    instead of `{}` — otherwise every product maps to `price: 0` and, on an
+ *    ISR page, that $0 gets baked into the static output for the whole
+ *    revalidate window. Serving slightly-stale-but-correct prices is far
+ *    safer than serving (and caching) $0.
+ *
+ * If we have neither fresh nor last-good data, we THROW rather than return an
+ * empty map — a thrown error aborts the page render so Next.js retries the
+ * static generation instead of persisting a $0 snapshot.
  */
 let cachedMinimumPrices: Record<string, number> | null = null;
 let pricesCacheTime = 0;
+let lastGoodMinimumPrices: Record<string, number> | null = null;
 const PRICES_CACHE_TTL = 60_000; // 60 seconds
 
 function getApiBaseUrl(): string {
@@ -474,6 +550,15 @@ function getApiBaseUrl(): string {
   if (vercelUrl) return `https://${vercelUrl}`;
   const port = process.env.PORT || '3000';
   return `http://localhost:${port}`;
+}
+
+function acceptMinimumPrices(prices: Record<string, number>): Record<string, number> {
+  cachedMinimumPrices = prices;
+  pricesCacheTime = Date.now();
+  if (Object.keys(prices).length > 0) {
+    lastGoodMinimumPrices = prices;
+  }
+  return prices;
 }
 
 async function getMinimumPrices(): Promise<Record<string, number>> {
@@ -489,22 +574,25 @@ async function getMinimumPrices(): Promise<Record<string, number>> {
   if (isServerSide) {
     try {
       const pricingService = await import('@/lib/server/pricing.service');
-      cachedMinimumPrices = await pricingService.getMinimumPricesByHandle();
-      if (Object.keys(cachedMinimumPrices).length === 0) {
+      const prices = await pricingService.getMinimumPricesByHandle();
+      if (Object.keys(prices).length === 0) {
         console.warn(
           '[Pricing] getMinimumPricesByHandle returned no prices. ' +
           'Check that: (1) pricing data is present in src/data/pricing/pricing-data.json, ' +
           '(2) SHOPIFY_ADMIN_ACCESS_TOKEN is set, and ' +
           '(3) the custom.price_band_name metafield is set on Shopify products.'
         );
+        // Empty result — prefer last-good over caching/serving an all-$0 map.
+        if (lastGoodMinimumPrices) return lastGoodMinimumPrices;
+        throw new Error('No minimum prices available and no last-good cache to fall back to');
       }
-      pricesCacheTime = now;
-      return cachedMinimumPrices;
+      return acceptMinimumPrices(prices);
     } catch (err) {
       console.error('[Pricing] Failed to fetch minimum prices from pricing data:', err);
-      cachedMinimumPrices = {};
-      pricesCacheTime = now;
-      return cachedMinimumPrices;
+      if (lastGoodMinimumPrices) return lastGoodMinimumPrices;
+      // Nothing usable — rethrow so the caller/page render fails instead of
+      // baking a $0 snapshot into the ISR cache.
+      throw err instanceof Error ? err : new Error(String(err));
     }
   }
 
@@ -517,13 +605,12 @@ async function getMinimumPrices(): Promise<Record<string, number>> {
   const response = await fetch(`${base}/api/pricing/minimum-prices`, fetchOptions);
 
   if (!response.ok) {
+    if (lastGoodMinimumPrices) return lastGoodMinimumPrices;
     throw new Error(`Failed to fetch minimum prices: ${response.status}`);
   }
 
   const json = await response.json();
-  cachedMinimumPrices = json.data;
-  pricesCacheTime = now;
-  return cachedMinimumPrices!;
+  return acceptMinimumPrices(json.data ?? {});
 }
 
 /**
@@ -535,6 +622,25 @@ export async function fetchShopifyProductsMerged(
 ): Promise<ApiProduct[]> {
   const [sfProducts, minimumPrices] = await Promise.all([
     fetchAllShopifyProducts(searchQuery),
+    getMinimumPrices(),
+  ]);
+
+  return sfProducts.map((sfProduct) =>
+    mapStorefrontProduct(sfProduct, minimumPrices)
+  );
+}
+
+/**
+ * Lightweight counterpart to fetchShopifyProductsMerged for live-typing
+ * search previews — fetches only the top `first` matches in one request
+ * instead of paginating through the whole result set.
+ */
+export async function fetchShopifyProductsPageMerged(
+  searchQuery: string,
+  first: number
+): Promise<ApiProduct[]> {
+  const [sfProducts, minimumPrices] = await Promise.all([
+    fetchShopifyProductsPage(searchQuery, first),
     getMinimumPrices(),
   ]);
 

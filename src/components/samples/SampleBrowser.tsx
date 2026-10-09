@@ -331,7 +331,7 @@ const SampleBrowser = ({ categories }: SampleBrowserProps) => {
           )}
 
           <p className="mt-4 text-xs leading-relaxed text-gray-400">
-            Free samples are posted directly through your letterbox — no payment, no signature required.
+            Free samples are delivered straight to your mailbox — no payment, no signature required.
           </p>
         </div>
       </aside>
