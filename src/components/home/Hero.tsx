@@ -3,8 +3,11 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import { SEASONAL_SALE } from '@/data/seasonal';
 
 const slides = [
+  // Seasonal sale banners lead the carousel while a seasonal sale is active.
+  ...(SEASONAL_SALE?.heroSlides ?? []),
   {
     src: '/home/hero/hero-1.webp',
     mobileSrc: '/home/hero/hero-1-mobile.webp',

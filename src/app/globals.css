@@ -16,6 +16,9 @@
   --color-foreground: var(--foreground);
   --color-primary: var(--primary);
   --color-primary-dark: var(--primary-dark);
+  /* Seasonal sale theme (see src/data/seasonal.ts) — currently Halloween */
+  --color-seasonal-dark: #1a1023;
+  --color-seasonal-accent: #ff7a1a;
   --font-sans: var(--font-inter), Arial, Helvetica, sans-serif;
   --font-display: var(--font-montserrat), Arial, Helvetica, sans-serif;
 }

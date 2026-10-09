@@ -11,7 +11,9 @@ import {
 } from '@/lib/api';
 import { buildCheckoutItem } from '@/lib/checkout';
 import { trackStoreCartView, trackStoreCheckoutInitiated, getStoreSessionContext } from '@/lib/store-events';
-import { findDiscountCode, type DiscountCodeDefinition } from '@/data/promo';
+import { findDiscountCode, PROMO_CODE, PROMO_CODE_PERCENT, type DiscountCodeDefinition } from '@/data/promo';
+import { SEASONAL_SALE } from '@/data/seasonal';
+import { PumpkinIcon } from '@/components/seasonal';
 import { CartItem, CheckoutItemRequest, PriceOption } from '@/types';
 import CartItemEditModal from '@/components/cart/CartItemEditModal';
 import { FitGuaranteeIcon } from '@/components/fit-guarantee';
@@ -443,6 +445,22 @@ export default function CartPage() {
 
       <div className="px-4 md:px-6 lg:px-20 py-8 md:py-12">
         <div className="max-w-[1200px] mx-auto">
+          {SEASONAL_SALE && (
+            <div className="mb-6 flex items-center justify-center gap-2 rounded-lg bg-seasonal-dark px-4 py-2.5 text-center text-sm text-white">
+              <PumpkinIcon className="h-5 w-5 shrink-0 text-seasonal-accent" />
+              <p>
+                <span className="font-bold text-seasonal-accent">{SEASONAL_SALE.saleName}</span> prices are in your
+                cart.
+                {!appliedDiscount && (
+                  <>
+                    {' '}
+                    Enter code <span className="font-bold">{PROMO_CODE}</span> in the discount field for an extra{' '}
+                    {PROMO_CODE_PERCENT}% off.
+                  </>
+                )}
+              </p>
+            </div>
+          )}
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">
             <div className="flex-1">
               <div className="bg-white rounded-lg p-4 md:p-6">

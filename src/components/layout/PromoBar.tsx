@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { PROMO_CODE, PROMO_CODE_PERCENT, SALE_MAX_PERCENT } from '@/data/promo';
+import { SEASONAL_SALE } from '@/data/seasonal';
 import CountdownTimer from '@/components/common/CountdownTimer';
+import { PumpkinIcon } from '@/components/seasonal';
 
 const PromoBar = () => {
   const [copied, setCopied] = useState(false);
@@ -19,14 +21,21 @@ const PromoBar = () => {
   };
 
   return (
-    <div className="bg-[#00473c] text-white">
+    <div className={`${SEASONAL_SALE ? 'bg-seasonal-dark' : 'bg-[#00473c]'} text-white`}>
       <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 px-4 py-2 text-center sm:gap-x-3 sm:py-2.5 lg:flex-nowrap lg:text-left">
-        <span className="flex items-center gap-1.5 whitespace-nowrap text-xs font-bold tracking-wide sm:text-sm">
-          <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5.586a1 1 0 01.707.293l7.414 7.414a1 1 0 010 1.414l-8.586 8.586a1 1 0 01-1.414 0l-7.414-7.414A1 1 0 013 12.586V7a4 4 0 014-4z" />
-          </svg>
-          UP TO {SALE_MAX_PERCENT}% OFF
-        </span>
+        {SEASONAL_SALE ? (
+          <span className="flex items-center gap-1.5 whitespace-nowrap text-xs font-bold tracking-wide text-seasonal-accent sm:text-sm">
+            <PumpkinIcon className="h-4 w-4 shrink-0" />
+            {SEASONAL_SALE.saleName.toUpperCase()}: UP TO {SALE_MAX_PERCENT}% OFF
+          </span>
+        ) : (
+          <span className="flex items-center gap-1.5 whitespace-nowrap text-xs font-bold tracking-wide sm:text-sm">
+            <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5.586a1 1 0 01.707.293l7.414 7.414a1 1 0 010 1.414l-8.586 8.586a1 1 0 01-1.414 0l-7.414-7.414A1 1 0 013 12.586V7a4 4 0 014-4z" />
+            </svg>
+            UP TO {SALE_MAX_PERCENT}% OFF
+          </span>
+        )}
 
         <span className="hidden text-white/40 sm:inline">|</span>
 
@@ -65,7 +74,11 @@ const PromoBar = () => {
 
         <Link
           href="/collections"
-          className="ml-1 whitespace-nowrap rounded-full bg-white px-4 py-1 text-xs font-bold tracking-wide text-[#00473c] transition-colors hover:bg-gray-100 sm:text-sm"
+          className={`ml-1 whitespace-nowrap rounded-full px-4 py-1 text-xs font-bold tracking-wide transition-colors sm:text-sm ${
+            SEASONAL_SALE
+              ? 'bg-seasonal-accent text-seasonal-dark hover:bg-white'
+              : 'bg-white text-[#00473c] hover:bg-gray-100'
+          }`}
         >
           SHOP NOW
         </Link>

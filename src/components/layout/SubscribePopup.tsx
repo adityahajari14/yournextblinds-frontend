@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { SUBSCRIBE_POPUP_CODE, SUBSCRIBE_POPUP_PERCENT } from '@/data/promo';
+import { SEASONAL_SALE } from '@/data/seasonal';
+import { PumpkinIcon } from '@/components/seasonal';
 
 const SHOW_DELAY_MS = 10_000;
 const SESSION_KEY = 'subscribe-popup-shown';
@@ -94,9 +96,18 @@ const SubscribePopup = () => {
       onClick={dismiss}
     >
       <div
-        className="relative w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl sm:p-8"
+        className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white p-6 shadow-2xl sm:p-8"
         onClick={(event) => event.stopPropagation()}
       >
+        {SEASONAL_SALE && (
+          <>
+            <div className="absolute inset-x-0 top-0 h-1.5 bg-seasonal-accent" />
+            <div className="mb-3 flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-seasonal-dark">
+              <PumpkinIcon className="h-5 w-5 text-seasonal-accent" />
+              {SEASONAL_SALE.saleName}
+            </div>
+          </>
+        )}
         <button
           type="button"
           onClick={dismiss}

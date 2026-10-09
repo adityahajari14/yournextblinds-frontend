@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { navigationData, NavigationItem } from '@/data/navigation';
+import { SEASONAL_SALE } from '@/data/seasonal';
 
 const DEFAULT_NAV_ICON = '/nav-icons/vertical-blinds.webp';
 
@@ -195,6 +196,9 @@ const NavBar = () => {
           </>
         )}
       </nav>
+
+      {/* Seasonal accent line under the header (all breakpoints) */}
+      {SEASONAL_SALE && <div className="h-[3px] bg-seasonal-accent" aria-hidden="true" />}
     </>
   );
 };

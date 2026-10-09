@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { getNextMidnight } from '@/data/promo';
+import { SEASONAL_SALE } from '@/data/seasonal';
 
 interface CountdownTimerProps {
   /** Visual style: 'inline' for banners, 'boxed' for standalone blocks. */
@@ -45,7 +46,11 @@ const CountdownTimer = ({ variant = 'inline', className = '' }: CountdownTimerPr
   if (variant === 'boxed') {
     const cell = (value: number, label: string) => (
       <div className="flex flex-col items-center">
-        <span className="min-w-[2.5rem] rounded-md bg-[#00473c] px-2 py-1.5 text-lg font-bold tabular-nums text-white md:text-xl">
+        <span
+          className={`min-w-[2.5rem] rounded-md px-2 py-1.5 text-lg font-bold tabular-nums text-white md:text-xl ${
+            SEASONAL_SALE ? 'bg-seasonal-dark' : 'bg-[#00473c]'
+          }`}
+        >
           {pad(value)}
         </span>
         <span className="mt-1 text-[10px] font-medium uppercase tracking-wide text-[#4d6b65]">
@@ -54,12 +59,16 @@ const CountdownTimer = ({ variant = 'inline', className = '' }: CountdownTimerPr
       </div>
     );
 
+    const separator = (
+      <span className={`pb-4 text-lg font-bold ${SEASONAL_SALE ? 'text-seasonal-dark' : 'text-[#00473c]'}`}>:</span>
+    );
+
     return (
       <div className={`flex items-center gap-2 ${className}`}>
         {cell(time.hours, 'Hours')}
-        <span className="pb-4 text-lg font-bold text-[#00473c]">:</span>
+        {separator}
         {cell(time.minutes, 'Mins')}
-        <span className="pb-4 text-lg font-bold text-[#00473c]">:</span>
+        {separator}
         {cell(time.seconds, 'Secs')}
       </div>
     );

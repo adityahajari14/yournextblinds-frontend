@@ -20,6 +20,7 @@ import { FitGuaranteeTrustBlock, MeasureReassurance, FitGuaranteeIcon } from '@/
 import { FIT_GUARANTEE_PATH } from '@/data/fitGuarantee';
 import { PRODUCT_GUIDES } from '@/data/guides';
 import { PROMO_CODE, PROMO_CODE_PERCENT, FLASH_SALE_DISCOUNT_PERCENT } from '@/data/promo';
+import { SEASONAL_SALE } from '@/data/seasonal';
 import { trackShopifyProductView } from '@/lib/shopify-analytics';
 import { trackStoreProductView, trackStoreCheckoutInitiated, getStoreSessionContext } from '@/lib/store-events';
 import { getEstimatedDispatchDateRange } from '@/lib/dispatch-date';
@@ -193,6 +194,11 @@ const BAND_H_INSTALLATION_GUIDE_LANGUAGES: Array<{
 ];
 
 const FLASH_SALE_COUPON_CODE = PROMO_CODE;
+// Price badge: label and colors follow the seasonal sale theme while one is active.
+const SALE_BADGE_LABEL = `${FLASH_SALE_DISCOUNT_PERCENT}% Off ${SEASONAL_SALE?.saleName ?? 'Flash Sale'}`;
+const SALE_BADGE_CLASS = `rounded-md px-2.5 py-1 text-xs font-semibold ${
+  SEASONAL_SALE ? 'bg-seasonal-accent text-seasonal-dark' : 'bg-[#00473c] text-white'
+}`;
 const EMPTY_MISSING_FIELD_KEYS = new Set<string>();
 
 function getVariantDisplayOption(variant: ProductVariant) {
@@ -1366,7 +1372,11 @@ const ProductPage = ({
       <button
         type="button"
         onClick={() => setIsFlashSaleCouponOpen(true)}
-        className="fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 border-[#0f5f52] bg-[#00473c] px-2.5 py-3 text-white shadow-lg transition-colors hover:bg-[#003830] lg:px-3 lg:py-4"
+        className={`fixed right-0 top-1/2 z-40 -translate-y-1/2 rounded-l-md border border-r-0 px-2.5 py-3 text-white shadow-lg transition-colors lg:px-3 lg:py-4 ${
+          SEASONAL_SALE
+            ? 'border-seasonal-accent bg-seasonal-dark hover:bg-black'
+            : 'border-[#0f5f52] bg-[#00473c] hover:bg-[#003830]'
+        }`}
         aria-label={`Open ${PROMO_CODE_PERCENT} percent off coupon`}
       >
         <span
@@ -1469,9 +1479,7 @@ const ProductPage = ({
                     <span className="text-2xl font-bold text-[#3a3a3a]">
                       {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
                     </span>
-                    <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
-                      {FLASH_SALE_DISCOUNT_PERCENT}% Off Flash Sale
-                    </span>
+                    <span className={SALE_BADGE_CLASS}>{SALE_BADGE_LABEL}</span>
                   </div>
                   {priceCalculation && !showMinPriceIndicator && (
                     <div className="mt-3 text-xs text-gray-400">
@@ -1521,9 +1529,7 @@ const ProductPage = ({
                     <span className="text-xl md:text-2xl font-bold text-[#3a3a3a]">
                       {formatPriceWithCurrency(formatPrice(displayedPrice), product.currency)}
                     </span>
-                    <span className="rounded-md bg-[#00473c] px-2.5 py-1 text-xs font-semibold text-white">
-                      {FLASH_SALE_DISCOUNT_PERCENT}% Off Flash Sale
-                    </span>
+                    <span className={SALE_BADGE_CLASS}>{SALE_BADGE_LABEL}</span>
                   </div>
                   {priceCalculation && !showMinPriceIndicator && (
                     <div className="text-xs text-gray-400 mb-3">
@@ -2730,20 +2736,35 @@ const ProductPage = ({
                     className="w-full max-w-md overflow-hidden rounded-lg bg-white shadow-xl"
                     onClick={(event) => event.stopPropagation()}
                   >
-                    <div className="border-b border-[#d6e7e3] bg-[#f6fffd] px-5 py-4">
+                    <div
+                      className={`border-b px-5 py-4 ${
+                        SEASONAL_SALE ? 'border-seasonal-dark bg-seasonal-dark' : 'border-[#d6e7e3] bg-[#f6fffd]'
+                      }`}
+                    >
                       <div className="flex items-start justify-between gap-4">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wide text-[#00473c]">
-                            Limited-time saving
+                          <p
+                            className={`text-xs font-semibold uppercase tracking-wide ${
+                              SEASONAL_SALE ? 'text-seasonal-accent' : 'text-[#00473c]'
+                            }`}
+                          >
+                            {SEASONAL_SALE ? SEASONAL_SALE.saleName : 'Limited-time saving'}
                           </p>
-                          <h3 id="flash-sale-coupon-title" className="mt-1 text-2xl font-bold text-[#2f2f2f]">
+                          <h3
+                            id="flash-sale-coupon-title"
+                            className={`mt-1 text-2xl font-bold ${SEASONAL_SALE ? 'text-white' : 'text-[#2f2f2f]'}`}
+                          >
                             Take an extra {PROMO_CODE_PERCENT}% off
                           </h3>
                         </div>
                         <button
                           type="button"
                           onClick={() => setIsFlashSaleCouponOpen(false)}
-                          className="flex h-8 w-8 items-center justify-center rounded-md border border-[#d6e7e3] text-gray-500 hover:bg-white hover:text-gray-700"
+                          className={`flex h-8 w-8 items-center justify-center rounded-md border ${
+                            SEASONAL_SALE
+                              ? 'border-white/30 text-white/80 hover:bg-white/10 hover:text-white'
+                              : 'border-[#d6e7e3] text-gray-500 hover:bg-white hover:text-gray-700'
+                          }`}
                           aria-label="Close coupon dialog"
                         >
                           <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

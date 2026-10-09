@@ -7,6 +7,7 @@ import { StarRating } from '@/components/product';
 import { formatPrice, formatPriceWithCurrency } from '@/lib/api';
 import { ROLLER_BAND_F_ROOM_DARKENING_OPTIONS } from '@/data/rollerBandF';
 import { FLASH_SALE_DISCOUNT_PERCENT } from '@/data/promo';
+import { SEASONAL_SALE } from '@/data/seasonal';
 
 export type CollectionContext = 'light-filtering' | 'blackout' | undefined;
 
@@ -130,7 +131,11 @@ export default function ProductCard({ product, className = '', preselectedMotori
             <span className="text-lg md:text-xl font-bold text-black">
               {formatPriceWithCurrency(displayPrice, currency)}
             </span>
-            <span className="rounded-md bg-[#00473c] px-1.5 py-0.5 text-[10px] md:text-xs font-semibold text-white">
+            <span
+              className={`rounded-md px-1.5 py-0.5 text-[10px] md:text-xs font-semibold ${
+                SEASONAL_SALE ? 'bg-seasonal-accent text-seasonal-dark' : 'bg-[#00473c] text-white'
+              }`}
+            >
               {FLASH_SALE_DISCOUNT_PERCENT}% Off
             </span>
           </div>

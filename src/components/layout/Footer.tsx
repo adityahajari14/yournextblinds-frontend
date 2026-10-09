@@ -1,10 +1,15 @@
 import Link from 'next/link';
 import Image from 'next/image';
+import { SEASONAL_SALE } from '@/data/seasonal';
+import { CobwebCorner } from '@/components/seasonal';
 
 const Footer = () => {
   return (
-    <footer className="bg-white px-4 md:px-6 lg:px-20 pt-12 lg:pt-16 pb-4">
-      <div className="max-w-[1200px] mx-auto flex flex-col">
+    <footer className="relative overflow-hidden bg-white px-4 md:px-6 lg:px-20 pt-12 lg:pt-16 pb-4">
+      {SEASONAL_SALE && (
+        <CobwebCorner className="pointer-events-none absolute right-0 top-0 h-20 w-20 -scale-x-100 text-seasonal-dark/25 md:h-32 md:w-32" />
+      )}
+      <div className="relative max-w-[1200px] mx-auto flex flex-col">
         {/* Top Section */}
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-0 justify-between items-center lg:items-start">
           <div className="flex flex-col gap-5 max-w-[360px] w-full md:w-auto text-center lg:text-left items-center lg:items-start">

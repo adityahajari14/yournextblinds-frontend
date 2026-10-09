@@ -1,4 +1,5 @@
 import { PROMO_CODE, PROMO_CODE_PERCENT, SALE_MAX_PERCENT } from '@/data/promo';
+import { SEASONAL_SALE } from '@/data/seasonal';
 import { PRODUCT_GUIDES } from '@/data/guides';
 import { REFUND_POLICY, SHIPPING_POLICY, TERMS_AND_CONDITIONS, PRIVACY_POLICY, FIT_GUARANTEE, type Policy } from '@/data/policies';
 
@@ -78,7 +79,7 @@ Up to 10 free fabric samples, delivered free. Customers order these from the
 samples page at /samples. Direct them there — you cannot place a sample order.
 
 ## Current offer
-Up to ${SALE_MAX_PERCENT}% off sale pricing, plus an extra ${PROMO_CODE_PERCENT}% off
+${SEASONAL_SALE ? `The current sale is called the ${SEASONAL_SALE.saleName}. It is the same offer as below — do not promise any extra seasonal discount.\n` : ''}Up to ${SALE_MAX_PERCENT}% off sale pricing, plus an extra ${PROMO_CODE_PERCENT}% off
 with code ${PROMO_CODE} entered in the discount field at checkout. The code stacks
 on top of sale pricing. Do not invent other discount codes.
 
