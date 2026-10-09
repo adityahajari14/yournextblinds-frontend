@@ -8,6 +8,7 @@
 // (promo bar, sale section, price badges, coupon modal, popup, header line, footer,
 // cart banner, hero slides, FAQ, chat knowledge) falls back to its regular styling
 // and copy. The theme colours live in globals.css (--color-seasonal-*).
+// Full removal guide: docs/halloween-sale-theme.md
 
 /** The one switch. `false` restores the regular storefront. */
 export const SEASONAL_SALE_ENABLED = true;
@@ -17,7 +18,7 @@ export const SEASONAL_SALE_ENABLED = true;
  * exist in public/home/hero/ — until then the slides are left out so the carousel
  * never shows a broken image. Prompts: docs/halloween-hero-banner-prompts.md
  */
-const SEASONAL_HERO_BANNERS_READY = false;
+const SEASONAL_HERO_BANNERS_READY = true;
 
 export interface SeasonalHeroSlide {
   src: string;
