@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { SUBSCRIBE_POPUP_CODE, SUBSCRIBE_POPUP_PERCENT } from '@/data/promo';
 import { SEASONAL_SALE } from '@/data/seasonal';
-import { PumpkinIcon } from '@/components/seasonal';
+import { SaleTagIcon } from '@/components/seasonal';
 
 const SHOW_DELAY_MS = 10_000;
 const SESSION_KEY = 'subscribe-popup-shown';
@@ -103,7 +103,7 @@ const SubscribePopup = () => {
           <>
             <div className="absolute inset-x-0 top-0 h-1.5 bg-seasonal-accent" />
             <div className="mb-3 flex items-center justify-center gap-1.5 text-xs font-bold uppercase tracking-[0.14em] text-seasonal-dark">
-              <PumpkinIcon className="h-5 w-5 text-seasonal-accent" />
+              <SaleTagIcon className="h-5 w-5 text-seasonal-accent" />
               {SEASONAL_SALE.saleName}
             </div>
           </>

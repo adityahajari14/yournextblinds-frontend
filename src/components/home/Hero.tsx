@@ -56,7 +56,7 @@ const Hero = () => {
   const goToNext = () => setCurrent((prev) => (prev + 1) % slides.length);
 
   return (
-    <section className="relative aspect-[1792/2400] sm:aspect-[2752/1536] w-full overflow-hidden">
+    <section className="relative w-full overflow-hidden" aria-label="Featured offers">
       {/* The slide artwork carries the visible headline; this is the machine-readable one. */}
       <h1 className="sr-only">
         Made-to-Measure Blinds and Shades, Manufactured in Texas — Your Next Blinds
@@ -64,28 +64,30 @@ const Hero = () => {
       {slides.map((slide, index) => (
         <div
           key={index}
-          className={`absolute inset-0 transition-opacity duration-1000 ${
-            index === current ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
+          className={`transition-opacity duration-1000 ${
+            index === current ? 'relative opacity-100 pointer-events-auto' : 'absolute inset-0 opacity-0 pointer-events-none'
           }`}
           aria-hidden={index !== current}
         >
-          <Link href={slide.href} className="block h-full w-full" tabIndex={index === current ? 0 : -1}>
-            {/* Mobile: 3:4 portrait art-directed image */}
+          <Link href={slide.href} className="block w-full" tabIndex={index === current ? 0 : -1}>
+            {/* Natural image proportions keep the full artwork visible, edge to edge. */}
             <Image
               src={slide.mobileSrc}
               alt={slide.alt}
-              fill
+              width={slide.mobileWidth ?? 1792}
+              height={slide.mobileHeight ?? 2400}
               sizes="100vw"
-              className="object-cover sm:hidden"
+              className="h-auto w-full sm:hidden"
               priority={index === 0}
             />
             {/* Desktop/tablet: wide landscape image */}
             <Image
               src={slide.src}
               alt={slide.alt}
-              fill
+              width={slide.width ?? 2752}
+              height={slide.height ?? 1536}
               sizes="100vw"
-              className="hidden object-cover sm:block"
+              className="hidden h-auto w-full sm:block"
               priority={index === 0}
             />
           </Link>
@@ -115,12 +117,13 @@ const Hero = () => {
       </button>
 
       {/* Dot indicators */}
-      <div className="absolute bottom-5 left-1/2 -translate-x-1/2 z-10 flex gap-2.5">
+      <div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 gap-2.5 sm:bottom-5">
         {slides.map((_, index) => (
           <button
             key={index}
             onClick={() => setCurrent(index)}
             aria-label={`Go to slide ${index + 1}`}
+            aria-current={index === current ? 'true' : undefined}
             className={`w-2.5 h-2.5 rounded-full transition-colors duration-300 ${
               index === current ? 'bg-white' : 'bg-white/50'
             }`}

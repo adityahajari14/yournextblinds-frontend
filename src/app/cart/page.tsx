@@ -13,7 +13,7 @@ import { buildCheckoutItem } from '@/lib/checkout';
 import { trackStoreCartView, trackStoreCheckoutInitiated, getStoreSessionContext } from '@/lib/store-events';
 import { findDiscountCode, PROMO_CODE, PROMO_CODE_PERCENT, type DiscountCodeDefinition } from '@/data/promo';
 import { SEASONAL_SALE } from '@/data/seasonal';
-import { PumpkinIcon } from '@/components/seasonal';
+import { SaleTagIcon } from '@/components/seasonal';
 import { CartItem, CheckoutItemRequest, PriceOption } from '@/types';
 import CartItemEditModal from '@/components/cart/CartItemEditModal';
 import { FitGuaranteeIcon } from '@/components/fit-guarantee';
@@ -447,7 +447,7 @@ export default function CartPage() {
         <div className="max-w-[1200px] mx-auto">
           {SEASONAL_SALE && (
             <div className="mb-6 flex items-center justify-center gap-2 rounded-lg bg-seasonal-dark px-4 py-2.5 text-center text-sm text-white">
-              <PumpkinIcon className="h-5 w-5 shrink-0 text-seasonal-accent" />
+              <SaleTagIcon className="h-5 w-5 shrink-0 text-seasonal-accent" />
               <p>
                 <span className="font-bold text-seasonal-accent">{SEASONAL_SALE.saleName}</span> prices are in your
                 cart.

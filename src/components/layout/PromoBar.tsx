@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { PROMO_CODE, PROMO_CODE_PERCENT, SALE_MAX_PERCENT } from '@/data/promo';
 import { SEASONAL_SALE } from '@/data/seasonal';
 import CountdownTimer from '@/components/common/CountdownTimer';
-import { PumpkinIcon } from '@/components/seasonal';
+import { SaleTagIcon } from '@/components/seasonal';
 
 const PromoBar = () => {
   const [copied, setCopied] = useState(false);
@@ -25,7 +25,7 @@ const PromoBar = () => {
       <div className="mx-auto flex max-w-[1400px] flex-wrap items-center justify-center gap-x-2.5 gap-y-1.5 px-4 py-2 text-center sm:gap-x-3 sm:py-2.5 lg:flex-nowrap lg:text-left">
         {SEASONAL_SALE ? (
           <span className="flex items-center gap-1.5 whitespace-nowrap text-xs font-bold tracking-wide text-seasonal-accent sm:text-sm">
-            <PumpkinIcon className="h-4 w-4 shrink-0" />
+            <SaleTagIcon className="h-4 w-4 shrink-0" />
             {SEASONAL_SALE.saleName.toUpperCase()}: UP TO {SALE_MAX_PERCENT}% OFF
           </span>
         ) : (

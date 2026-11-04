@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { PROMO_CODE, PROMO_HEADLINE, PROMO_CODE_PERCENT } from '@/data/promo';
 import { SEASONAL_SALE } from '@/data/seasonal';
 import CountdownTimer from '@/components/common/CountdownTimer';
-import { BatIcon, CobwebCorner, PumpkinIcon } from '@/components/seasonal';
+import { SaleCorner, SaleTagIcon, SparkleIcon } from '@/components/seasonal';
 
 const FlashSale = () => {
   const [copied, setCopied] = useState(false);
@@ -31,16 +31,16 @@ const FlashSale = () => {
 
       {SEASONAL_SALE && (
         <div className="pointer-events-none absolute inset-0 text-seasonal-accent">
-          <CobwebCorner className="absolute right-0 top-0 h-24 w-24 -scale-x-100 opacity-30 md:h-40 md:w-40" />
-          <BatIcon className="absolute right-[14%] top-10 hidden h-5 w-10 rotate-6 opacity-50 md:block" />
-          <BatIcon className="absolute left-[20%] top-16 hidden h-4 w-8 -rotate-12 opacity-35 md:block" />
-          <BatIcon className="absolute bottom-10 right-[24%] hidden h-3 w-6 -rotate-6 opacity-30 lg:block" />
+          <SaleCorner className="absolute right-0 top-0 h-24 w-24 -scale-x-100 opacity-30 md:h-40 md:w-40" />
+          <SparkleIcon className="absolute right-[14%] top-10 hidden h-6 w-6 rotate-6 opacity-50 md:block" />
+          <SparkleIcon className="absolute left-[20%] top-16 hidden h-5 w-5 -rotate-12 opacity-35 md:block" />
+          <SparkleIcon className="absolute bottom-10 right-[24%] hidden h-4 w-4 -rotate-6 opacity-30 lg:block" />
         </div>
       )}
 
       <div className="relative z-10 px-4 md:px-6 lg:px-20 py-12 md:py-16 lg:py-20 flex flex-col gap-6 md:gap-7 items-center">
         <div className="flex flex-col gap-2 md:gap-3 items-center text-center max-w-[720px]">
-          {SEASONAL_SALE && <PumpkinIcon className="h-9 w-9 text-seasonal-accent md:h-11 md:w-11" />}
+          {SEASONAL_SALE && <SaleTagIcon className="h-9 w-9 text-seasonal-accent md:h-11 md:w-11" />}
           <h2 className="text-xl md:text-2xl lg:text-[32px] font-semibold text-white tracking-tight leading-tight">
             {SEASONAL_SALE ? SEASONAL_SALE.sectionHeading : 'OUR BIGGEST FLASH SALE EVER'}
           </h2>

@@ -1,1 +1,1 @@
-export { PumpkinIcon, BatIcon, CobwebCorner } from './SeasonalIcons';
+export { SaleTagIcon, SparkleIcon, SaleCorner } from './SeasonalIcons';
