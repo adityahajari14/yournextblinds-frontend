@@ -8,19 +8,25 @@ interface CountdownTimerProps {
   /** Visual style: 'inline' for banners, 'boxed' for standalone blocks. */
   variant?: 'inline' | 'boxed';
   className?: string;
+  /** Kept inside the timer so it disappears along with an expired countdown. */
+  label?: string;
 }
 
 interface TimeParts {
+  days: number;
   hours: number;
   minutes: number;
   seconds: number;
 }
 
-function getTimeLeft(): TimeParts {
-  const diff = Math.max(0, getNextMidnight().getTime() - Date.now());
+function getTimeLeft(): TimeParts | null {
+  const deadline = SEASONAL_SALE ? new Date(SEASONAL_SALE.endsAt) : getNextMidnight();
+  const diff = deadline.getTime() - Date.now();
+  if (!Number.isFinite(diff) || diff <= 0) return null;
   const totalSeconds = Math.floor(diff / 1000);
   return {
-    hours: Math.floor(totalSeconds / 3600),
+    days: Math.floor(totalSeconds / 86400),
+    hours: SEASONAL_SALE ? Math.floor((totalSeconds % 86400) / 3600) : Math.floor(totalSeconds / 3600),
     minutes: Math.floor((totalSeconds % 3600) / 60),
     seconds: totalSeconds % 60,
   };
@@ -28,7 +34,7 @@ function getTimeLeft(): TimeParts {
 
 const pad = (n: number) => n.toString().padStart(2, '0');
 
-const CountdownTimer = ({ variant = 'inline', className = '' }: CountdownTimerProps) => {
+const CountdownTimer = ({ variant = 'inline', className = '', label }: CountdownTimerProps) => {
   // Start null so server and first client render match (avoids a hydration
   // mismatch); the interval callback fills it in immediately after mount, so state
   // is only ever set from the async tick, never synchronously in the effect body.
@@ -64,20 +70,28 @@ const CountdownTimer = ({ variant = 'inline', className = '' }: CountdownTimerPr
     );
 
     return (
-      <div className={`flex items-center gap-2 ${className}`}>
-        {cell(time.hours, 'Hours')}
-        {separator}
-        {cell(time.minutes, 'Mins')}
-        {separator}
-        {cell(time.seconds, 'Secs')}
+      <div className={`flex flex-col items-center gap-2 ${className}`}>
+        {label && <span className="text-xs font-medium text-[#00473c]">{label}</span>}
+        <div className="flex items-center gap-2" role="timer" aria-label={label ?? 'Time remaining'}>
+          {SEASONAL_SALE && cell(time.days, 'Days')}
+          {SEASONAL_SALE && separator}
+          {cell(time.hours, 'Hours')}
+          {separator}
+          {cell(time.minutes, 'Mins')}
+          {separator}
+          {cell(time.seconds, 'Secs')}
+        </div>
       </div>
     );
   }
 
   // inline
   return (
-    <span className={`font-semibold tabular-nums ${className}`}>
-      {pad(time.hours)}:{pad(time.minutes)}:{pad(time.seconds)}
+    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap font-semibold tabular-nums ${className}`}>
+      {label && <span className="font-normal">{label}</span>}
+      <span role="timer" aria-label={label ?? 'Time remaining'}>
+        {SEASONAL_SALE && `${time.days}d `}{pad(time.hours)}:{pad(time.minutes)}:{pad(time.seconds)}
+      </span>
     </span>
   );
 };

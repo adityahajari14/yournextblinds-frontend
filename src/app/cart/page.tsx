@@ -142,8 +142,8 @@ export default function CartPage() {
 
   const handleCheckout = () => startCheckout(cart.items);
 
-  const handleApplyDiscount = () => {
-    const match = findDiscountCode(discountInput);
+  const applyDiscount = (code: string) => {
+    const match = findDiscountCode(code);
     if (!match) {
       setAppliedDiscount(null);
       setDiscountError('That code is invalid or has expired.');
@@ -152,6 +152,8 @@ export default function CartPage() {
     setAppliedDiscount(match);
     setDiscountError(null);
   };
+
+  const handleApplyDiscount = () => applyDiscount(discountInput);
 
   const handleRemoveDiscount = () => {
     setAppliedDiscount(null);
@@ -446,19 +448,28 @@ export default function CartPage() {
       <div className="px-4 md:px-6 lg:px-20 py-8 md:py-12">
         <div className="max-w-[1200px] mx-auto">
           {SEASONAL_SALE && (
-            <div className="mb-6 flex items-center justify-center gap-2 rounded-lg bg-seasonal-dark px-4 py-2.5 text-center text-sm text-white">
+            <div className="mb-6 flex flex-col items-center justify-center gap-3 rounded-lg bg-seasonal-dark px-4 py-4 text-center text-sm text-white sm:flex-row">
               <SaleTagIcon className="h-5 w-5 shrink-0 text-seasonal-accent" />
               <p>
-                <span className="font-bold text-seasonal-accent">{SEASONAL_SALE.saleName}</span> prices are in your
-                cart.
-                {!appliedDiscount && (
-                  <>
-                    {' '}
-                    Enter code <span className="font-bold">{PROMO_CODE}</span> in the discount field for an extra{' '}
-                    {PROMO_CODE_PERCENT}% off.
-                  </>
-                )}
+                <span className="font-bold text-seasonal-accent">{SEASONAL_SALE.saleName}</span>
+                <span className="mt-1 block">
+                  {appliedDiscount
+                    ? `You saved ${formatPriceWithCurrency(discountAmount)} extra with ${appliedDiscount.code}.`
+                    : `Sale prices are already included. Take another ${PROMO_CODE_PERCENT}% off your order.`}
+                </span>
               </p>
+              {!appliedDiscount && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setDiscountInput(PROMO_CODE);
+                    applyDiscount(PROMO_CODE);
+                  }}
+                  className="shrink-0 rounded-md bg-seasonal-accent px-4 py-2 font-bold text-seasonal-dark transition-colors hover:bg-white"
+                >
+                  Apply {PROMO_CODE}
+                </button>
+              )}
             </div>
           )}
           <div className="flex flex-col lg:flex-row gap-6 lg:gap-8">

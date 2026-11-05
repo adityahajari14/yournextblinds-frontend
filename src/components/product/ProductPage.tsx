@@ -1094,6 +1094,13 @@ const ProductPage = ({
     ? product.price + blackoutSurcharge
     : totalPrice;
   const compareAtPrice = displayedPrice / (1 - FLASH_SALE_DISCOUNT_PERCENT / 100);
+  const seasonalPriceOffer = SEASONAL_SALE && displayedPrice > 0 ? (
+    <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-medium text-[#00473c]">
+      <button type="button" onClick={() => setIsFlashSaleCouponOpen(true)} className="underline underline-offset-4 hover:text-black">
+        Extra {PROMO_CODE_PERCENT}% with {PROMO_CODE}
+      </button>
+    </div>
+  ) : null;
 
   const honeycombControlOptionName = (() => {
     // Cordless is built into the product, not a picked option — nothing sets
@@ -1481,6 +1488,7 @@ const ProductPage = ({
                     </span>
                     <span className={SALE_BADGE_CLASS}>{SALE_BADGE_LABEL}</span>
                   </div>
+                  {seasonalPriceOffer}
                   {priceCalculation && !showMinPriceIndicator && (
                     <div className="mt-3 text-xs text-gray-400">
                       Size: {priceCalculation.widthBand?.inches}" × {priceCalculation.heightBand?.inches}"
@@ -1531,6 +1539,7 @@ const ProductPage = ({
                     </span>
                     <span className={SALE_BADGE_CLASS}>{SALE_BADGE_LABEL}</span>
                   </div>
+                  {seasonalPriceOffer}
                   {priceCalculation && !showMinPriceIndicator && (
                     <div className="text-xs text-gray-400 mb-3">
                       Size: {priceCalculation.widthBand?.inches}" × {priceCalculation.heightBand?.inches}"
@@ -2776,8 +2785,9 @@ const ProductPage = ({
 
                     <div className="p-5">
                       <p className="text-sm leading-relaxed text-gray-600">
-                        This reserved coupon is available for a limited period on custom shade orders.
-                        Enter the code at checkout before confirming your order.
+                        {SEASONAL_SALE
+                          ? `Your Black Friday sale price is already included. Use ${PROMO_CODE} in your cart or at checkout for an extra ${PROMO_CODE_PERCENT}% off.`
+                          : 'Enter this coupon at checkout before confirming your custom shade order.'}
                       </p>
 
                       <div className="mt-5 rounded-lg border border-dashed border-[#00473c] bg-white p-4 text-center shadow-sm">
@@ -2788,7 +2798,7 @@ const ProductPage = ({
                           {FLASH_SALE_COUPON_CODE}
                         </p>
                         <p className="mt-2 text-xs text-gray-500">
-                          Apply this code in the discount field while the offer is available.
+                          One code per order. Your extra saving is applied at checkout.
                         </p>
                       </div>
 
@@ -2827,7 +2837,7 @@ const ProductPage = ({
                           }}
                           className="rounded-lg border border-[#00473c] px-4 py-3 text-sm font-semibold text-[#00473c] transition-colors hover:bg-[#f0fdf9]"
                         >
-                          {flashSaleCouponCopied ? 'Copied!' : 'Copy Coupon'}
+                          {flashSaleCouponCopied ? 'Copied!' : `Copy ${PROMO_CODE}`}
                         </button>
                         <button
                           type="button"

@@ -14,7 +14,7 @@ const faqData = [
   {
     id: 5,
     question: `How do I use my ${PROMO_CODE_PERCENT}% off discount code?`,
-    answer: `Add your made-to-measure blinds to the cart and proceed to checkout. Enter the code ${PROMO_CODE} in the discount field to take an extra ${PROMO_CODE_PERCENT}% off your order. It stacks on top of ${SEASONAL_SALE ? `${SEASONAL_SALE.saleName} pricing` : 'any current sale pricing'}.`,
+    answer: `Add your made-to-measure blinds to the cart. ${SEASONAL_SALE ? `Select Apply ${PROMO_CODE} in the cart, or enter the code at checkout,` : `Enter the code ${PROMO_CODE} in the discount field at checkout`} to take an extra ${PROMO_CODE_PERCENT}% off your order. It applies on top of ${SEASONAL_SALE ? `${SEASONAL_SALE.saleName} pricing` : 'any current sale pricing'}. Use one discount code per order.`,
   },
   {
     id: 2,

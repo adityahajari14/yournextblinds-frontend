@@ -57,20 +57,20 @@ const PromoBar = () => {
 
         <span className="hidden text-white/40 sm:inline">|</span>
 
-        <span className="hidden whitespace-nowrap text-xs sm:inline sm:text-sm">Today Only</span>
+        {!SEASONAL_SALE && (
+          <>
+            <span className="hidden whitespace-nowrap text-xs sm:inline sm:text-sm">Today Only</span>
+            <span className="hidden text-white/40 sm:inline">|</span>
+            <span className="hidden whitespace-nowrap text-xs sm:inline sm:text-sm">While Supplies Last</span>
+            <span className="hidden text-white/40 sm:inline">|</span>
+          </>
+        )}
 
-        <span className="hidden text-white/40 sm:inline">|</span>
-
-        <span className="hidden whitespace-nowrap text-xs sm:inline sm:text-sm">While Supplies Last</span>
-
-        <span className="hidden text-white/40 sm:inline">|</span>
-
-        <span className="flex items-center gap-1.5 whitespace-nowrap text-xs sm:text-sm">
-          <svg className="h-3.5 w-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-          </svg>
-          Sale ends in <CountdownTimer variant="inline" className="text-white" />
-        </span>
+        <CountdownTimer
+          variant="inline"
+          className="text-xs text-white sm:text-sm"
+          label={SEASONAL_SALE ? `Ends ${SEASONAL_SALE.endsLabel} in` : 'Sale ends in'}
+        />
 
         <Link
           href="/collections"
@@ -80,7 +80,7 @@ const PromoBar = () => {
               : 'bg-white text-[#00473c] hover:bg-gray-100'
           }`}
         >
-          SHOP NOW
+          {SEASONAL_SALE ? 'SHOP BLACK FRIDAY' : 'SHOP NOW'}
         </Link>
       </div>
     </div>

@@ -40,10 +40,16 @@ const FlashSale = () => {
 
       <div className="relative z-10 px-4 md:px-6 lg:px-20 py-12 md:py-16 lg:py-20 flex flex-col gap-6 md:gap-7 items-center">
         <div className="flex flex-col gap-2 md:gap-3 items-center text-center max-w-[720px]">
-          {SEASONAL_SALE && <SaleTagIcon className="h-9 w-9 text-seasonal-accent md:h-11 md:w-11" />}
+          {SEASONAL_SALE && (
+            <span className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-seasonal-accent">
+              <SaleTagIcon className="h-5 w-5" />
+              {SEASONAL_SALE.saleName}
+            </span>
+          )}
           <h2 className="text-xl md:text-2xl lg:text-[32px] font-semibold text-white tracking-tight leading-tight">
             {SEASONAL_SALE ? SEASONAL_SALE.sectionHeading : 'OUR BIGGEST FLASH SALE EVER'}
           </h2>
+          {SEASONAL_SALE && <p className="text-sm text-white/80 md:text-base">{SEASONAL_SALE.sectionDescription}</p>}
           <p className="text-sm md:text-base lg:text-lg text-white/90 leading-relaxed">
             {PROMO_HEADLINE} + Get an Extra {PROMO_CODE_PERCENT}% Off with code{' '}
             <button
@@ -57,14 +63,18 @@ const FlashSale = () => {
           </p>
         </div>
 
-        <div className="flex flex-col items-center gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-white/70">
-            Hurry — offer ends in
-          </span>
-          <div className="rounded-lg bg-white/95 px-4 py-3">
-            <CountdownTimer variant="boxed" />
-          </div>
-        </div>
+        {SEASONAL_SALE && (
+          <p className="text-center text-xs text-white/75 md:text-sm">
+            Made to Measure <span aria-hidden="true">·</span> Manufactured in Texas <span aria-hidden="true">·</span>{' '}
+            <Link href="/your-next-fit-guarantee" className="underline underline-offset-4 hover:text-white">Fit Guarantee</Link>
+          </p>
+        )}
+
+        <CountdownTimer
+          variant="boxed"
+          className="rounded-lg bg-white/95 px-4 py-3"
+          label={SEASONAL_SALE ? `Black Friday ends ${SEASONAL_SALE.endsLabel}` : 'Hurry — offer ends in'}
+        />
 
         <Link
           href="/collections"
@@ -74,7 +84,7 @@ const FlashSale = () => {
               : 'bg-white text-[#00473c] hover:bg-gray-100'
           }`}
         >
-          {SEASONAL_SALE ? `Shop the ${SEASONAL_SALE.saleName}` : 'Shop the Sale'}
+          {SEASONAL_SALE ? SEASONAL_SALE.ctaLabel : 'Shop the Sale'}
         </Link>
       </div>
     </section>

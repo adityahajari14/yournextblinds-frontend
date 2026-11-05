@@ -150,10 +150,12 @@ const SubscribePopup = () => {
         ) : (
           <div className="text-center">
             <h2 id="subscribe-popup-heading" className="text-xl font-bold text-[#00473c] sm:text-2xl">
-              Get {SUBSCRIBE_POPUP_PERCENT}% Off Your First Order
+              {SEASONAL_SALE ? `Your first order. An extra ${SUBSCRIBE_POPUP_PERCENT}% off.` : `Get ${SUBSCRIBE_POPUP_PERCENT}% Off Your First Order`}
             </h2>
             <p className="mt-2 text-sm text-gray-600">
-              Subscribe for style tips and exclusive offers, and we&apos;ll send your discount code straight away.
+              {SEASONAL_SALE
+                ? 'Start your Black Friday window upgrade. Subscribe for your discount code and ideas for your home. One code per order.'
+                : 'Subscribe for style tips and exclusive offers, and we’ll send your discount code straight away.'}
             </p>
             <form onSubmit={handleSubmit} className="mt-5 space-y-3 text-left">
               <label htmlFor="subscribe-popup-email" className="sr-only">
@@ -175,9 +177,9 @@ const SubscribePopup = () => {
               <button
                 type="submit"
                 disabled={status === 'submitting'}
-                className="w-full rounded-lg bg-[#00473c] px-4 py-3 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-[#00332a] disabled:opacity-60"
+                className={`w-full rounded-lg px-4 py-3 text-sm font-bold uppercase tracking-wide transition-colors disabled:opacity-60 ${SEASONAL_SALE ? 'bg-seasonal-accent text-seasonal-dark hover:bg-seasonal-dark hover:text-white' : 'bg-[#00473c] text-white hover:bg-[#00332a]'}`}
               >
-                {status === 'submitting' ? 'Subscribing…' : 'Get My Code'}
+                {status === 'submitting' ? 'Subscribing…' : SEASONAL_SALE ? `Get My ${SUBSCRIBE_POPUP_PERCENT}% Code` : 'Get My Code'}
               </button>
             </form>
             <button

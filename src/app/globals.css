@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+/* Keep the shared carousel readable on short landscape screens. */
+@media (min-width: 768px) and (max-height: 600px) {
+  .storefront-hero .hero-copy {
+    gap: 10px;
+    padding-top: 12px;
+    padding-bottom: 30px;
+  }
+
+  .storefront-hero .hero-title {
+    font-size: 28px;
+  }
+
+  .storefront-hero .hero-description {
+    display: none;
+  }
+
+  .storefront-hero .hero-actions {
+    gap: 10px;
+  }
+
+  .storefront-hero .hero-cta {
+    min-height: 36px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+}
+
 :root {
   --background: #fafafa;
   --foreground: #171717;

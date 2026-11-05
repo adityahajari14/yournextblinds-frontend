@@ -112,7 +112,9 @@ export default function ProductCard({ product, className = '', preselectedMotori
       {/* Info */}
       <div
         className={`bg-white flex-1 min-w-0 flex gap-2 ${
-          isGridLayout
+          SEASONAL_SALE
+            ? 'flex-col items-stretch pt-3 pb-1 md:pt-4'
+            : isGridLayout
             ? 'flex-col justify-center sm:flex-row sm:items-end sm:justify-between sm:pt-3 sm:pb-1 md:pt-4'
             : 'items-end justify-between pt-3 pb-1 md:pt-4'
         }`}
@@ -143,11 +145,11 @@ export default function ProductCard({ product, className = '', preselectedMotori
 
         <button
           onClick={handleAddToCart}
-          className={`border border-black bg-white px-2.5 py-2.5 text-base text-black hover:bg-black hover:text-white transition-colors shrink-0 ${
-            isGridLayout ? 'mt-1 w-fit self-start sm:mt-0 sm:w-auto sm:self-auto' : ''
+          className={`border px-2.5 py-2.5 transition-colors shrink-0 ${SEASONAL_SALE ? 'w-full border-seasonal-dark bg-seasonal-dark text-sm font-semibold text-white hover:bg-black' : 'border-black bg-white text-base text-black hover:bg-black hover:text-white'} ${
+            !SEASONAL_SALE && isGridLayout ? 'mt-1 w-fit self-start sm:mt-0 sm:w-auto sm:self-auto' : ''
           }`}
         >
-          Add to Cart
+          {SEASONAL_SALE ? 'Customize & Save' : 'Add to Cart'}
         </button>
       </div>
     </Link>
